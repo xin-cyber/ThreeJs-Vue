@@ -39,6 +39,8 @@ export const initStats = (type) => {
 
     stats.showPanel(panelType); // 0: fps, 1: ms, 2: mb, 3+: custom
     stats.dom.style.marginTop = "35px";
+    stats.dom.setAttribute("id", "stats");
+
     document.body.appendChild(stats.dom);
 
     return stats;

@@ -1,4 +1,6 @@
-<template><div></div></template>
+<template>
+    <div></div>
+</template>
 
 <script>
 import * as THREE from "three";
@@ -13,6 +15,7 @@ export default {
         // stats
         let stats = Stats();
         stats.dom.style.marginTop = "35px";
+        stats.dom.setAttribute("id", "stats");
         document.body.appendChild(stats.dom);
 
         // create a scene, that will hold all our elements such as objects, cameras and lights.
@@ -218,4 +221,5 @@ export default {
     },
 };
 </script>
-<style scoped></style>
+<style scoped>
+</style>
