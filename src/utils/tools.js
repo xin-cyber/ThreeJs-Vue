@@ -299,7 +299,7 @@ export const addBasicMaterialSettings = (gui, controls, material, name) => {
     let folderName = (name !== undefined) ? name : 'THREE.Material';
 
     controls.material = material;
-
+    console.log(material);
     let folder = gui.addFolder(folderName);
     folder.add(controls.material, 'id');
     folder.add(controls.material, 'uuid');
@@ -318,11 +318,13 @@ export const addBasicMaterialSettings = (gui, controls, material, name) => {
     });
 
     folder.add(controls.material, 'colorWrite');
-    // 145版本three.js不存在
-    controls.material.flatShading && folder.add(controls.material, 'flatShading').onChange(function (shading) {
-        controls.material.flatShading = shading;
-        controls.material.needsUpdate = true;
-    });
+    if (controls.material.flatShading !== undefined) {
+        folder.add(controls.material, 'flatShading').onChange(function (shading) {
+            controls.material.flatShading = shading;
+            controls.material.needsUpdate = true;
+        });
+    }
+
     folder.add(controls.material, 'premultipliedAlpha');
     folder.add(controls.material, 'dithering');
     folder.add(controls.material, 'shadowSide', {

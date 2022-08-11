@@ -107,7 +107,7 @@ export default {
             }),
         ];
 
-        // 复合材质创建mesh；为materials数组每个材质创建一个实例，然后再把这些实例存放到一个three.object3d对象里面，使用方法类似于scene.children
+        // 复合材质创建Group对象；为materials数组每个材质创建一个实例，然后再把这些实例存放到一个three.object3d对象里面，使用方法类似于scene.children
         let mesh = createMultiMaterialObject(geom, materials);
         mesh.castShadow = true;
         mesh.children.forEach(function (e) {
@@ -160,7 +160,7 @@ export default {
                             wireframe: true,
                         }),
                     ];
-                    // 复合材质创建mesh(包含俩个three.mesh对象)；为materials数组每个材质创建一个实例，然后再把这些实例存放到一个three.object3d对象里面，使用方法类似于scene.children
+                    // 复合材质创建Group对象(包含俩个three.mesh对象)；为materials数组每个材质创建一个实例，然后再把这些实例存放到一个three.object3d对象里面，使用方法类似于scene.children
                     let mesh2 = createMultiMaterialObject(
                         clonedGeometry,
                         materials

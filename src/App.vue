@@ -116,6 +116,10 @@ export default {
                             value: "MeshNromalMaterial",
                             label: "MeshNromalMaterial",
                         },
+                        {
+                            value: "ManyMaterials",
+                            label: "立方体六个面不同材质",
+                        },
                     ],
                 },
             ],

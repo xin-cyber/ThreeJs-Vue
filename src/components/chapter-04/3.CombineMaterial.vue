@@ -51,19 +51,23 @@ export default {
                 let cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
 
                 //let cubeMaterial = new THREE.MeshLambertMaterial({color:  Math.random() * 0xffffff });
+                // 获取颜色变化，离相机远近变化
                 let cubeMaterial = new THREE.MeshDepthMaterial();
+                // 获取颜色
                 let colorMaterial = new THREE.MeshBasicMaterial({
                     color: controls.color,
-                    transparent: true,
+                    transparent: true, // 必要，否则会是纯绿色实心立方体，不执行融合操作
+                    // 融合模式，前景色和背景色相乘，
                     blending: THREE.MultiplyBlending
                 });
-                // 复合材质创建mesh；为materials数组每个材质创建一个实例，然后再把这些实例存放到一个three.object3d对象里面，使用方法类似于scene.children
+                // 复合材质创建Group对象；为materials数组每个材质创建一个实例，然后再把这些实例存放到一个three.object3d对象里面，使用方法类似于scene.children
                 let cube = createMultiMaterialObject(cubeGeometry, [colorMaterial,
                     cubeMaterial
                 ]);
+                // 缩小MeshDepthMaterial对象，避免渲染闪烁问题
                 cube.children[1].scale.set(0.99, 0.99, 0.99);
                 cube.castShadow = true;
-
+                console.log(cube);
                 // position the cube randomly in the scene
                 cube.position.x = -60 + Math.round((Math.random() * 100));
                 cube.position.y = Math.round((Math.random() * 10));
@@ -117,6 +121,7 @@ export default {
             requestAnimationFrame(render);
             renderer.render(scene, camera);
         }
+        console.log(scene);
     },
 };
 </script>
