@@ -1,0 +1,334 @@
+# three.js
+
+> https://threejs.org/docs/index.html#manual/en/introduction/Useful-links
+
+## 1.total
+
++ we need three things: **scene**, **camera** and **renderer**, so that we can render the scene with camera.（场景空间，相机，渲染器）
+
++ objects further away from the camera than the value of `far` or closer than `near` **won't be rendered**.
+
++ except WebGLRenderer we use here, three.js comes with a few others, often used as fallbacks for users with older browsers or for those who don't have WebGL support for some reason.
+
++ ```html
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8" />
+      <title>My first three.js app</title>
+      <style>
+        body {
+          margin: 0;
+        }
+      </style>
+    </head>
+    <body>
+      <script src="./js/three,js"></script>
+      <script>
+        const scene = new THREE.Scene();
+        // 远景相机
+        // 第一个属性75设置的是视角（field of view）。
+        // 第二个属性设置的是相机拍摄面的长宽比（aspect ratio）。我们几乎总是会使用元素的宽除以高，否则会出现挤压变形。
+  	  // 接下来的2个属性是近裁剪面（near clipping plane） 和 远裁剪面（far clipping plane）
+        const camera = new THREE.PerspectiveCamera(
+          75,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          1000,
+        );
+  	 // 也支持其他render方式
+        const renderer = new THREE.WebGLRenderer();
+       // 设置大小
+        renderer.setSize(window.innerWidth, window.innerHeight);
+       // 加入页面是canvas
+        document.body.appendChild(renderer.domElement);
+  
+        // 形状
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        // 材料
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+        // mesh网格汇合
+        const cube = new THREE.Mesh(geometry, material);
+        // 默认添加到（0,0）
+        scene.add(cube);
+  	  // 物体和相机都是(0,0); 要给camera一点z距离
+        camera.position.z = 5;
+  
+        function animate() {
+          // it pauses when the user navigates to another browser tab
+          requestAnimationFrame(animate);
+  
+          cube.rotation.x += 0.01;
+          cube.rotation.y += 0.01;
+  
+          renderer.render(scene, camera);
+        }
+  
+        animate();
+      </script>
+    </body>
+  </html>
+  
+  ```
+
+  **ps  :   requestAnimationFrame **
+
+  > requestAnimationFrame() 他的作用就是代替定时器做更加流畅高性能的动画，做可以匹配设备刷新率的动画，他解决了定时器做动画时间间隔不稳定的问题（也就是解决定时器做动画不流畅的问题）
+  >
+  > ⭐帧——就是**影像动画中最小单位的单幅影像画面**，相当于电影胶片上的每一格镜头。
+  >
+  > 切换tab页会停止
+
+  ```js
+  （120帧就每秒执行120次,60帧就执行60次）。
+  ```
+
++ render text
+  + html+css  => z-index覆盖
+  + Use CSS2DRenderer or CSS3DRenderer
+  + texture 纹理
+  + new THREE.TextGeometry( text, parameters );
+  + Bitmap Fonts
+  + Troika Text
+
+## 2.camera
+
+### PerspectiveCamera ( 透视相机 )
+
+> PerspectiveCamera( fov, aspect, near, far )
+
+**Arguments: ( number )**
+
+![preview](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/view)
+
+- fov——fov表示视场，所谓视场就是能够看到的角度范围，人的眼睛大约能够看到180度的视场，视角大小设置要根据具体应用，一般游戏会设置60~90度。 默认值45
+- aspect——aspect表示渲染窗口的长宽比，如果一个网页上只有一个全屏的canvas画布且画布上只有一个窗口，那么aspect的值就是网页窗口客户区的宽高比 window.innerWidth/window.innerHeight
+- near——near属性表示的是从距离相机多远的位置开始渲染，一般情况会设置一个很小的值。 默认值0.1
+- far——far属性表示的是距离相机多远的位置截止渲染，如果设置的值偏小小，会有部分场景看不到。过大会影响渲染性能； 默认值1000
+- ![551694448-5d0466003ec34](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/551694448-5d0466003ec34.webp)
+
+```js
+/**
+ * 透视投影相机设置
+ */
+var width = window.innerWidth; //窗口宽度
+var height = window.innerHeight; //窗口高度
+/**透视投影相机对象*/
+var camera = new THREE.PerspectiveCamera(60, width / height, 1, 1000);
+camera.position.set(200, 300, 200); //设置相机位置
+camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
+
+lookAt方法用来指定相机拍摄对象的坐标位置，.lookAt()方法的参数是Vector3对象，可以手动定义new THREE.Vector3(x,y,z), 实际开发的时候，你希望相机对准那个对象，就返回那个对象的位置属性值，比如上面代码中的scene.position， 就表示返回scene的位置坐标，如果把scene换成网格模型对象就是mesh.position，上面的网格模型是一个立方体， 具体的position属性值就是立方体的几何中心。通过观察点的位置和lookAt方法指向的位置就可以计算出相机的拍摄角度。
+
+对于的透视投影，相机位置与lookAt指向的观察目标位置越小，场景中的三维模型放大倍数越大，同时超出的部分会被剪裁掉， 比如更改上面代码camera.position.set(100,200,200);为(20,20,20)，测试结果你会发现立方体几何体放大显示，超出区域被剪裁。
+```
+
+## 3.Geometry
+
+> 关于立方体、二十面体或由 Three.js 几何方法创建的任何其他对象都是相同的东西——**几何**——它们只是在**不同的位置有不同数量的顶点**。
+>
+> 几何对象有一个名为 vertices 的属性——它包含代表每个顶点的对象数组。您可以修改这些顶点的位置，甚至可以在顶点数组中添加或删除它们。
+
+
+
+### BufferGeometry ( 缓存几何模型 )
+
+> 该类是一个 [几何模型(Geometry)](javascript:window.parent.goTo('几何模型(Geometry)')) 的高效替代，因为它使用缓存（buffer）来保存所有数据，包括顶点位置、面索引、法向量、颜色、UVs以及自定义属性。 这节约了向GPU传递全部这些数据的成本。但同时也使得BufferGeometry要比 [几何模型(Geometry)]) 更难以处理，不是以对象的方式来访问，比如使用[Vector3](javascript:window.parent.goTo('Vector3'))来访问位置数据， 以[Color](javascript:window.parent.goTo('Color'))对象来访问颜色数据，你得从相应的[attribute](javascript:window.parent.goTo('缓存属性(BufferAttribute)'))缓存中访问原始数据。 这使得BufferGeometry很适合用来存储静态对象，也就是当我们创建完模型实例后不太需要去操作它。
+
+## 4.Color
+
+```js
+// 转化16进制颜色，例如0x000000
+// use hex string
+var color = new THREE.Color("#6f4171");
+// use rgba string
+var color = new THREE.Color("rgba(188, 141, 190, 1)");
+// 转化成例如0x000000
+var hex = color.getHex()
+```
+
+## 5.Lights
+
+> 阴影更加柔和
+>
+> + spotLight.shadow.mapSize = new THREE.Vector2(1024, 1024)，提高mapSize
+>
+> +   renderer.shadowMapSoft = true;
+>
+>     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+### 1.AmbientLights (环境光)
+
+>不能作为唯一光源，会将物体渲染成一个颜色
+>
+>不需要指定位置
+
+### 2.PointLIght (点光源)
+
+> 从一点向所有方向发射光线
+
+### 3.SpotLIght (聚光灯）
+
+> 锥型光，最常用 (color,intensity,distance,fov)
+>
+> p58 ; 薄对象渲染阴影 ====> 渲染失真  ===> shadow.bias
+
+```js
+spotlight.shadow.mapSize = new Three.Vector2(512,512) // default; 增加可以看起来更顺滑，减少锯齿
+```
+
+### 4.DirectionalLight (平行光)
+
+> 模拟太阳光；不会随着距离越远光线变暗
+
+### 5.HemisphereLight (半球光)
+
+> 一种直接位于场景上方的光源，颜色从天空颜色淡化到地面颜色。模拟真实太阳光，贴合户外光照效果
+
+```js
+new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 ) /// skyColor; groundColor ; intensity  
+```
+
+### 6.RectAreaLight (区域光)
+
+> RectAreaLight 在面部均匀地发射出一个矩形平面。这种类型的光可以用来模拟光源，如明亮的窗户或条形照明。
+
+### 7.Lensflare (光晕)
+
+> LensflareElement ( texture : Texture, size : Float, distance : Float, color : Color )
+
+
+
+## 6.Material
+
+> 基础属性：p72
+>
+> 融合属性：p73
+>
+> 高级属性：p74 
+
+### 1.简单网格材质
+
+#### 1.MeshBasicMaterial
+
+> 无光照影响；
+>
+> side：材质应用于物体哪一侧，plane旋转时有一半时间看不见，因为材质默认渲染在前面 ==> 但是side:double ===> 影响性能
+>
+
+#### 应用场景
+
+​	双面贴图，立方体、球体前后贴图，
+
+
+
+#### 2.MeshDepthMaterial
+
+>其外观不是由光照或者属性决定，而是由物体于摄像机距离决定；camer.near / far;决定所见区域范围
+
+#### 应用场景
+
+​	物体随着距离增大逐渐消失
+
+
+
+#### 3.联合材质
+
+> 重点
+
+
+
+#### 4.MeshNromalMaterial
+
+> 将flatshading 设置为true时，每一个小方块面的颜色是由该面的法向量的方向决定的
+
+
+
+## 7.Loader
+
+### 1.OBJLoader
+
+> 用于加载.obj 资源的加载程序。
+>
+> OBJ 文件格式是一种简单的数据格式，它以人类可读的格式表示三维几何图形，如每个顶点的位置，每个纹理坐标顶点的 UV 位置，顶点法线，以及使每个多边形定义为顶点列表的面，和纹理顶点。
+
+```js
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
+```
+
+
+
+## 8.Core
+
+### 1.clock
+
+> `Clock`本质上就是对 JS 的`Date`对象进行封装，
+
++ .getDelta ()
+
+  获得前后两次执行该方法的时间间隔
+
+  > 假设你执行一次`.getDelta ()`方法，再执行一次`.getDelta ()`方法，第二次执行`.getDelta ()`方法时候，可以返回上次调用该方法到本次调用之间的时间间隔，返回间隔时间单位是秒，
+
+## 9.controls
+
+### 1.TrackballControls
+
+> 只能出现在appendchild之后
+
+```js
+document.body.appendChild(renderer.domElement);
+
+let trackballControls = initTrackballControls(camera, renderer);
+```
+
+
+
+
+
+
+
+## 10.other
+
+### 1.stats.js
+
+> **JavaScript Performance Monitor**
+
+This class provides a simple info box that will help you monitor your code performance.
+
+- **FPS** Frames rendered in the last second. The higher the number the better. 
+  + 每秒帧数
+- **MS** Milliseconds needed to render a frame. The lower the number the better.
+  + 渲染一帧花费时间
+- **MB** MBytes of allocated memory. (Run Chrome with `--enable-precise-memory-info`)
+  + 内存占用量
+- **CUSTOM** User-defined panel support.
+
+### 2.dat.gui
+
+> **gui.add(object, key, min, max, step);**
+>
+> 对象，key，最小值，最大值，单位
+
+```js
+var testObj = {
+    x: 10,
+    y: "20",
+    z: 30,
+    color: '#66ccff',
+};
+
+var gui = new dat.GUI();
+// 折叠
+var f = gui.addFolder('入门');
+f.add(testObj, "x", 5, 175, 1);
+f.add(testObj, "y");
+f.add(testObj, "z");
+f.addColor(testObj, "color");
+f.add(testObj, "type", ['one', 'two', '三']); // 下拉
+f.add(testObj, "speed", {slow: 1, '中速': 20, fast: 50});
+
+.listen()双向绑定
+// 如果你想从外部控制选项，你可以为选项调用 listen 方法，则你改变option时，也会同步到面板里
+```
+

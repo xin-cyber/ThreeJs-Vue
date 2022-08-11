@@ -13,11 +13,11 @@
 | chapter-03 |     SpotLight (聚光灯)     | spotLight.lookAt = spotLight.target ; CameraHelper ； SpotLightHelper; |            可以产生阴影            |
 | chapter-03 |    PointLight (点光源)     |     ⭐pointLight.position.copy(sphereLightMesh.position)      |            可以产生阴影            |
 | chapter-03 | DirectionalLight（平行光） |                          onlyShadow                          |            可以产生阴影            |
-|            |                            |                                                              |                                    |
-|            |                            |                                                              |                                    |
-|            |                            |                                                              |                                    |
-|            |                            |                                                              |                                    |
-|            |                            |                                                              |                                    |
-|            |                            |                                                              |                                    |
+| chapter-04 |     MeshBasicMaterial      |                      MeshBasicMaterial                       |                                    |
+| chapter-04 |     MeshDepthMaterial      |                      MeshDepthMaterial                       |                                    |
+| chapter-04 |          联合材质          |                                                              |                                    |
+| chapter-04 |                            |                                                              |                                    |
+| chapter-04 |                            |                                                              |                                    |
+| chapter-04 |                            |                                                              |                                    |
 
 

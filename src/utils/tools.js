@@ -1,8 +1,13 @@
 import * as THREE from "three";
 // import * as dat from 'dat.gui';
 // import Stats from 'stats-js';
-import { TrackballControls } from "three/examples/jsm/controls/TrackballControls.js";
+import {
+    TrackballControls
+} from "three/examples/jsm/controls/TrackballControls.js";
 import Stats from "stats-js";
+import {
+    OBJLoader
+} from 'three/examples/jsm/loaders/OBJLoader.js';
 
 /**
  * Initialize trackball controls to control the scene ,初始化相机视角控制
@@ -32,9 +37,9 @@ export const initTrackballControls = (camera, renderer) => {
  */
 export const initStats = (type) => {
     let panelType =
-        typeof type !== "undefined" && type && !isNaN(type)
-            ? parseInt(type)
-            : 0;
+        typeof type !== "undefined" && type && !isNaN(type) ?
+        parseInt(type) :
+        0;
     let stats = Stats();
 
     stats.showPanel(panelType); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -54,9 +59,8 @@ export const initStats = (type) => {
  */
 export const initRenderer = (additionalProperties) => {
     let props =
-        typeof additionalProperties !== "undefined" && additionalProperties
-            ? additionalProperties
-            : {};
+        typeof additionalProperties !== "undefined" && additionalProperties ?
+        additionalProperties : {};
     let renderer = new THREE.WebGLRenderer(props);
     // 阴影更加柔和
     renderer.shadowMapSoft = true;
@@ -77,9 +81,9 @@ export const initRenderer = (additionalProperties) => {
  */
 export const initCamera = (initialPosition) => {
     let position =
-        initialPosition !== undefined
-            ? initialPosition
-            : new THREE.Vector3(-30, 40, 30);
+        initialPosition !== undefined ?
+        initialPosition :
+        new THREE.Vector3(-30, 40, 30);
 
     let camera = new THREE.PerspectiveCamera(
         45,
@@ -218,7 +222,7 @@ export const addHouseAndTree = (scene) => {
  *
  * @param {THREE.Scene} scene
  */
- export const addDefaultCubeAndSphere = (scene) => {
+export const addDefaultCubeAndSphere = (scene) => {
     // create a cube
     let cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
     let cubeMaterial = new THREE.MeshLambertMaterial({
@@ -261,13 +265,13 @@ export const addHouseAndTree = (scene) => {
  *
  * @param {THREE.Scene} scene
  */
- export const addGroundPlane = (scene) => {
+export const addGroundPlane = (scene) => {
     // create the ground plane
-    var planeGeometry = new THREE.PlaneGeometry(60, 20, 120, 120);
-    var planeMaterial = new THREE.MeshPhongMaterial({
+    let planeGeometry = new THREE.PlaneGeometry(60, 20, 120, 120);
+    let planeMaterial = new THREE.MeshPhongMaterial({
         color: 0xffffff,
     });
-    var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    let plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.receiveShadow = true;
 
     // rotate and position the plane
@@ -279,4 +283,116 @@ export const addHouseAndTree = (scene) => {
     scene.add(plane);
 
     return plane;
+}
+
+/**
+ * Add a folder to the gui containing the basic material properties.
+ * 初始化遍历BasicMaterial的属性并且添加到GUI中
+ * @param gui the gui to add to
+ * @param controls the current controls object
+ * @param material the material to control
+ * @param geometry the geometry we're working with
+ * @param name optionally the name to assign to the folder
+ */
+export const addBasicMaterialSettings = (gui, controls, material, name) => {
+
+    let folderName = (name !== undefined) ? name : 'THREE.Material';
+
+    controls.material = material;
+
+    let folder = gui.addFolder(folderName);
+    folder.add(controls.material, 'id');
+    folder.add(controls.material, 'uuid');
+    folder.add(controls.material, 'name');
+    folder.add(controls.material, 'opacity', 0, 1, 0.01);
+    folder.add(controls.material, 'transparent');
+    // 145版本three.js不存在
+    controls.material.overdraw && folder.add(controls.material, 'overdraw', 0, 1, 0.01);
+    folder.add(controls.material, 'visible');
+    folder.add(controls.material, 'side', {
+        FrontSide: 0,
+        BackSide: 1,
+        BothSides: 2
+    }).onChange(function (side) {
+        controls.material.side = parseInt(side)
+    });
+
+    folder.add(controls.material, 'colorWrite');
+    // 145版本three.js不存在
+    controls.material.flatShading && folder.add(controls.material, 'flatShading').onChange(function (shading) {
+        controls.material.flatShading = shading;
+        controls.material.needsUpdate = true;
+    });
+    folder.add(controls.material, 'premultipliedAlpha');
+    folder.add(controls.material, 'dithering');
+    folder.add(controls.material, 'shadowSide', {
+        FrontSide: 0,
+        BackSide: 1,
+        BothSides: 2
+    });
+    folder.add(controls.material, 'vertexColors', {
+        NoColors: THREE.NoColors,
+        FaceColors: THREE.FaceColors,
+        VertexColors: THREE.VertexColors
+    }).onChange(function (vertexColors) {
+        material.vertexColors = parseInt(vertexColors);
+    });
+    controls.material.fog && folder.add(controls.material, 'fog');
+
+    return folder;
+}
+
+/**
+ * Load a gopher, and apply the material
+ * @param material if set apply this material to the gopher
+ * @returns promise which is fullfilled once the goher is loaded
+ */
+export const loadGopher = (material) => {
+    let loader = new OBJLoader();
+    let mesh = null;
+    let p = new Promise(function (resolve) {
+        loader.load('../../../assets/models/gopher/gopher.obj', function (loadedMesh) {
+            // this is a group of meshes, so iterate until we reach a THREE.Mesh
+            mesh = loadedMesh;
+            if (material) {
+                // material is defined, so overwrite the default material.
+                computeNormalsGroup(mesh);
+                setMaterialGroup(material, mesh);
+            }
+            resolve(mesh);
+        });
+    });
+
+    return p;
+}
+
+function setMaterialGroup(material, group) {
+    if (group instanceof THREE.Mesh) {
+        group.material = material;
+    } else if (group instanceof THREE.Group) {
+        group.children.forEach(function (child) {
+            setMaterialGroup(material, child)
+        });
+    }
+}
+
+function computeNormalsGroup(group) {
+    if (group instanceof THREE.Mesh) {
+        let tempGeom = new THREE.Geometry();
+        tempGeom.fromBufferGeometry(group.geometry)
+        tempGeom.computeFaceNormals();
+        tempGeom.mergeVertices();
+        tempGeom.computeVertexNormals();
+
+        tempGeom.normalsNeedUpdate = true;
+
+        // group = new THREE.BufferGeometry();
+        // group.fromGeometry(tempGeom);
+        group.geometry = tempGeom;
+
+    } else if (group instanceof THREE.Group) {
+        group.children.forEach(function (child) {
+            computeNormalsGroup(child)
+        });
+    }
 }

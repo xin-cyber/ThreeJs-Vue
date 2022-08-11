@@ -96,6 +96,28 @@ export default {
                         },
                     ],
                 },
+                {
+                    value: "第四章材质Materials",
+                    label: "第四章材质Materials",
+                    children: [
+                        {
+                            value: "MeshBasicMaterial",
+                            label: "MeshBasicMaterial",
+                        },
+                        {
+                            value: "MeshDepthMaterial",
+                            label: "MeshDepthMaterial",
+                        },
+                        {
+                            value: "CombineMaterial",
+                            label: "联合材质",
+                        },
+                        {
+                            value: "MeshNromalMaterial",
+                            label: "MeshNromalMaterial",
+                        },
+                    ],
+                },
             ],
         };
     },
