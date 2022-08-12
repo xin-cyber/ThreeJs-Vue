@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <Cascader @on-change="change" style="width: 240px" :data="data" v-model="currentDemo"></Cascader>
+        <Cascader @on-change="change" style="width: 270px" :data="data" v-model="currentDemo"></Cascader>
         <component :is="currentDemo[1]"> </component>
     </div>
 </template>
@@ -119,6 +119,22 @@ export default {
                         {
                             value: "ManyMaterials",
                             label: "立方体六个面不同材质",
+                        },
+                        {
+                            value: "MeshLambertMaterial",
+                            label: "MeshLambertMaterial",
+                        },
+                        {
+                            value: "MeshPhongMaterial",
+                            label: "MeshPhongMaterial",
+                        },
+                        {
+                            value: "ShaderMaterial",
+                            label: "ShaderMaterial",
+                        },
+                        {
+                            value: "LineBasicMaterial",
+                            label: "LineBasicMaterial",
                         },
                     ],
                 },

@@ -23,10 +23,10 @@ export default {
         let scene = new THREE.Scene();
 
         // add spotlight for the shadows
-        let spotLight = new THREE.SpotLight(0xffffff);
-        spotLight.position.set(-40, 60, -10);
-        spotLight.castShadow = true;
-        scene.add(spotLight);
+        // let spotLight = new THREE.SpotLight(0xffffff);
+        // spotLight.position.set(-40, 60, -10);
+        // spotLight.castShadow = true;
+        // scene.add(spotLight);
 
         let group = new THREE.Mesh();
         // add all the rubik cube elements

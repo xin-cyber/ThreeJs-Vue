@@ -11,14 +11,13 @@
 
     <script type="text/javascript" src="../js/util.js"></script>
     <script type="text/javascript" src="./js/04-11.js"></script>
-    <link rel="stylesheet" href="../../css/default.css">
+    <!-- <link rel="stylesheet" href="../../css/default.css"> -->
 </head>
 
 <body>
-  <script id="vertex-shader" type="x-shader/x-vertex">
-      uniform float time;
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        uniform float time;
       varying vec2 vUv;
-
 
       void main()
       {
@@ -32,8 +31,8 @@
 
   </script>
 
-  <script id="fragment-shader-1" type="x-shader/x-fragment">
-      precision highp float;
+    <script id="fragment-shader-1" type="x-shader/x-fragment">
+        precision highp float;
       uniform float time;
       uniform float alpha;
       uniform vec2 resolution;
@@ -79,8 +78,8 @@
 
   </script>
 
-  <script id="fragment-shader-2" type="x-shader/x-fragment">
-      // from http://glsl.heroku.com/e#7906.0
+    <script id="fragment-shader-2" type="x-shader/x-fragment">
+        // from http://glsl.heroku.com/e#7906.0
 
 
       uniform float time;
@@ -162,8 +161,8 @@
 
   </script>
 
-  <script id="fragment-shader-3" type="x-shader/x-fragment">
-      uniform vec2 resolution;
+    <script id="fragment-shader-3" type="x-shader/x-fragment">
+        uniform vec2 resolution;
       uniform float time;
 
       vec2 rand(vec2 pos)
@@ -206,10 +205,10 @@
 
   </script>
 
-  <script id="fragment-shader-4" type="x-shader/x-fragment">
+    <script id="fragment-shader-4" type="x-shader/x-fragment">
 
 
-      uniform float time;
+        uniform float time;
       uniform vec2 resolution;
 
       vec2 rand(vec2 pos)
@@ -257,9 +256,9 @@
 
   </script>
 
-  <script id="fragment-shader-5" type="x-shader/x-fragment">
+    <script id="fragment-shader-5" type="x-shader/x-fragment">
 
-      uniform float time;
+        uniform float time;
       uniform vec2 resolution;
 
       // tie nd die by Snoep Games.
@@ -287,10 +286,10 @@
 
   </script>
 
-  <script id="fragment-shader-6" type="x-shader/x-fragment">
+    <script id="fragment-shader-6" type="x-shader/x-fragment">
 
 
-      uniform float time;
+        uniform float time;
       uniform vec2 resolution;
 
 
@@ -324,11 +323,13 @@
     <div id="webgl-output">
     </div>
     <script type="text/javascript">
-            (function () {
-                // your page initialization code here
-                // the DOM will be available here
-                init()
-            })();
-      </script>
+        (function () {
+            // your page initialization code here
+            // the DOM will be available here
+            init()
+        })();
+
+    </script>
 </body>
+
 </html>

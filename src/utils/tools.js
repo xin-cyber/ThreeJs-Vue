@@ -287,7 +287,7 @@ export const addGroundPlane = (scene) => {
 
 /**
  * Add a folder to the gui containing the basic material properties.
- * 初始化遍历BasicMaterial的属性并且添加到GUI中
+ * 初始化遍历Material基类的属性并且添加到GUI中
  * @param gui the gui to add to
  * @param controls the current controls object
  * @param material the material to control
@@ -397,4 +397,101 @@ function computeNormalsGroup(group) {
             computeNormalsGroup(child)
         });
     }
+}
+
+/**
+ * Add a simple ground plance to the provided scene
+ * 
+ * @param {THREE.Scene} scene 
+ */
+export const addLargeGroundPlane = (scene, useTexture) => {
+
+    let withTexture = (useTexture !== undefined) ? useTexture : false;
+
+    // create the ground plane
+    let planeGeometry = new THREE.PlaneGeometry(10000, 10000);
+    let planeMaterial = new THREE.MeshPhongMaterial({
+        color: 0xffffff
+    });
+    if (withTexture) {
+        let textureLoader = new THREE.TextureLoader();
+        planeMaterial.map = textureLoader.load("../../../assets/textures/general/floor-wood.jpg");
+        planeMaterial.map.wrapS = THREE.RepeatWrapping;
+        planeMaterial.map.wrapT = THREE.RepeatWrapping;
+        planeMaterial.map.repeat.set(80, 80)
+    }
+    let plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.receiveShadow = true;
+
+    // rotate and position the plane
+    plane.rotation.x = -0.5 * Math.PI;
+    plane.position.x = 0;
+    plane.position.y = 0;
+    plane.position.z = 0;
+
+    scene.add(plane);
+
+    return plane;
+}
+
+
+/**
+ * 
+ * 
+ * @param gui the gui to add to
+ * @param controls the current controls object
+ * @param material material for the meshes
+ */
+export const addMeshSelection = (gui, controls, material, scene) => {
+    let sphereGeometry = new THREE.SphereGeometry(10, 20, 20);
+    let cubeGeometry = new THREE.BoxGeometry(16, 16, 15);
+    let planeGeometry = new THREE.PlaneGeometry(14, 14, 4, 4);
+
+    let sphere = new THREE.Mesh(sphereGeometry, material);
+    let cube = new THREE.Mesh(cubeGeometry, material);
+    let plane = new THREE.Mesh(planeGeometry, material);
+
+    sphere.position.x = 0;
+    sphere.position.y = 11;
+    sphere.position.z = 2;
+
+    cube.position.y = 8;
+
+    controls.selectedMesh = "cube";
+    // loadGopher(material).then(function (gopher) {
+
+    //     gopher.scale.x = 5;
+    //     gopher.scale.y = 5;
+    //     gopher.scale.z = 5;
+    //     gopher.position.z = 0
+    //     gopher.position.x = -10
+    //     gopher.position.y = 0
+
+    gui.add(controls, 'selectedMesh', ["cube", "sphere", "plane"]).onChange(function (e) {
+
+        scene.remove(controls.selected);
+
+        switch (e) {
+            case "cube":
+                scene.add(cube);
+                controls.selected = cube;
+                break;
+            case "sphere":
+                scene.add(sphere);
+                controls.selected = sphere;
+                break;
+            case "plane":
+                scene.add(plane);
+                controls.selected = plane;
+                break;
+                // case "gopher":
+                //     scene.add(gopher);
+                //     controls.selected = gopher;
+                //     break;
+        }
+    });
+    // });
+
+    controls.selected = cube;
+    scene.add(controls.selected);
 }
