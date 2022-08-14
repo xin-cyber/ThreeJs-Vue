@@ -242,6 +242,76 @@ new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 ) /// skyColor; groundColor ; i
 
 > 将flatshading 设置为true时，每一个小方块面的颜色是由该面的法向量的方向决定的
 
+## 7.Geometry
+
+### 1.二维几何体
+
+#### 1.BufferGeometry（新几何基类⭐）
+
+> 内部数据组织形式和GPU所期待的数据结构保持一致，提高了运行效率
+>
+> 将数据放在一块连续的内存空间中, 有效减少向 GPU 传输上述数据所需的开销
+
+```js
+旧几何基类：Geometry({vertices:[] , face:[new THREE.Face3()]})
+```
+
+```js
+新几何基类：attribute(分量) index(索引)
+```
+
+#### 2.PlaneGeometry(正方形平面)
+
+> (width ,  height ,  widthSegments ,  heightSegments )
+>
+> 宽 ， 高 ，宽度划分为几段，高度划分为几段
+>
+> ⭐访问宽度 ：plane.parameters.width(不能直接时plane.width)
+
+#### 3.CircleGeometry(圆形平面)
+
+> (radius , segments, thetaStart , thetaLength )
+>
+> 半径 ， 创建圆需要的三角面数量 ， 从哪里开始画圆 ， 圆画多大默认2Π
+
+#### 4.RingGeometry(同心圆)
+
+> innerRadius , outerRadius, thetaSegments , phiSegments , thetaStart , thetaLength 
+>
+> 内径 ， 外径  ，对角线段数量 ， 面数量，开始位置 ， 圆画多大默认2Π
+
+#### 5.ShapeGeometry(自定义二维图形形状)
+
+![image-20220813134559226](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220813134559226.png)
+
+> 详见demo
+
+### 2.三维几何体
+
+#### 1.BoxGeometry (立方体)
+
+#### 2.SphereGeometry (球体)
+
+#### 3.CylinderGeometry (圆柱体)
+
+#### 4.ConeGeometry (圆锥体)
+
+#### 5.TorusGeometry (圆环，甜甜圈)
+
+#### 6.TorusKnotGeometry (环形纽结，管子绕几圈)
+
+#### 7.PolyhedronGeometry (自定义多面几何体)
+
+#### 8.TetrahedronGeometry (正四面体)
+
+#### 9.OctahedronGeometry (正八面体)
+
+#### 10.DodecahedronGeometry (正十二面体)
+
+## 8.精灵和粒子
+
+
+
 
 
 ## 7.Loader

@@ -138,6 +138,42 @@ export default {
                         },
                     ],
                 },
+                {
+                    value: "第五章创建场景",
+                    label: "第五章创建场景",
+                    children: [
+                        {
+                            value: "BufferGeometry",
+                            label: "自定义几何体",
+                        },
+                        {
+                            value: "Lights",
+                            label: "Lights",
+                        },
+                        {
+                            value: "Animation",
+                            label: "动画+stats+dat.gui+自适应大小",
+                        },
+                    ],
+                },
+                {
+                    value: "第七章精灵和粒子",
+                    label: "第七章精灵和粒子",
+                    children: [
+                        {
+                            value: "SpritePoints",
+                            label: "SpritePoints",
+                        },
+                        {
+                            value: "Lights",
+                            label: "Lights",
+                        },
+                        {
+                            value: "Animation",
+                            label: "动画+stats+dat.gui+自适应大小",
+                        },
+                    ],
+                },
             ],
         };
     },

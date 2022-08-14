@@ -6,9 +6,9 @@
  */
 function initStats(type) {
     var panelType =
-        typeof type !== "undefined" && type && !isNaN(type)
-            ? parseInt(type)
-            : 0;
+        typeof type !== "undefined" && type && !isNaN(type) ?
+        parseInt(type) :
+        0;
     var stats = new Stats();
 
     stats.showPanel(panelType); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -25,9 +25,8 @@ function initStats(type) {
  */
 function initRenderer(additionalProperties) {
     var props =
-        typeof additionalProperties !== "undefined" && additionalProperties
-            ? additionalProperties
-            : {};
+        typeof additionalProperties !== "undefined" && additionalProperties ?
+        additionalProperties : {};
     var renderer = new THREE.WebGLRenderer(props);
     renderer.shadowMap.enabled = true;
     renderer.shadowMapSoft = true;
@@ -63,9 +62,9 @@ function initCanvasRenderer() {
  */
 function initCamera(initialPosition) {
     var position =
-        initialPosition !== undefined
-            ? initialPosition
-            : new THREE.Vector3(-30, 40, 30);
+        initialPosition !== undefined ?
+        initialPosition :
+        new THREE.Vector3(-30, 40, 30);
 
     var camera = new THREE.PerspectiveCamera(
         45,
@@ -81,9 +80,9 @@ function initCamera(initialPosition) {
 
 function initDefaultLighting(scene, initialPosition) {
     var position =
-        initialPosition !== undefined
-            ? initialPosition
-            : new THREE.Vector3(-10, 30, 40);
+        initialPosition !== undefined ?
+        initialPosition :
+        new THREE.Vector3(-10, 30, 40);
 
     var spotLight = new THREE.SpotLight(0xffffff);
     spotLight.position.copy(position);
@@ -104,9 +103,9 @@ function initDefaultLighting(scene, initialPosition) {
 
 function initDefaultDirectionalLighting(scene, initialPosition) {
     var position =
-        initialPosition !== undefined
-            ? initialPosition
-            : new THREE.Vector3(100, 200, 200);
+        initialPosition !== undefined ?
+        initialPosition :
+        new THREE.Vector3(100, 200, 200);
 
     var dirLight = new THREE.DirectionalLight(0xffffff);
     dirLight.position.copy(position);
@@ -158,7 +157,9 @@ function initTrackballControls(camera, renderer) {
  */
 var applyMeshStandardMaterial = function (geometry, material) {
     if (!material || material.type !== "MeshStandardMaterial") {
-        var material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+        var material = new THREE.MeshStandardMaterial({
+            color: 0xff0000
+        });
         material.side = THREE.DoubleSide;
     }
 
