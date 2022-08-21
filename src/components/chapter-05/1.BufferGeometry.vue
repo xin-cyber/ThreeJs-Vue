@@ -34,7 +34,7 @@ export default {
 
         const geometry = new THREE.BufferGeometry();
 
-        // 六个点，每三个点组成一个面（⭐三角面）
+        // 六个点坐标，每三个点组成一个面（⭐三角面）
         const vertices = new Float32Array([
             // JavaScript 类型化数组是一种类似数组的对象，并提供了一种用于访问原始二进制数据的机制。
             -5.0, -5.0, 5.0,

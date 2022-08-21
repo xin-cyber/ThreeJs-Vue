@@ -157,6 +157,20 @@ export default {
                     ],
                 },
                 {
+                    value: "第六章高级几何体",
+                    label: "第六章高级几何体",
+                    children: [
+                        {
+                            value: "ConvexGeometry",
+                            label: "ConvexGeometry",
+                        },
+                        {
+                            value: "Fontloader",
+                            label: "三维文本",
+                        },
+                    ],
+                },
+                {
                     value: "第七章精灵和粒子",
                     label: "第七章精灵和粒子",
                     children: [

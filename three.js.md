@@ -216,7 +216,7 @@ new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 ) /// skyColor; groundColor ; i
 > side：材质应用于物体哪一侧，plane旋转时有一半时间看不见，因为材质默认渲染在前面 ==> 但是side:double ===> 影响性能
 >
 
-#### 应用场景
+#### 应用场景（side）
 
 ​	双面贴图，立方体、球体前后贴图，
 
@@ -308,7 +308,31 @@ new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 ) /// skyColor; groundColor ; i
 
 #### 10.DodecahedronGeometry (正十二面体)
 
+### 3.高级几何体
+
+#### 1.LatheGeometry（花瓶）
+
+![image-20220821145904945](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220821145904945.png)
+
+#### 2.ExtrudeGeometry（二维拉伸变为三维）
+
+#### 3.TubeGeometry（管状物体）
+
+#### 4.ParametricGeometry（波浪平面）
+
+> 基于等式的几何体
+
+#### 5.三维文本
+
+1. 使用ExtrudeGeometry将二维文本转化为三维
+
 ## 8.精灵和粒子
+
+> 精灵始终面向相机
+
+```js
+let sprite = new THREE.Sprite(material);
+```
 
 
 
@@ -402,3 +426,10 @@ f.add(testObj, "speed", {slow: 1, '中速': 20, fast: 50});
 // 如果你想从外部控制选项，你可以为选项调用 listen 方法，则你改变option时，也会同步到面板里
 ```
 
+### ⭐3.Float32Array
+
+> `Float32Array` 类型数组代表的是平台字节顺序为32位的浮点数型数组
+>
+> 使用场景 : 数组数量大，操作频繁，操作二进制数据
+>
+> ⭐数组放在堆中，ArrayBuffer则把数据放在栈中（所以取数据时后者快）

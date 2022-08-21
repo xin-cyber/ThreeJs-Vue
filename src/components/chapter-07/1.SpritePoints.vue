@@ -20,13 +20,9 @@ export default {
         // 初始化渲染器renderer
         let renderer = initRenderer();
         // 初始化透视相机
-        let camera = initCamera();
+        let camera = initCamera(new THREE.Vector3(0, 0, 150));
         let scene = new THREE.Scene();
         // position and point the camera to the center of the scene
-        camera.position.x = 0;
-        camera.position.y = 0;
-        camera.position.z = 150;
-        camera.lookAt(new THREE.Vector3(0, 0, 0))
 
         let control = initTrackballControls(camera, renderer)
         let clock = new THREE.Clock()
@@ -57,51 +53,34 @@ export default {
         }
         // three需要单独管理每个sprite对象
         // 使用大量sprite会存在性能问题，需要使用THREE.Points，集中管理Three.Points
-        // geometry弃用
+        // geometry弃用,改用BufferGeometry基类
         function createPoints() {
-            let geom = new THREE.BufferGeometry();
-            let material = new THREE.PointsMaterial({
-                size: 2,
-                vertexColors: true,
-                color: 0xffffff
-            });
-
+            const gemo = new THREE.BufferGeometry()
+            const material = new THREE.PointsMaterial({
+                'size': 2,
+                'vertexColors': true,
+                'color': 0xffffff
+            })
+            let veticsFloat32Array = []
+            let veticsColors = []
             for (let x = -15; x < 15; x++) {
-                for (let y = -10; y < 10; y++) {
-                    const vertices = new Float32Array([
-                        // JavaScript 类型化数组是一种类似数组的对象，并提供了一种用于访问原始二进制数据的机制。
-                        // -5.0, -5.0, 5.0,
-                        // 5.0, -5.0, 5.0,
-                        // 5.0, 5.0, 5.0,
-
-                        // 5.0, 5.0, 5.0,
-                        // -5.0, 5.0, 5.0,
-                        // -5.0, -5.0, 5.0
-                    ]);
-                    let particle = new THREE.Vector3(x * 4, y * 4, 0);
-                    vertices.set(particle);
-                    console.log(vertices);
-                    // ⭐数组 vertices 中每三个元素构成一个点
-                    geom.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-
-                    var colors = new Uint8Array([
-
-                    ]);
-                    let particle2 = new THREE.Vector3(255, 125, 250);
-
-                    colors.set(particle2)
-                    // Don't forget to normalize the array! (third param = true)
-                    geom.setAttribute('color', new THREE.BufferAttribute(colors, 3, true));
-                    // geom.setAttribute('color', new THREE.Color(Math.random() * 0xffffff));
-
-                    // geom.colors.push(new THREE.Color(Math.random() * 0xffffff));
+                for (let y = -15; y < 15; y++) {
+                    veticsFloat32Array.push(x * 4, y * 4, 0)
+                    // 生成随机颜色
+                    const randomColor = new THREE.Color(Math.random() * 0xffffff)
+                    // 必要值
+                    veticsColors.push(randomColor.r, randomColor.g, randomColor.b)
                 }
             }
+            // 坐标
+            const vertices = new THREE.Float32BufferAttribute(veticsFloat32Array, 3)
+            const colors = new THREE.Float32BufferAttribute(veticsColors, 3)
+            gemo.attributes.position = vertices
+            gemo.attributes.color = colors
 
-            let cloud = new THREE.Points(geom, material);
-            scene.add(cloud);
+            const cloud = new THREE.Points(gemo, material)
+            scene.add(cloud)
         }
-
 
     },
 };
