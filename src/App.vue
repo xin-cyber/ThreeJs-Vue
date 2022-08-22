@@ -179,12 +179,12 @@ export default {
                             label: "SpritePoints",
                         },
                         {
-                            value: "Lights",
-                            label: "Lights",
+                            value: "",
+                            label: "",
                         },
                         {
-                            value: "Animation",
-                            label: "动画+stats+dat.gui+自适应大小",
+                            value: "",
+                            label: "",
                         },
                     ],
                 },
