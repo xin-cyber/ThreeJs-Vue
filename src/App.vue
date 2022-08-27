@@ -179,8 +179,8 @@ export default {
                             label: "SpritePoints",
                         },
                         {
-                            value: "",
-                            label: "",
+                            value: "Object3DGroup",
+                            label: "sprites纹理点group旋转",
                         },
                         {
                             value: "",
