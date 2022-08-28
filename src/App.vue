@@ -188,6 +188,20 @@ export default {
                         },
                     ],
                 },
+                {
+                    value: "第8",
+                    label: "第8",
+                    children: [
+                        {
+                            value: "GeometryMerge",
+                            label: "GeometryMerge",
+                        },
+                        {
+                            value: "BlenderLoadSource",
+                            label: "BlenderLoadSource",
+                        },
+                    ],
+                },
             ],
         };
     },
