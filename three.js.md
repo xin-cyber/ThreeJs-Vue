@@ -244,6 +244,16 @@ new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 ) /// skyColor; groundColor ; i
 
 > 将flatshading 设置为true时，每一个小方块面的颜色是由该面的法向量的方向决定的
 
+
+
+#### 5.MeshLambertMaterial
+
+> 感光，石头木材等，
+>
+> emisssive:无法被光源照射到的暗处显示的颜色，默认为黑色
+
+
+
 ## 7.Geometry
 
 ### 1.二维几何体
@@ -339,10 +349,131 @@ let sprite = new THREE.Sprite(material);
 ### 9.Group
 
 > 与Three.Mesh 和 Three.Scene 的基类Three.Object3D非常接近，唯一不同是它本身没有任何可渲染的数据
+>
+> 旋转缩放都是相对于自身，08-group，一个整体
 
-+ 旋转缩放都是相对于自身，08-group，一个整体
+## 10.加载外部资源
 
-## 7.Loader
+- JSON
+
+  > 导出单个mesh的json文件
+
+  ```js
+  // 保存json格式文件
+  let result = new THREE.mesh( geometry , material ).toJSON();
+  localStorage.setItem("json", JSON.stringify(result));
+  
+  // 加载json格式文件
+  let loadedGeometry = JSON.parse(json);
+  let loadedMesh = new THREE.ObjectLoader().parse(loadedGeometry);
+  ```
+
+  > 导出所有场景信息的json文件
+
+  ```js
+  // 保存json格式文件
+  let result = scene.toJSON();
+  localStorage.setItem("json", JSON.stringify(result));
+  
+  // 加载json格式文件
+  let loadedGeometry = JSON.parse(json);
+  let loadedMesh = new THREE.ObjectLoader().parse(loadedGeometry);
+  ```
+
+  > blender 导出json文件
+
+  ```js
+  let loader = new THREE.JSONLoader();
+  loader.load('../../assets/models/house/house.json', function (geometry, mat) {
+  
+      let mesh = new THREE.Mesh(geometry, mat[0]);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+  
+      // call the default render loop.
+      loaderScene.render(mesh, camera);
+  });
+  ```
+
+- OBJ / MTL
+
+  > OBJ定义几何体，MTL定义材质，基于文本的材质
+  >
+  > ps：blender导出OBJ / MTL 文件
+
+  ```js
+  import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
+  let loader = new OBJLoader();
+  loader.load('../../assets/models/pinecone/pinecone.obj', function (mesh) {
+  
+  let material = new THREE.MeshLambertMaterial({
+    color: 0x5C3A21
+  });
+  
+  // loadedMesh is a group of meshes. For 
+  // each mesh set the material, and compute the information 
+  // three.js needs for rendering.
+  mesh.children.forEach(function (child) {
+    child.material = material;
+    child.geometry.computeVertexNormals();
+    child.geometry.computeFaceNormals();
+  });
+  
+  mesh.scale.set(120,120,120)
+  
+  // call the default render loop.
+  loaderScene.render(mesh, camera);
+  });
+  ```
+
+  ```js
+  var mtlLoader = new THREE.MTLLoader();
+  mtlLoader.setPath("../../assets/models/butterfly/")
+  mtlLoader.load('butterfly.mtl', function (materials) {
+  materials.preload();
+  
+  var objLoader = new THREE.OBJLoader();
+  objLoader.setMaterials(materials);
+  objLoader.load('../../assets/models/butterfly/butterfly.obj', function (object) {
+  
+    // move wings to more horizontal position 同层次位置
+    [0, 2, 4, 6].forEach(function (i) {
+      object.children[i].rotation.z = 0.3 * Math.PI
+    });
+  
+    [1, 3, 5, 7].forEach(function (i) {
+      object.children[i].rotation.z = -0.3 * Math.PI
+    });
+  
+    // configure the wings,
+    var wing2 = object.children[5];
+    var wing1 = object.children[4];
+  
+    wing1.material.opacity = 0.9;
+    wing1.material.transparent = true;
+    wing1.material.depthTest = false;
+    // 两侧都可以看见  
+    wing1.material.side = THREE.DoubleSide;
+  
+    wing2.material.opacity = 0.9;
+    wing2.material.depthTest = false;
+    wing2.material.transparent = true;
+    wing2.material.side = THREE.DoubleSide;
+  
+    object.scale.set(140, 140, 140);
+    mesh = object;
+  
+    object.rotation.x = 0.2;
+    object.rotation.y = -1.3;
+  
+    loaderScene.render(mesh, camera);
+  });
+  });
+  ```
+
+
+
+## 10.Loader
 
 ### 1.OBJLoader
 
@@ -409,16 +540,16 @@ This class provides a simple info box that will help you monitor your code perfo
 > 对象，key，最小值，最大值，单位
 
 ```js
-var testObj = {
+let testObj = {
     x: 10,
     y: "20",
     z: 30,
     color: '#66ccff',
 };
 
-var gui = new dat.GUI();
+let gui = new dat.GUI();
 // 折叠
-var f = gui.addFolder('入门');
+let f = gui.addFolder('入门');
 f.add(testObj, "x", 5, 175, 1);
 f.add(testObj, "y");
 f.add(testObj, "z");
@@ -440,6 +571,12 @@ f.add(testObj, "speed", {slow: 1, '中速': 20, fast: 50});
 
 ### 4.Three框选
 
->https://threejs.org/examples/#misc_boxselection
+> https://threejs.org/examples/#misc_boxselection
 >
->https://blog.csdn.net/qq_40147088/article/details/120860635
+> https://blog.csdn.net/qq_40147088/article/details/120860635
+
+### 5.Material.depthTest
+
+> depthTest:深度渲染，俩个物体重合时设为false只渲染前面
+
+用于去除纹理的黑色背景，

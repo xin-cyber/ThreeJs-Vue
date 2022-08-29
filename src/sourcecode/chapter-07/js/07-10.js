@@ -36,10 +36,13 @@ function init() {
     });
 
     // we have 1 row, with five sprites
-    spriteMaterial.map.offset = new THREE.Vector2(0.2 * spriteNumber, 0);
+    // 平移
+    spriteMaterial.map.offset = new THREE.Vector2((1 / 5) * spriteNumber, 0);
+    // 缩放 ,前1/5 ;如果没有上面就只是白色
     spriteMaterial.map.repeat = new THREE.Vector2(1 / 5, 1);
+    // 用于去除纹理的黑色背景，
     spriteMaterial.depthTest = false;
-
+    // 设置元素与背景的融合模式
     spriteMaterial.blending = THREE.AdditiveBlending;
 
     var sprite = new THREE.Sprite(spriteMaterial);
@@ -51,13 +54,12 @@ function init() {
 
     return sprite;
   }
-
-
+  console.log(group, scene);
 
   function render() {
 
     stats.update();
-    group.rotation.x +=0.01;
+    group.rotation.x += 0.01;
 
     requestAnimationFrame(render);
     webGLRenderer.render(scene, camera);

@@ -55,6 +55,7 @@ export default {
         // 使用大量sprite会存在性能问题，需要使用THREE.Points，集中管理Three.Points
         // geometry弃用,改用BufferGeometry基类
         function createPoints() {
+            // src目录下需要require
             let a = require('../../assets/textures/particles/raindrop-3.png')
             let texture = new THREE.TextureLoader().load(a);
             const gemo = new THREE.BufferGeometry()
