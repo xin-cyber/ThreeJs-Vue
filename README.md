@@ -21,8 +21,9 @@
 | chapter-04 |     LineBasicMaterial      |           new THREE.BufferGeometry().setFromPoints           | Geometry(126+弃用)改为BufferGeometry  |
 | chapter-07 |        SpritePoints        | Float32BufferAttribute ； PointsMaterial ； Points ;TextureLoader().load | 加载纹理需要require，不能直接引入路径 |
 | chapter-07 |       Object3DGroup        | Object3D ； SpriteMaterial=> map.offset,map.repeat;depthTest;blending |  纹理大小位置，背景去黑色，融合模式   |
+| chapter-08 |           Group            |                            Group                             |                                       |
 | chapter-08 |       GeometryMerge        |          BufferGeometryUtils.mergeBufferGeometries           |              几何体合并               |
-|            |                            |                                                              |                                       |
+| chapter-09 |        SelectObject        | new Three.Vector3().unproject ; Raycaster ; intersectObjects |               物体选中                |
 |            |                            |                                                              |                                       |
 |            |                            |                                                              |                                       |
 

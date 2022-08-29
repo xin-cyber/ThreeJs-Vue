@@ -1,6 +1,8 @@
 # three.js
 
 > https://threejs.org/docs/index.html#manual/en/introduction/Useful-links
+>
+> webgl : 支持3d，gpu并行计算和渲染，速度快，有利于大数据量和复杂物体渲染
 
 ## 1.total
 
@@ -483,6 +485,42 @@ let sprite = new THREE.Sprite(material);
 
 ```js
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
+```
+
+
+
+## 11.动画animation
+
+### 1.物体选中Raycaster
+
+> 这个类用于进行[raycasting](https://link.juejin.cn/?target=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FRay_casting)（光线投射）。 光线投射用于进行鼠标拾取（在三维空间中计算出鼠标移过了什么物体）。
+
+![image-20220829223004697](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220829223004697.png)
+
+![image-20220829223034707](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220829223034707.png)
+
+```js
+let raycaster = new THREE.Raycaster();
+
+// 鼠标的默认位置是一个二维向量
+var mouse = new THREE.Vector3()
+document.addEventListener("mousemove", onDocumentMouseMove, false);
+
+// 监听鼠标移动，记录坐标信息
+function onDocumentMouseMove(event) {
+    event.preventDefault();
+
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    mouse.z = 0.5
+}
+// 计算出相机照射到鼠标的光线
+// 归一化坐标 ； 光线起源位置
+raycaster.setFromCamera(mouse, camera);
+// 找到 和射线相交的对象，返回数组(相交的物体不只有一个)
+let intersects = raycaster.intersectObjects(scene.children);
+// your logic
+...
 ```
 
 

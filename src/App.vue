@@ -178,13 +178,33 @@ export default {
                             value: "SpritePoints",
                             label: "SpritePoints",
                         },
+                    ],
+                },
+                {
+                    value: "第八章Group和merge",
+                    label: "第八章Group和merge",
+                    children: [
                         {
-                            value: "",
-                            label: "",
+                            value: "Group",
+                            label: "Group",
                         },
                         {
-                            value: "",
-                            label: "",
+                            value: "GeometryMerge",
+                            label: "GeometryMerge",
+                        },
+                    ],
+                },
+                {
+                    value: "第九章动画",
+                    label: "第九章动画",
+                    children: [
+                        {
+                            value: "SelectObject",
+                            label: "SelectObject",
+                        },
+                        {
+                            value: "GeometryMerge",
+                            label: "GeometryMerge",
                         },
                     ],
                 },
