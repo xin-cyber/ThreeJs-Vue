@@ -178,13 +178,15 @@ export default {
                             value: "SpritePoints",
                             label: "SpritePoints",
                         },
+                    ],
+                },
+                {
+                    value: "第八章组合和加载外部资源",
+                    label: "第八章组合和加载外部资源",
+                    children: [
                         {
-                            value: "",
-                            label: "",
-                        },
-                        {
-                            value: "",
-                            label: "",
+                            value: "Group",
+                            label: "Group",
                         },
                     ],
                 },

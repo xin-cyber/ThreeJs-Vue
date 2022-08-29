@@ -20,7 +20,7 @@
 | chapter-04 |     MeshPhongMaterial      | material.emissive.getStyle()  ;  material.specular.getStyle() |                                       |
 | chapter-04 |     LineBasicMaterial      |           new THREE.BufferGeometry().setFromPoints           | Geometry(126+弃用)改为BufferGeometry  |
 | chapter-07 |        SpritePoints        | Float32BufferAttribute ； PointsMaterial ； Points ;TextureLoader().load | 加载纹理需要require，不能直接引入路径 |
-|            |                            |                                                              |                                       |
+| chapter-08 |           Group            |           THREE.Group() ; ArrowHelper ; DoubleSide           |                                       |
 |            |                            |                                                              |                                       |
 |            |                            |                                                              |                                       |
 |            |                            |                                                              |                                       |

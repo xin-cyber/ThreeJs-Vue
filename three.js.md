@@ -99,7 +99,9 @@
 
 **Arguments: ( number )**
 
-![preview](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/view)
+![899901-20160727081844778-301622290](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/899901-20160727081844778-301622290.png)
+
+![899901-20160727081858981-1447408348](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/899901-20160727081858981-1447408348.png)
 
 - fov——fov表示视场，所谓视场就是能够看到的角度范围，人的眼睛大约能够看到180度的视场，视角大小设置要根据具体应用，一般游戏会设置60~90度。 默认值45
 - aspect——aspect表示渲染窗口的长宽比，如果一个网页上只有一个全屏的canvas画布且画布上只有一个窗口，那么aspect的值就是网页窗口客户区的宽高比 window.innerWidth/window.innerHeight
@@ -334,9 +336,11 @@ new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 ) /// skyColor; groundColor ; i
 let sprite = new THREE.Sprite(material);
 ```
 
+### 9.Group
 
+> 与Three.Mesh 和 Three.Scene 的基类Three.Object3D非常接近，唯一不同是它本身没有任何可渲染的数据
 
-
++ 旋转缩放都是相对于自身，08-group，一个整体
 
 ## 7.Loader
 
@@ -433,3 +437,9 @@ f.add(testObj, "speed", {slow: 1, '中速': 20, fast: 50});
 > 使用场景 : 数组数量大，操作频繁，操作二进制数据
 >
 > ⭐数组放在堆中，ArrayBuffer则把数据放在栈中（所以取数据时后者快）
+
+### 4.Three框选
+
+>https://threejs.org/examples/#misc_boxselection
+>
+>https://blog.csdn.net/qq_40147088/article/details/120860635
