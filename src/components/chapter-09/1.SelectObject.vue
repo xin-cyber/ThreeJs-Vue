@@ -48,10 +48,12 @@ export default {
         function onDocumentMouseDown(event) {
             console.log(123);
             var vector = new THREE.Vector3((event.clientX / window.innerWidth) * 2 - 1, -(event.clientY / window.innerHeight) * 2 + 1, 0.5);
-            vector = vector.unproject(camera); //用摄像机的投影矩阵解压矢量
+            // vector = vector.unproject(camera); //用摄像机的投影矩阵解压矢量
 
-            // 光线投射Raycaster,光线投射用于进行鼠标拾取（在三维空间中计算出鼠标移过了什么物体）
-            var raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
+            // // 光线投射Raycaster,光线投射用于进行鼠标拾取（在三维空间中计算出鼠标移过了什么物体）
+            // var raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
+            let raycaster = new THREE.Raycaster()
+            raycaster.setFromCamera(vector, camera)
             //多个几何体 [sphere, cylinder, cube]
             var intersects = raycaster.intersectObjects(scene.children);
             console.log(intersects);

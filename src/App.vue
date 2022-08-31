@@ -203,8 +203,8 @@ export default {
                             label: "SelectObject",
                         },
                         {
-                            value: "GeometryMerge",
-                            label: "GeometryMerge",
+                            value: "tweenjs",
+                            label: "tweenjs",
                         },
                     ],
                 },

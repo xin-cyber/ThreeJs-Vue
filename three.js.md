@@ -500,6 +500,9 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 ![image-20220829223034707](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220829223034707.png)
 
 ```js
+// 官网实例
+https://threejs.org/docs/index.html?q=ray#api/en/core/Raycaster
+
 let raycaster = new THREE.Raycaster();
 
 // 鼠标的默认位置是一个二维向量
@@ -522,6 +525,12 @@ let intersects = raycaster.intersectObjects(scene.children);
 // your logic
 ...
 ```
+
+### 2.Tween.js的使用
+
+> 通过这个库可以很容易地实现某个属性在两个值之间的进行过渡，而且起始值和结束值之间的所有中间值都会自动计算出来，这个过程叫作`tweening`（补间）, 产生平滑的动画效果。
+
+
 
 
 
