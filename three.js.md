@@ -529,8 +529,12 @@ let intersects = raycaster.intersectObjects(scene.children);
 ### 2.Tween.js的使用
 
 > 通过这个库可以很容易地实现某个属性在两个值之间的进行过渡，而且起始值和结束值之间的所有中间值都会自动计算出来，这个过程叫作`tweening`（补间）, 产生平滑的动画效果。
+>
+> [ tween.js 中文使用指南 - 掘金 ](https://juejin.cn/post/6844903545053921293)
 
+### 3.摄像机
 
+![image-20220901221248725](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220901221248725.png)
 
 
 
