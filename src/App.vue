@@ -1,6 +1,11 @@
 <template>
     <div id="app">
-        <Cascader @on-change="change" style="width: 270px" :data="data" v-model="currentDemo"></Cascader>
+        <Cascader
+            @on-change="change"
+            style="width: 270px"
+            :data="data"
+            v-model="currentDemo"
+        ></Cascader>
         <component :is="currentDemo[1]"> </component>
     </div>
 </template>
@@ -206,6 +211,10 @@ export default {
                             value: "tweenjs",
                             label: "tweenjs",
                         },
+                        {
+                            value: "EffectComposer",
+                            label: "EffectComposer物体边框动画",
+                        },
                     ],
                 },
             ],
@@ -214,16 +223,16 @@ export default {
     methods: {
         change() {
             if (this.currentDemo.length === 0) return;
-            document.querySelector('body #stats') && document.querySelector('body #stats').remove()
+            document.querySelector("body #stats") &&
+                document.querySelector("body #stats").remove();
             this.$nextTick(() => {
-                document.querySelector('body canvas').remove()
-                if (document.querySelector('.ac').childNodes.length > 1) {
-                    document.querySelector('.ac').childNodes[0].remove()
+                document.querySelector("body canvas").remove();
+                if (document.querySelector(".ac").childNodes.length > 1) {
+                    document.querySelector(".ac").childNodes[0].remove();
                 }
             });
         },
     },
-
 };
 </script>
 

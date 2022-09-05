@@ -24,7 +24,7 @@
 | chapter-08 |           Group            |                            Group                             |                                       |
 | chapter-08 |       GeometryMerge        |          BufferGeometryUtils.mergeBufferGeometries           |              几何体合并               |
 | chapter-09 |        SelectObject        | new Three.Vector3().unproject ; Raycaster ; intersectObjects |               物体选中                |
-|            |                            |                                                              |                                       |
+| chapter-09 |          tweenjs           |                       tweenjs补间动画                        |                                       |
 |            |                            |                                                              |                                       |
 
 
