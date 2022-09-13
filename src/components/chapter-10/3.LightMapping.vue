@@ -13,7 +13,7 @@ import {
 } from "../../utils/tools";
 
 export default {
-    name: "",
+    name: "LightMapping",
     mounted() {
         // stats面板
         let stats = initStats();
@@ -26,13 +26,14 @@ export default {
         // 初始化Controls
         let control = initTrackballControls(camera, renderer);
         let clock = new THREE.Clock();
-        // 创建球体
-        let geometry = new THREE.SphereGeometry(9, 32, 16);
-        let material = new THREE.MeshBasicMaterial({
-            color: new THREE.Color("#4ba2e2"),
-        });
-        let sphere = new THREE.Mesh(geometry, material);
-        scene.add(sphere);
+        // 创建平行光
+        let sun = new THREE.DirectionalLight(0xffffff);
+        sun.position.set(300, 100, 100);
+        scene.add(sun);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+        // 初始化加载器
+        // let textureLoader = new THREE.TextureLoader();
+
         render();
 
         function render() {

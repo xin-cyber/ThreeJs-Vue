@@ -217,6 +217,24 @@ export default {
                         },
                     ],
                 },
+                {
+                    value: "第十纹理",
+                    label: "第十纹理",
+                    children: [
+                        {
+                            value: "basicTexture",
+                            label: "初次简单require引入纹理图片",
+                        },
+                        {
+                            value: "BumpMapping",
+                            label: "凹凸贴图",
+                        },
+                        {
+                            value: "LightMapping",
+                            label: "光照贴图",
+                        },
+                    ],
+                },
             ],
         };
     },

@@ -25,7 +25,9 @@
 | chapter-08 |       GeometryMerge        |          BufferGeometryUtils.mergeBufferGeometries           |              几何体合并               |
 | chapter-09 |        SelectObject        | new Three.Vector3().unproject ; Raycaster ; intersectObjects |               物体选中                |
 | chapter-09 |          tweenjs           |                       tweenjs补间动画                        |                                       |
-|            |                            |                                                              |                                       |
+| chapter-09 |       EffectComposer       |                       物体后期着色处理                       |             物体选中光圈              |
+| chapter-10 |        basicTexture        |            new THREE.TextureLoader().load("path")            |               纹理加载                |
+| chapter-10 |        BumpMapping         |      wrapS ； wrapT ; map.repeat ; bumpMap ; bumpScale       |                UV贴图                 |
 
 
 

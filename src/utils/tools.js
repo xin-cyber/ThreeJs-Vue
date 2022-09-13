@@ -479,7 +479,7 @@ export const addLargeGroundPlane = (scene, useTexture) => {
     });
     if (withTexture) {
         let textureLoader = new THREE.TextureLoader();
-        planeMaterial.map = textureLoader.load("../../../assets/textures/general/floor-wood.jpg");
+        planeMaterial.map = textureLoader.load(require("../assets/textures/general/floor-wood.jpg"));
         planeMaterial.map.wrapS = THREE.RepeatWrapping;
         planeMaterial.map.wrapT = THREE.RepeatWrapping;
         planeMaterial.map.repeat.set(80, 80)

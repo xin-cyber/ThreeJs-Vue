@@ -473,22 +473,6 @@ let sprite = new THREE.Sprite(material);
   });
   ```
 
-
-
-## 10.Loader
-
-### 1.OBJLoader
-
-> 用于加载.obj 资源的加载程序。
->
-> OBJ 文件格式是一种简单的数据格式，它以人类可读的格式表示三维几何图形，如每个顶点的位置，每个纹理坐标顶点的 UV 位置，顶点法线，以及使每个多边形定义为顶点列表的面，和纹理顶点。
-
-```js
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
-```
-
-
-
 ## 11.动画animation
 
 ### 1.物体选中Raycaster
@@ -536,9 +520,73 @@ let intersects = raycaster.intersectObjects(scene.children);
 
 ![image-20220901221248725](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220901221248725.png)
 
+## 12.Loader
 
+### 1.OBJLoader
 
-## 8.Core
+> 用于加载.obj 资源的加载程序。
+>
+> OBJ 文件格式是一种简单的数据格式，它以人类可读的格式表示三维几何图形，如每个顶点的位置，每个纹理坐标顶点的 UV 位置，顶点法线，以及使每个多边形定义为顶点列表的面，和纹理顶点。
+
+```
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
+```
+
+## 13.纹理加载⭐
+
+### 1.引入纹理文件
+
++ **加载方式**
+
+  > // src目录下需要require , 其他直接写路径，图片可以是jpg，jpeg，png
+  >
+  > ⭐图片长宽最好是2的次方，`256*256`、`512*512`、`1024*1024`
+  >
+  > let a = require('../../assets/textures/particles/raindrop-3.png')
+  >
+  > let texture = new THREE.TextureLoader().load(a);
+
++ **⭐纹理加载是异步的**
+
+  > load ( '../../位置路径'，loadFunction ,  onProgressFunction , onErrorFunction)
+  >
+  > 成功回调 ， 加载进度回调 ， 解析错误回调
+
++ **纹理处理**
+
+  > 纹理不会是刚刚好的，通常需要放大缩小，设置magFilter来指定纹理如何放大 ；设置minFilter设置纹理如何缩小；
+
+  ![image-20220906223417907](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220906223417907.png)
+
+  > 除了上面俩，还可以设置mipmap，mipmap是将纹理按照2的倍数缩小（光滑过滤效果，正方形）
+
+  ![image-20220906223837171](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220906223837171.png)
+
+  > 默认值 magFilter ： Three.LinearFilter ;  minFilter : Three.LinearMIpMapLinearFilter
+
++ UV贴图
+
+  > 纹理可以很好的贴合，是通过UV贴图实现的，可以告诉渲染器将纹理的哪部分应用到指定的面上
+
+### 2.凹凸贴图创建褶皱
+
+> 为材质添加厚度
+
++ 普通凹凸贴图增加细节凹凸感
+
++ 法向量贴图细节更强
+
++ 位移贴图真正改变物体表面形状
+
++ 环境光遮挡贴图
+
+  > 重复渲染阴影消耗性能，静态的阴影可以使用一次性的环境光遮挡贴图
+
++ 光照贴图，光照遮挡阴影
+
++ 
+
+## 14.Core
 
 ### 1.clock
 
@@ -550,7 +598,7 @@ let intersects = raycaster.intersectObjects(scene.children);
 
   > 假设你执行一次`.getDelta ()`方法，再执行一次`.getDelta ()`方法，第二次执行`.getDelta ()`方法时候，可以返回上次调用该方法到本次调用之间的时间间隔，返回间隔时间单位是秒，
 
-## 9.controls
+## 15.controls
 
 ### 1.TrackballControls
 
@@ -568,7 +616,7 @@ let trackballControls = initTrackballControls(camera, renderer);
 
 
 
-## 10.other
+## 16.other
 
 ### 1.stats.js
 
