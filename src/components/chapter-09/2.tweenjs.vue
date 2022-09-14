@@ -40,7 +40,8 @@ export default {
             .to({ x: 50, y: 50, z: 50 }, 10000)
             .start()
             // 补间动画期间运行logic
-            .onUpdate((obj) => {
+            .onUpdate(() => {
+                // 参数obj
                 // obj为sphere.position
                 // console.log(obj);
             })

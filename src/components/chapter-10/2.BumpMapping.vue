@@ -46,7 +46,7 @@ export default {
         // 垂直方向纹理包裹方式，=> UV映射中的V
         planeMaterial.map.wrapT = THREE.RepeatWrapping; // 重复平铺
         // 在UV方向上重复多少次，x轴和y轴上多久重复一次，大于1纹理重复平铺
-        planeMaterial.map.repeat.set(80, 80);
+        planeMaterial.map.repeat.set(80, 80); // 越大图越小
 
         let plane = new THREE.Mesh(planeGeometry, planeMaterial);
         plane.receiveShadow = true;
@@ -106,7 +106,7 @@ export default {
             map: textureLoader.load(
                 require("../../assets/textures/uv-move/w_c.jpg")
             ),
-            // 设置纹理对象
+            // 设置纹理对象,位移贴图
             displacementMap: textureLoader.load(
                 require("../../assets/textures/uv-move/w_d.png")
             ),
@@ -132,4 +132,6 @@ export default {
     },
 };
 </script>
-<style scoped></style>
+<style scoped>
+
+</style>

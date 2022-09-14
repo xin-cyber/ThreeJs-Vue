@@ -254,6 +254,12 @@ new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 ) /// skyColor; groundColor ; i
 >
 > emisssive:无法被光源照射到的暗处显示的颜色，默认为黑色
 
+#### 最佳材质⭐6.MeshStandardMaterial
+
+> metalness设置金属质感表面
+>
+> roughness设置木制或者塑料质感表面
+
 
 
 ## 7.Geometry
@@ -582,9 +588,15 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 
   > 重复渲染阴影消耗性能，静态的阴影可以使用一次性的环境光遮挡贴图
 
-+ 光照贴图，光照遮挡阴影
++ 光照贴图，光照遮挡产生阴影，
 
-+ 
++ 金属贴图和粗糙贴图，金属光泽和粗糙（木制塑料）表面
+
++ 透明贴图
+
++ 自发光贴图，自己不会成为光源
+
++ 环境贴图，伪造镜面反射
 
 ## 14.Core
 

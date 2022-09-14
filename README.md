@@ -1,33 +1,41 @@
-|    章节    |            小节            |                             概述                             |                  ps                   |
-| :--------: | :------------------------: | :----------------------------------------------------------: | :-----------------------------------: |
-|  FirstTry  |         FirstDemo          |                         初始绘制场景                         |                                       |
-|  FirstTry  |       FirstDrawLine        |      LineBasicMaterial；BufferGeometry.setFromPoints；       |                                       |
-| chapter-01 |           Scene            |               初始化渲染场景-----AxesHelper；                |                                       |
-| chapter-01 |           Lights           |               SpotLight；AmbientLight；Vector2               |                                       |
-| chapter-01 |     :star: Animations      | Stats-js ;   castShadow ;   receiveShadow ;  dat.GUI ;   trackballControls ;   onResize ; THREE.Clock().getDelta() |                                       |
-| chapter-02 |        SceneDetail         | scene.remove ;   scene.children.length ;   cube.name ;    planeGeometry.parameters.width ; scene.traverse :star:  ;    scene.fog ;   scene.overrideMaterial;   scene.getObjectByName |                                       |
-| chapter-02 |      Geometry/custom       | 手动创建立方体：new three.geometry().computeFaceNormals ； geometry.clone() ;createMultiMaterialObject ； translateX |         Three.face3(125+弃用)         |
-| chapter-02 |         MeshDetail         | mesh.position / rotation /scale /translateX /translateY /visible / cube.rotation.set(x, y, z) =cube.rotation = new THREE.Vector3(x,y,z) |                                       |
-| chapter-02 |        CameraDeatil        | OrthographicCamera: 正交投影相机；PerspectiveCamera：透视投影相机 |                                       |
-| chapter-03 |   AmbientLight (环境光)    | ambientLight.color / intensity / visible ; spotLight.color.getStyle() |  CubeGeometry(弃用) =>> BoxGeometry   |
-| chapter-03 |     SpotLight (聚光灯)     | spotLight.lookAt = spotLight.target ; CameraHelper ； SpotLightHelper; |             可以产生阴影              |
-| chapter-03 |    PointLight (点光源)     |     ⭐pointLight.position.copy(sphereLightMesh.position)      |             可以产生阴影              |
-| chapter-03 | DirectionalLight（平行光） |                          onlyShadow                          |             可以产生阴影              |
-| chapter-04 |     MeshBasicMaterial      |                      MeshBasicMaterial                       |                                       |
-| chapter-04 |     MeshDepthMaterial      |                      MeshDepthMaterial                       |                                       |
-| chapter-04 |          联合材质          | createMultiMaterialObject ； blending: THREE.MultiplyBlending ；camera.updateProjectionMatrix():star:相机更新需要调用 |                                       |
-| chapter-04 |    MeshLambertMaterial     |    emisssive:无法被光源照射到的暗处显示的颜色，默认为黑色    |                 感光                  |
-| chapter-04 |     MeshPhongMaterial      | material.emissive.getStyle()  ;  material.specular.getStyle() |                                       |
-| chapter-04 |     LineBasicMaterial      |           new THREE.BufferGeometry().setFromPoints           | Geometry(126+弃用)改为BufferGeometry  |
-| chapter-07 |        SpritePoints        | Float32BufferAttribute ； PointsMaterial ； Points ;TextureLoader().load | 加载纹理需要require，不能直接引入路径 |
-| chapter-07 |       Object3DGroup        | Object3D ； SpriteMaterial=> map.offset,map.repeat;depthTest;blending |  纹理大小位置，背景去黑色，融合模式   |
-| chapter-08 |           Group            |                            Group                             |                                       |
-| chapter-08 |       GeometryMerge        |          BufferGeometryUtils.mergeBufferGeometries           |              几何体合并               |
-| chapter-09 |        SelectObject        | new Three.Vector3().unproject ; Raycaster ; intersectObjects |               物体选中                |
-| chapter-09 |          tweenjs           |                       tweenjs补间动画                        |                                       |
-| chapter-09 |       EffectComposer       |                       物体后期着色处理                       |             物体选中光圈              |
-| chapter-10 |        basicTexture        |            new THREE.TextureLoader().load("path")            |               纹理加载                |
-| chapter-10 |        BumpMapping         |      wrapS ； wrapT ; map.repeat ; bumpMap ; bumpScale       |                UV贴图                 |
+|    章节    |            小节            |                             概述                             |                    ps                    |
+| :--------: | :------------------------: | :----------------------------------------------------------: | :--------------------------------------: |
+|  FirstTry  |         FirstDemo          |                         初始绘制场景                         |                                          |
+|  FirstTry  |       FirstDrawLine        |      LineBasicMaterial；BufferGeometry.setFromPoints；       |                                          |
+| chapter-01 |           Scene            |               初始化渲染场景-----AxesHelper；                |                                          |
+| chapter-01 |           Lights           |               SpotLight；AmbientLight；Vector2               |                                          |
+| chapter-01 |     :star: Animations      | Stats-js ;   castShadow ;   receiveShadow ;  dat.GUI ;   trackballControls ;   onResize ; THREE.Clock().getDelta() |                                          |
+| chapter-02 |        SceneDetail         | scene.remove ;   scene.children.length ;   cube.name ;    planeGeometry.parameters.width ; scene.traverse :star:  ;    scene.fog ;   scene.overrideMaterial;   scene.getObjectByName |                                          |
+| chapter-02 |      Geometry/custom       | 手动创建立方体：new three.geometry().computeFaceNormals ； geometry.clone() ;createMultiMaterialObject ； translateX |          Three.face3(125+弃用)           |
+| chapter-02 |         MeshDetail         | mesh.position / rotation /scale /translateX /translateY /visible / cube.rotation.set(x, y, z) =cube.rotation = new THREE.Vector3(x,y,z) |                                          |
+| chapter-02 |        CameraDeatil        | OrthographicCamera: 正交投影相机；PerspectiveCamera：透视投影相机 |                                          |
+| chapter-03 |   AmbientLight (环境光)    | ambientLight.color / intensity / visible ; spotLight.color.getStyle() |    CubeGeometry(弃用) =>> BoxGeometry    |
+| chapter-03 |     SpotLight (聚光灯)     | spotLight.lookAt = spotLight.target ; CameraHelper ； SpotLightHelper; |               可以产生阴影               |
+| chapter-03 |    PointLight (点光源)     |     ⭐pointLight.position.copy(sphereLightMesh.position)      |               可以产生阴影               |
+| chapter-03 | DirectionalLight（平行光） |                          onlyShadow                          |               可以产生阴影               |
+| chapter-04 |     MeshBasicMaterial      |                      MeshBasicMaterial                       |                                          |
+| chapter-04 |     MeshDepthMaterial      |                      MeshDepthMaterial                       |                                          |
+| chapter-04 |          联合材质          | createMultiMaterialObject ； blending: THREE.MultiplyBlending ；camera.updateProjectionMatrix():star:相机更新需要调用 |                                          |
+| chapter-04 |    MeshLambertMaterial     |    emisssive:无法被光源照射到的暗处显示的颜色，默认为黑色    |                   感光                   |
+| chapter-04 |     MeshPhongMaterial      | material.emissive.getStyle()  ;  material.specular.getStyle() |                                          |
+| chapter-04 |     LineBasicMaterial      |           new THREE.BufferGeometry().setFromPoints           |   Geometry(126+弃用)改为BufferGeometry   |
+| chapter-07 |        SpritePoints        | Float32BufferAttribute ； PointsMaterial ； Points ;TextureLoader().load |  加载纹理需要require，不能直接引入路径   |
+| chapter-07 |       Object3DGroup        | Object3D ； SpriteMaterial=> map.offset,map.repeat;depthTest;blending |    纹理大小位置，背景去黑色，融合模式    |
+| chapter-08 |           Group            |                            Group                             |                                          |
+| chapter-08 |       GeometryMerge        |          BufferGeometryUtils.mergeBufferGeometries           |                几何体合并                |
+| chapter-09 |        SelectObject        | new Three.Vector3().unproject ; Raycaster ; intersectObjects |                 物体选中                 |
+| chapter-09 |          tweenjs           |                       tweenjs补间动画                        |                                          |
+| chapter-09 |       EffectComposer       |                       物体后期着色处理                       |               物体选中光圈               |
+| chapter-10 |        basicTexture        |            new THREE.TextureLoader().load("path")            |                 纹理加载                 |
+| chapter-10 |        BumpMapping         |      wrapS ； wrapT ; map.repeat ; bumpMap ; bumpScale       |                  UV贴图                  |
+| chapter-10 |      RoughMetalMappig      | CubeTextureLoader ; background ; envMap ; metalness ; roughness ; metalnessMap ; roughnessMap | MeshStandardMaterial的金属贴图和粗糙贴图 |
+| chapter-10 |        AlphaMapping        |               alphaMap ;  alphaTest ;  repeat                |                 透明贴图                 |
+| chapter-10 |        LightMapping        | emissiveMap ； emissive ； normalMap ； metalnessMap ； normalScale |                自发光贴图                |
+|            |                            |                                                              |                                          |
+|            |                            |                                                              |                                          |
+|            |                            |                                                              |                                          |
+|            |                            |                                                              |                                          |
+|            |                            |                                                              |                                          |
 
 
 

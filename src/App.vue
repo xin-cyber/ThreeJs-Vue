@@ -1,11 +1,6 @@
 <template>
     <div id="app">
-        <Cascader
-            @on-change="change"
-            style="width: 270px"
-            :data="data"
-            v-model="currentDemo"
-        ></Cascader>
+        <Cascader @on-change="change" style="width: 270px" :data="data" v-model="currentDemo"></Cascader>
         <component :is="currentDemo[1]"> </component>
     </div>
 </template>
@@ -230,9 +225,26 @@ export default {
                             label: "凹凸贴图",
                         },
                         {
-                            value: "LightMapping",
-                            label: "光照贴图",
+                            value: "RoughMetalMappig",
+                            label: "粗糙金属贴图",
                         },
+                        {
+                            value: "AlphaMapping",
+                            label: "Alpha贴图",
+                        },
+                        {
+                            value: "LightMapping",
+                            label: "自发光贴图",
+                        },
+                        {
+                            value: "EnvReflect",
+                            label: "环境反射贴图",
+                        },
+                        {
+                            value: "RoughMetalMappig",
+                            label: "粗糙金属贴图",
+                        },
+
                     ],
                 },
             ],
