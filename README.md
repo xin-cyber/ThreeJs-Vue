@@ -31,11 +31,11 @@
 | chapter-10 |      RoughMetalMappig      | CubeTextureLoader ; background ; envMap ; metalness ; roughness ; metalnessMap ; roughnessMap | MeshStandardMaterial的金属贴图和粗糙贴图 |
 | chapter-10 |        AlphaMapping        |               alphaMap ;  alphaTest ;  repeat                |                 透明贴图                 |
 | chapter-10 |        LightMapping        | emissiveMap ； emissive ； normalMap ； metalnessMap ； normalScale |                自发光贴图                |
-|            |                            |                                                              |                                          |
-|            |                            |                                                              |                                          |
-|            |                            |                                                              |                                          |
-|            |                            |                                                              |                                          |
-|            |                            |                                                              |                                          |
+| chapter-10 |         EnvReflect         |                            envMap                            |               环境反射物体               |
+| chapter-10 |                            |                                                              |                                          |
+| chapter-10 |                            |                                                              |                                          |
+| chapter-10 |                            |                                                              |                                          |
+| chapter-10 |                            |                                                              |                                          |
 
 
 

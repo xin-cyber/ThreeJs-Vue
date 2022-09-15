@@ -241,8 +241,8 @@ export default {
                             label: "环境反射贴图",
                         },
                         {
-                            value: "RoughMetalMappig",
-                            label: "粗糙金属贴图",
+                            value: "UVMapping",
+                            label: "UV贴图",
                         },
 
                     ],

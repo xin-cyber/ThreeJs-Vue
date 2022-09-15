@@ -598,6 +598,16 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 
 + 环境贴图，伪造镜面反射
 
++ UV映射
+
+  > 2d图片加载到3d物体上面；指定纹理的哪部分显示在物体的表面；uv映射一般是在类似于Blender的软件中完成，
+
+  ![image-20220915204106728](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220915204106728.png)
+
+![image-20220915204209214](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220915204209214.png)
+
+![image-20220915204352950](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220915204352950.png)
+
 ## 14.Core
 
 ### 1.clock
