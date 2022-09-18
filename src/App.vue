@@ -247,6 +247,20 @@ export default {
 
                     ],
                 },
+                {
+                    value: "老陈p17",
+                    label: "老陈p17",
+                    children: [
+                        {
+                            value: "Geometry",
+                            label: "Geometry",
+                        },
+                        {
+                            value: "GeometryMerge",
+                            label: "GeometryMerge",
+                        },
+                    ],
+                },
             ],
         };
     },

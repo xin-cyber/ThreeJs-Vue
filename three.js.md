@@ -280,6 +280,28 @@ new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 ) /// skyColor; groundColor ; i
 新几何基类：attribute(分量) index(索引)
 ```
 
+attribute属性 以BoxGeometry为例 
+
++ normal ：法向量 
+
+  > 24个值；俩个一组，itemSize
+  >
+  > 当前面的朝向，例如计算当前面的光线反射
+
++  position：顶点位置 
+
+  > 六个面，每个面四个点，一共24组，每个组（坐标）由(x,y,z)三个值构成，一共72个值
+
++ UV
+
+  > 24个值；俩个一组，itemSize
+  >
+  > 立方体展开的坐标 (x,y)
+
+  ![image-20220918221652823](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220918221652823.png)
+
+  ![image-20220918222034390](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220918222034390.png)
+
 #### 2.PlaneGeometry(正方形平面)
 
 > (width ,  height ,  widthSegments ,  heightSegments )
@@ -354,7 +376,7 @@ new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 ) /// skyColor; groundColor ; i
 let sprite = new THREE.Sprite(material);
 ```
 
-### 9.Group
+## 9.Group
 
 > 与Three.Mesh 和 Three.Scene 的基类Three.Object3D非常接近，唯一不同是它本身没有任何可渲染的数据
 >
