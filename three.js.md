@@ -591,10 +591,20 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
   ![image-20220906223837171](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220906223837171.png)
 
   > 默认值 magFilter ： Three.LinearFilter ;  minFilter : Three.LinearMIpMapLinearFilter
+  >
+  > 放大缩小时候的像素计算逻辑，默认是线性求知，有模糊效果
 
 + UV贴图
 
   > 纹理可以很好的贴合，是通过UV贴图实现的，可以告诉渲染器将纹理的哪部分应用到指定的面上
+  
++ 纹理属性
+
+  ![image-20220919203803563](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220919203803563.png)
+
+  > offset 纹理的平移
+  >
+  > rotation 纹理旋转 ；center:旋转中心点，默认是（0，0）即左下角 ====> 中心点是（0.5，0.5）
 
 ### 2.凹凸贴图创建褶皱
 
@@ -609,12 +619,20 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 + 环境光遮挡贴图
 
   > 重复渲染阴影消耗性能，静态的阴影可以使用一次性的环境光遮挡贴图
+  >
+  > aomap ,并且设置第二组uv
+  >
+  > ![image-20220919212131004](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220919212131004.png)
 
 + 光照贴图，光照遮挡产生阴影，
 
 + 金属贴图和粗糙贴图，金属光泽和粗糙（木制塑料）表面
 
 + 透明贴图
+
+  > 普通的map和alphamap可以一起使用，再加上transparent属性可以实现普通纹理部分隐藏
+  >
+  > 黑色透明，白色不透明，灰色中间
 
 + 自发光贴图，自己不会成为光源
 
@@ -711,6 +729,8 @@ f.add(testObj, "speed", {slow: 1, '中速': 20, fast: 50});
 > 使用场景 : 数组数量大，操作频繁，操作二进制数据
 >
 > ⭐数组放在堆中，ArrayBuffer则把数据放在栈中（所以取数据时后者快）
+>
+> 向下需要先设置长度，例如new Float32Array（9）或者new  Float32Array([10.,1.0,1.0,2.0,2.0,2.0])
 
 ### 4.Three框选
 

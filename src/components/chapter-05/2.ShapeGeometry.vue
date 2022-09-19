@@ -17,7 +17,7 @@ import {
 } from "../../utils/tools";
 
 export default {
-    name: "BufferGeometry",
+    name: "ShapeGeometry",
     mounted() {
         // stats面板
         let stats = initStats();

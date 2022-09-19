@@ -33,7 +33,6 @@ export default {
         scene.add(spotLight);
 
         const geometry = new THREE.BufferGeometry();
-
         // 六个点坐标，每三个点组成一个面（⭐三角面）
         const vertices = new Float32Array([
             // JavaScript 类型化数组是一种类似数组的对象，并提供了一种用于访问原始二进制数据的机制。
@@ -47,7 +46,9 @@ export default {
         ]);
 
         // ⭐数组 vertices 中每三个元素构成一个点
-        geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+        geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3)); // 缓冲区属性对象
+        // attribut 的position属性里面是顶点坐标
+        console.log(geometry);
         const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         const mesh = new THREE.Mesh(geometry, material);
         scene.add(mesh);

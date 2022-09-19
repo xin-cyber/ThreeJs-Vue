@@ -150,10 +150,6 @@ export default {
                             value: "Lights",
                             label: "Lights",
                         },
-                        {
-                            value: "Animation",
-                            label: "动画+stats+dat.gui+自适应大小",
-                        },
                     ],
                 },
                 {
