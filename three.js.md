@@ -846,3 +846,28 @@ f.add(testObj, "speed", {slow: 1, '中速': 20, fast: 50});
 
 `Object3D`对象角度属性`.rotation`和四元数属性`.quaternion`是相互关联的**⭐一个改变会同时改变另一个**。
 
+### 8.PBR
+
+> 基于物理引擎模仿光的实际行为，让图像看起来更真实
+
++ 组成部分
+
+![image-20220920213223463](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920213223463.png)
+
++ 灯光属性
+
+  + 1.光线类型
+
+    > 直射光；环境光
+    >
+    > 入射   === >  反射
+
+    ![image-20220920214238414](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920214238414.png)
+
+  + ![image-20220920214417842](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920214417842.png)
+
+![image-20220920214724375](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920214724375.png)
+
+![image-20220920214940190](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920214940190.png)
+
+![image-20220920215556311](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920215556311.png)
