@@ -260,6 +260,12 @@ new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 ) /// skyColor; groundColor ; i
 >
 > roughness设置木制或者塑料质感表面
 
++ displacementMap 位移贴图
+
+  > 几何体例如boxgeometry（1，1，1，200，200）点数增加才有效果
+  >
+  > displacementMapScale设置这个图突出来部分的比例
+
 
 
 ## 7.Geometry
@@ -580,6 +586,22 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
   >
   > 成功回调 ， 加载进度回调 ， 解析错误回调
 
+  ```js
+  const loadingManager = new THREE.loadingManager()
+  const textureLoader = new THREE.TextureLoader(loadingManager)
+  const aTexture = textureLoader.load('path',onSuccess,onProgress,onError)
+  ```
+
++ HDR
+
+  > DataTextureLoader()加载rgba，hdr，内部使用FileLoader
+  >
+  > RGBEloader
+  >
+  > 经纬度贴图
+
+  ![image-20220922221637470](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220922221637470.png)
+
 + **纹理处理**
 
   > 纹理不会是刚刚好的，通常需要放大缩小，设置magFilter来指定纹理如何放大 ；设置minFilter设置纹理如何缩小；
@@ -871,3 +893,7 @@ f.add(testObj, "speed", {slow: 1, '中速': 20, fast: 50});
 ![image-20220920214940190](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920214940190.png)
 
 ![image-20220920215556311](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920215556311.png)
+
+### 9.HDR
+
+> 高动态对比度技术，更广泛的色彩范围，照片效果更好，

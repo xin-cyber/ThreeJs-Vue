@@ -49,7 +49,8 @@ export default {
         let cubeLoader = new THREE.CubeTextureLoader();
         // ⭐如果不为空，则设置渲染场景时使用的背景，并且总是首先渲染。可以设置为设置清晰颜色的 Color，覆盖画布的 Texture，立方体贴图作为 CubeTexture 或等矩形作为 Texture。默认为空。
         scene.background = cubeLoader.load(urls);
-
+        // 给所有物体添加环境贴图，等级与envMap
+        scene.environment = cubeLoader.load(urls)
 
         // ⭐创建球体
         let cubeMaterial = new THREE.MeshStandardMaterial({
