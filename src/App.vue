@@ -27,6 +27,16 @@ export default {
                     ],
                 },
                 {
+                    value: "官网进阶更新场景",
+                    label: "官网进阶更新场景",
+                    children: [
+                        {
+                            value: "BufferGeometryLines",
+                            label: "line和BufferGeometry画线",
+                        },
+                    ],
+                },
+                {
                     value: "第一章创建场景",
                     label: "第一章创建场景",
                     children: [
@@ -241,20 +251,6 @@ export default {
                             label: "UV贴图",
                         },
 
-                    ],
-                },
-                {
-                    value: "老陈p17",
-                    label: "老陈p17",
-                    children: [
-                        {
-                            value: "Geometry",
-                            label: "Geometry",
-                        },
-                        {
-                            value: "GeometryMerge",
-                            label: "GeometryMerge",
-                        },
                     ],
                 },
             ],

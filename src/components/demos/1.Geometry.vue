@@ -4,88 +4,127 @@
 
 <script>
 import * as THREE from "three";
-import * as dat from "dat.gui";
+// import * as dat from "dat.gui";
 // import Stats from "stats-js";
 // import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
-import { initTrackballControls } from "../../utils/tools";
-
+// import { initTrackballControls } from "../../utils/tools";
 export default {
-    name: "Geometry",
+    name: "BufferGeometryLines",
     mounted() {
 
-        // listen to the resize events
-        window.addEventListener("resize", onResize, false);
+        let renderer, scene, camera;
+        let line;
+        const MAX_POINTS = 500;
+        let drawCount;
 
-        // default setup
-        let scene = new THREE.Scene();
-        let camera = new THREE.PerspectiveCamera(
-            45,
-            window.innerWidth / window.innerHeight,
-            0.1,
-            1000
-        );
-        let renderer = new THREE.WebGLRenderer();
+        init();
+        animate();
 
-        renderer.setClearColor(new THREE.Color(0x000000));
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        function init() {
+            // info
+            const info = document.createElement('div');
+            info.style.position = 'absolute';
+            info.style.top = '30px';
+            info.style.width = '100%';
+            info.style.textAlign = 'center';
+            info.style.color = '#fff';
+            info.style.fontSize = '20px'; ``
+            info.style.fontWeight = 'bold';
+            info.style.backgroundColor = 'transparent';
+            info.style.zIndex = '1';
+            info.style.fontFamily = 'Monospace';
+            info.innerHTML = "three.js animataed line using BufferGeometry";
+            document.body.appendChild(info);
 
+            // renderer
+            renderer = new THREE.WebGLRenderer();
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
 
-        // create a cube
-        let cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
-        console.log(cubeGeometry);
-        let cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
-        let cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+            // scene
+            scene = new THREE.Scene();
 
-        // add the cube to the scene
-        scene.add(cube);
+            // camera
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
+            camera.position.set(0, 0, 1000);
 
-        // 创建three坐标系
-        let axes = new THREE.AxesHelper(20);
-        scene.add(axes);
+            // geometry
+            const geometry = new THREE.BufferGeometry();
 
+            // attributes
+            const positions = new Float32Array(MAX_POINTS * 3); // 3 vertices per point
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
-        // position and point the camera to the center of the scene
-        camera.position.set(15, 10, 30);
-        camera.lookAt(scene.position);
+            // drawcalls
+            drawCount = 2; // draw the first 2 points, only
+            geometry.setDrawRange(0, drawCount);
 
-        // add subtle ambient lighting
-        let ambienLight = new THREE.AmbientLight(0x353535);
-        scene.add(ambienLight);
+            // material
+            const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
 
-        // add the output of the renderer to the html element
-        document.body.appendChild(renderer.domElement);
+            // line
+            line = new THREE.Line(geometry, material);
+            console.log(line);
+            scene.add(line);
 
+            // update positions
+            updatePositions();
 
-        let controls = {
-            rotationSpeed: 0.02,
-            bouncingSpeed: 0.03,
-        };
-
-        let gui = new dat.GUI();
-        gui.add(controls, "rotationSpeed", 0, 0.5);
-        gui.add(controls, "bouncingSpeed", 0, 0.5);
-
-        // attach them here, since appendChild needs to be called first
-        let trackballControls = initTrackballControls(camera, renderer);
-
-        let clock = new THREE.Clock();
-
-        renderScene();
-
-        function renderScene() {
-            // update the stats and the controls
-            trackballControls.update(clock.getDelta()); // clock.getDelta()返回俩次调用时间间隔， // 相机更新
-            // stats.update();
-
-            // render using requestAnimationFrame
-            requestAnimationFrame(renderScene);
-            renderer.render(scene, camera);
         }
 
-        function onResize() {
-            camera.aspect = window.innerWidth / window.innerHeight; //camera第二个参数；渲染窗口的长宽比
-            camera.updateProjectionMatrix(); // 更新相机
-            renderer.setSize(window.innerWidth, window.innerHeight); // 更新canvas大小，renderer
+        // update positions
+        function updatePositions() {
+
+            const positions = line.geometry.attributes.position.array;
+
+            let x, y, z, index;
+            x = y = z = index = 0;
+
+            for (let i = 0, l = MAX_POINTS; i < l; i++) {
+
+                positions[index++] = x;
+                positions[index++] = y;
+                positions[index++] = z;
+
+                x += (Math.random() - 0.5) * 30;
+                y += (Math.random() - 0.5) * 30;
+                z += (Math.random() - 0.5) * 30;
+
+            }
+
+        }
+
+        // render
+        function render() {
+
+            renderer.render(scene, camera);
+
+        }
+
+        // animate
+        function animate() {
+
+            requestAnimationFrame(animate);
+
+            drawCount = (drawCount + 1) % MAX_POINTS;
+
+            line.geometry.setDrawRange(0, drawCount);
+
+            if (drawCount === 0) {
+
+                // periodically, generate new data
+
+                updatePositions();
+
+                line.geometry.attributes.position.needsUpdate = true; // required after the first render
+
+                line.material.color.setHSL(Math.random(), 1, 0.5);
+
+            }
+
+            render();
+
         }
     },
 };
