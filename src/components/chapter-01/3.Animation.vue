@@ -116,6 +116,7 @@ export default {
         renderScene();
 
         function renderScene() {
+            console.log(clock.getDelta())
             // update the stats and the controls
             trackballControls.update(clock.getDelta()); // clock.getDelta()返回俩次调用时间间隔， // 相机更新
             stats.update();
@@ -144,4 +145,5 @@ export default {
 };
 </script>
 <style scoped>
+
 </style>

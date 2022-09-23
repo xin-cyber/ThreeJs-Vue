@@ -897,3 +897,27 @@ f.add(testObj, "speed", {slow: 1, '中速': 20, fast: 50});
 ### 9.HDR
 
 > 高动态对比度技术，更广泛的色彩范围，照片效果更好，
+
+### 10.缩略图
+
+> https://github.com/mrdoob/three.js/blob/master/examples/webgl_framebuffer_texture.html
+>
+> https://github.com/mrdoob/three.js/blob/master/examples/webgl_lines_fat.html
+>
+> http://localhost:8080/examples/#webgl_lines_fat_wireframe
+
+### 11.圆锥体指向
+
+> https://github.com/mrdoob/three.js/blob/master/examples/webgl_math_orientation_transform.html
+
+### 12.碰撞检测 + 2d四叉树+3d八叉树
+
+https://blog.csdn.net/zhanxinhang/article/details/6706217
+
+> https://threejs.org/examples/?q=tree#webgl_raycaster_bvh
+
+
+
+### 13.BOX3
+
+> Box3在3D空间中表示一个包围盒。其主要用于表示物体在世界坐标中的边界框。它方便我们判断物体和物体、物体和平面、物体和点的关系等等。
