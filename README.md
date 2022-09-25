@@ -32,10 +32,10 @@
 | chapter-10 |        AlphaMapping        |               alphaMap ;  alphaTest ;  repeat                |                 透明贴图                 |
 | chapter-10 |        LightMapping        | emissiveMap ； emissive ； normalMap ； metalnessMap ； normalScale |                自发光贴图                |
 | chapter-10 |         EnvReflect         |                            envMap                            |               环境反射物体               |
-| chapter-10 |                            |                                                              |                                          |
-| chapter-10 |                            |                                                              |                                          |
-| chapter-10 |                            |                                                              |                                          |
-| chapter-10 |                            |                                                              |                                          |
+|   demos    |    BufferGeometryLines     | BufferGeometry ; Float32Array ; geometry.setDrawRange ; Line |                                          |
+|   demos    |         WaterCloud         | VideoTexture ；skyMaterial.map.needsUpdate = true ; GLTFLoader ；DRACOLoader ；setDecoderPath ；setDRACOLoader ； // 球面映射 texture.mapping = THREE.EquirectangularReflectionMapping; |         水天一色demos ；视频纹理         |
+|   demos    |                            |                                                              |                                          |
+|   demos    |                            |                                                              |                                          |
 
 
 

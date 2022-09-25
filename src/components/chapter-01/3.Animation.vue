@@ -8,7 +8,6 @@ import * as dat from "dat.gui";
 import Stats from "stats-js";
 // import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 import { initTrackballControls } from "../../utils/tools";
-
 export default {
     name: "Animation",
     mounted() {

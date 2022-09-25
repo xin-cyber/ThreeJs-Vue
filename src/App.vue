@@ -253,6 +253,24 @@ export default {
 
                     ],
                 },
+                {
+                    value: "demos",
+                    label: "demos",
+                    children: [
+                        {
+                            value: "BufferGeometryLines",
+                            label: "BufferGeometryLines",
+                        },
+                        {
+                            value: "WaterCloud",
+                            label: "老陈水天一色案例",
+                        },
+                        {
+                            value: "EffectComposer",
+                            label: "EffectComposer物体边框动画",
+                        },
+                    ],
+                },
             ],
         };
     },
@@ -284,5 +302,18 @@ export default {
 
 .dg {
     margin-top: 18px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #1e1a20;
+}
+
+::-webkit-scrollbar {
+    display: none;
 }
 </style>

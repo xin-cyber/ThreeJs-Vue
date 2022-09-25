@@ -161,6 +161,10 @@ var hex = color.getHex()
 >
 >     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
+### 0.Light Camera
+
+![image-20220924220747474](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220924220747474.png)
+
 ### 1.AmbientLights (环境光)
 
 >不能作为唯一光源，会将物体渲染成一个颜色
@@ -565,6 +569,28 @@ let intersects = raycaster.intersectObjects(scene.children);
 ```
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 ```
+
+### 2.GLTFLoader
+
+> ⭐路径问题
+>
+> 用于载入*glTF 2.0*资源的加载器
+>
+> gl传输格式，更高效地传输、加载3D内容；该类文件以JSON（.gltf）格式或二进制（.glb）格式提供， 外部文件存储贴图（.jpg、.png）和额外的二进制数据（.bin）。一个glTF组件可传输一个或多个场景， 包括网格、材质、贴图、蒙皮、骨架、变形目标、动画、灯光以及摄像机。
+
+### 3.DRACOLoader
+
+> ⭐路径问题
+>
+> 压缩解压模型loader
+
+### 4.RGBELoader
+
+> 加载hdr文件
+
+
+
+
 
 ## 13.纹理加载⭐
 
