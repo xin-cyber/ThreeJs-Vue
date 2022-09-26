@@ -215,6 +215,41 @@ new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 ) /// skyColor; groundColor ; i
 >
 > 高级属性：p74 
 
+### 0.顶点颜色
+
+![image-20220926210041046](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220926210041046.png)
+
+```js
+// 创建属性缓冲区对象
+var attribue = new THREE.BufferAttribute(vertices, 3); //3个为一组，作为一个顶点的xyz坐标
+// 设置几何体attributes属性的位置position属性
+geometry.attributes.position = attribue;
+//类型数组创建顶点颜色color数据
+var colors = new Float32Array([
+  1, 0, 0, //顶点1颜色
+  0, 1, 0, //顶点2颜色
+  0, 0, 1, //顶点3颜色
+
+  1, 1, 0, //顶点4颜色
+  0, 1, 1, //顶点5颜色
+  1, 0, 1, //顶点6颜色
+]);
+// 设置几何体attributes属性的颜色color属性
+geometry.attributes.color = new THREE.BufferAttribute(colors, 3); //3个为一组,表示一个顶点的颜色数据RGB
+//材质对象
+var material = new THREE.PointsMaterial({
+  // 使用顶点颜色数据渲染模型，不需要再定义color属性
+  // color: 0xff0000,
+  vertexColors: THREE.VertexColors, //以顶点颜色为准
+  size: 10.0 //点对象像素尺寸
+});
+// 点渲染模式  点模型对象Points
+var points = new THREE.Points(geometry, material); //点模型对象
+scene.add(points); //点对象添加到场景
+```
+
+
+
 ### 1.简单网格材质
 
 > 对于three.js而言漫反射、镜面反射分别对应两个构造函数 MeshLambertMaterial  ， MeshPhongMaterial
@@ -947,3 +982,101 @@ https://blog.csdn.net/zhanxinhang/article/details/6706217
 ### 13.BOX3
 
 > Box3在3D空间中表示一个包围盒。其主要用于表示物体在世界坐标中的边界框。它方便我们判断物体和物体、物体和平面、物体和点的关系等等。
+
+#### 14.顶点与BufferGeometry
+
++ 面法向量
+
+  > WebGL中为了计算光线与物体表面入射角，你首先要计算物体表面每个位置的法线方向
+  >
+  > 没有法向量数据，点光源、平行光等带有方向性的光源不会起作用，三角形平面整个渲染效果相对暗淡，而且两个三角形分界位置没有棱角感。
+
+  ![image-20220926211126429](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220926211126429.png)
+
+  ![image-20220926211352678](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220926211352678.png)
+
+     ```js
+  var normals = new Float32Array([
+    0, 0, 1, //顶点1法向量
+    0, 0, 1, //顶点2法向量
+    0, 0, 1, //顶点3法向量
+  
+    0, 1, 0, //顶点4法向量
+    0, 1, 0, //顶点5法向量
+    0, 1, 0, //顶点6法向量
+  ]);
+  // 设置几何体attributes属性的位置normal属性
+  geometry.attributes.normal = new THREE.BufferAttribute(normals, 3); //3个为一组,表示一个顶点的法向量数据
+     ```
+
++ 顶点索引复用
+
+  ![image-20220926211827522](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220926211827522.png)
+
+  ```js
+  var geometry = new THREE.BufferGeometry(); //声明一个空几何体对象
+  //类型数组创建顶点位置position数据
+  var vertices = new Float32Array([
+    0, 0, 0, //顶点1坐标
+    80, 0, 0, //顶点2坐标
+    80, 80, 0, //顶点3坐标
+  
+    0, 0, 0, //顶点4坐标   和顶点1位置相同
+    80, 80, 0, //顶点5坐标  和顶点3位置相同
+    0, 80, 0, //顶点6坐标
+  ]);
+  // 创建属性缓冲区对象
+  var attribue = new THREE.BufferAttribute(vertices, 3); //3个为一组
+  // 设置几何体attributes属性的位置position属性
+  geometry.attributes.position = attribue
+  var normals = new Float32Array([
+    0, 0, 1, //顶点1法向量
+    0, 0, 1, //顶点2法向量
+    0, 0, 1, //顶点3法向量
+  
+    0, 0, 1, //顶点4法向量
+    0, 0, 1, //顶点5法向量
+    0, 0, 1, //顶点6法向量
+  ]);
+  // 设置几何体attributes属性的位置normal属性
+  geometry.attributes.normal = new THREE.BufferAttribute(normals, 3); //3个为一组,表示一个顶点的xyz坐标
+  ```
+
+  + 因为矩形的两个三角形有两个顶点位置重复，所以顶点位置数据、顶点法向量数据都只需要定义4个就可以。
+  + 创建顶点索引数组的时候，可以根据顶点的数量选择类型数组`Uint8Array`、`Uint16Array`、`Uint32Array`。对于顶点索引而言选择整型类型数组，对于非索引的顶点数据，需要使用浮点类型数组`Float32Array`等。
+
+  ```js
+  var geometry = new THREE.BufferGeometry(); //声明一个空几何体对象
+  //类型数组创建顶点位置position数据
+  var vertices = new Float32Array([
+    0, 0, 0, //顶点1坐标
+    80, 0, 0, //顶点2坐标
+    80, 80, 0, //顶点3坐标
+    0, 80, 0, //顶点4坐标
+  ]);
+  // 创建属性缓冲区对象
+  var attribue = new THREE.BufferAttribute(vertices, 3); //3个为一组
+  // 设置几何体attributes属性的位置position属性
+  geometry.attributes.position = attribue
+  var normals = new Float32Array([
+    0, 0, 1, //顶点1法向量
+    0, 0, 1, //顶点2法向量
+    0, 0, 1, //顶点3法向量
+    0, 0, 1, //顶点4法向量
+  ]);
+  // 设置几何体attributes属性的位置normal属性
+  geometry.attributes.normal = new THREE.BufferAttribute(normals, 3); //3个为一组,表示一个顶点的xyz坐标
+  
+  // Uint16Array类型数组创建顶点索引数据,16位整型
+  var indexes = new Uint16Array([
+    // 0对应第1个顶点位置数据、第1个顶点法向量数据
+    // 1对应第2个顶点位置数据、第2个顶点法向量数据
+    // 索引值3个为一组，表示一个三角形的3个顶点
+    0, 1, 2,
+    0, 2, 3,
+  ])
+  // 索引数据赋值给几何体的index属性
+  geometry.index = new THREE.BufferAttribute(indexes, 1); //1个为一组
+  ```
+
+  ![image-20220926212817183](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220926212817183.png)
