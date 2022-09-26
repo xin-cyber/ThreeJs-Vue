@@ -217,7 +217,7 @@ new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 ) /// skyColor; groundColor ; i
 
 ### 1.简单网格材质
 
-#### 1.MeshBasicMaterial
+> 对于three.js而言漫反射、镜面反射分别对应两个构造函数 MeshLambertMaterial  ， MeshPhongMaterial
 
 > 无光照影响；
 >
