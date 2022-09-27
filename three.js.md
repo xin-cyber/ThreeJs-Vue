@@ -189,6 +189,8 @@ spotlight.shadow.mapSize = new Three.Vector2(512,512) // default; 增加可以�
 
 > 模拟太阳光；不会随着距离越远光线变暗
 
+![image-20220927211256488](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220927211256488.png)
+
 ### 5.HemisphereLight (半球光)
 
 > 一种直接位于场景上方的光源，颜色从天空颜色淡化到地面颜色。模拟真实太阳光，贴合户外光照效果
@@ -248,7 +250,7 @@ var points = new THREE.Points(geometry, material); //点模型对象
 scene.add(points); //点对象添加到场景
 ```
 
-
+![image-20220927202330596](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220927202330596.png)
 
 ### 1.简单网格材质
 
@@ -412,6 +414,27 @@ attribute属性 以BoxGeometry为例
 #### 5.三维文本
 
 1. 使用ExtrudeGeometry将二维文本转化为三维
+
+
+
+### 4.旋转平移缩放
+
+![image-20220927204459899](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220927204459899.png)
+
+```js
+//向量Vector3对象表示方向
+var axis = new THREE.Vector3(1, 1, 1);
+axis.normalize(); //向量归一化
+//沿着axis轴表示方向平移100
+mesh.translateOnAxis(axis, 100);
+// 执行.translateX()、.translateY()、.translateOnAxis()等方法本质上改变的都是模型的位置属性.position。
+
+var axis = new THREE.Vector3(0,1,0);//向量axis
+mesh.rotateOnAxis(axis,Math.PI/8);//绕axis轴旋转π/8
+// 旋转方法改变的是表示模型角度状态的角度属性.rotation或者四元数属性.quaternion。
+```
+
+
 
 ## 8.精灵和粒子
 

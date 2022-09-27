@@ -266,8 +266,8 @@ export default {
                             label: "老陈水天一色案例",
                         },
                         {
-                            value: "EffectComposer",
-                            label: "EffectComposer物体边框动画",
+                            value: "LinePoints",
+                            label: "LinePoints",
                         },
                     ],
                 },
