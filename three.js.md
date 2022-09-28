@@ -295,6 +295,8 @@ scene.add(points); //点对象添加到场景
 >
 > emisssive:无法被光源照射到的暗处显示的颜色，默认为黑色
 
+
+
 #### 最佳材质⭐6.MeshStandardMaterial
 
 > metalness设置金属质感表面
@@ -415,7 +417,10 @@ attribute属性 以BoxGeometry为例
 
 1. 使用ExtrudeGeometry将二维文本转化为三维
 
+####  6.文字创建
 
++  css2DObject   css2DRenderer
++ css3DObject     css3DSprite    css3DRenderer
 
 ### 4.旋转平移缩放
 
