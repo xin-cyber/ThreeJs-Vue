@@ -269,6 +269,10 @@ export default {
                             value: "LinePoints",
                             label: "LinePoints",
                         },
+                        {
+                            value: "WorldPosition",
+                            label: "世界坐标和本地坐标",
+                        }
                     ],
                 },
             ],

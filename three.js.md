@@ -651,10 +651,6 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 
 > 加载hdr文件
 
-
-
-
-
 ## 13.纹理加载⭐
 
 ### 1.引入纹理文件
@@ -783,57 +779,11 @@ document.body.appendChild(renderer.domElement);
 let trackballControls = initTrackballControls(camera, renderer);
 ```
 
+### 
 
+## 16 .核心要点
 
-
-
-
-
-## 16.other
-
-### 1.stats.js
-
-> **JavaScript Performance Monitor**
-
-This class provides a simple info box that will help you monitor your code performance.
-
-- **FPS** Frames rendered in the last second. The higher the number the better. 
-  + 每秒帧数
-- **MS** Milliseconds needed to render a frame. The lower the number the better.
-  + 渲染一帧花费时间
-- **MB** MBytes of allocated memory. (Run Chrome with `--enable-precise-memory-info`)
-  + 内存占用量
-- **CUSTOM** User-defined panel support.
-
-### 2.dat.gui
-
-> **gui.add(object, key, min, max, step);**
->
-> 对象，key，最小值，最大值，单位
-
-```js
-let testObj = {
-    x: 10,
-    y: "20",
-    z: 30,
-    color: '#66ccff',
-};
-
-let gui = new dat.GUI();
-// 折叠
-let f = gui.addFolder('入门');
-f.add(testObj, "x", 5, 175, 1);
-f.add(testObj, "y");
-f.add(testObj, "z");
-f.addColor(testObj, "color");
-f.add(testObj, "type", ['one', 'two', '三']); // 下拉
-f.add(testObj, "speed", {slow: 1, '中速': 20, fast: 50});
-
-.listen()双向绑定
-// 如果你想从外部控制选项，你可以为选项调用 listen 方法，则你改变option时，也会同步到面板里
-```
-
-### 3.Float32Array⭐
+### 1.Float32Array⭐
 
 > `Float32Array` 固定长度，存储浮点类型数据的数组，别的数据类型转为NAN，默认为0
 >
@@ -843,19 +793,7 @@ f.add(testObj, "speed", {slow: 1, '中速': 20, fast: 50});
 >
 > 向下需要先设置长度，例如new Float32Array（9）或者new  Float32Array([10.,1.0,1.0,2.0,2.0,2.0])
 
-### 4.Three框选
-
-> https://threejs.org/examples/#misc_boxselection
->
-> https://blog.csdn.net/qq_40147088/article/details/120860635
-
-### 5.Material.depthTest
-
-> depthTest:深度渲染，俩个物体重合时设为false只渲染前面
-
-用于去除纹理的黑色背景，
-
-### 6.Matrix4(矩阵)
+### 2.Matrix4(矩阵)
 
 + **概述**：
 
@@ -871,7 +809,7 @@ f.add(testObj, "speed", {slow: 1, '中速': 20, fast: 50});
 
 ![image-20220829164658843](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220829164658843.png)
 
-### 7.欧拉角（Euler）and 四元数（Quaternion）
+### 3.欧拉角（Euler）and 四元数（Quaternion）
 
 + **Euler**
 
@@ -957,61 +895,7 @@ f.add(testObj, "speed", {slow: 1, '中速': 20, fast: 50});
 
 `Object3D`对象角度属性`.rotation`和四元数属性`.quaternion`是相互关联的**⭐一个改变会同时改变另一个**。
 
-### 8.PBR
-
-> 基于物理引擎模仿光的实际行为，让图像看起来更真实
-
-+ 组成部分
-
-![image-20220920213223463](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920213223463.png)
-
-+ 灯光属性
-
-  + 1.光线类型
-
-    > 直射光；环境光
-    >
-    > 入射   === >  反射
-
-    ![image-20220920214238414](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920214238414.png)
-
-  + ![image-20220920214417842](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920214417842.png)
-
-![image-20220920214724375](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920214724375.png)
-
-![image-20220920214940190](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920214940190.png)
-
-![image-20220920215556311](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920215556311.png)
-
-### 9.HDR
-
-> 高动态对比度技术，更广泛的色彩范围，照片效果更好，
-
-### 10.缩略图
-
-> https://github.com/mrdoob/three.js/blob/master/examples/webgl_framebuffer_texture.html
->
-> https://github.com/mrdoob/three.js/blob/master/examples/webgl_lines_fat.html
->
-> http://localhost:8080/examples/#webgl_lines_fat_wireframe
-
-### 11.圆锥体指向
-
-> https://github.com/mrdoob/three.js/blob/master/examples/webgl_math_orientation_transform.html
-
-### 12.碰撞检测 + 2d四叉树+3d八叉树
-
-https://blog.csdn.net/zhanxinhang/article/details/6706217
-
-> https://threejs.org/examples/?q=tree#webgl_raycaster_bvh
-
-
-
-### 13.BOX3
-
-> Box3在3D空间中表示一个包围盒。其主要用于表示物体在世界坐标中的边界框。它方便我们判断物体和物体、物体和平面、物体和点的关系等等。
-
-#### 14.顶点与BufferGeometry
+### 4.顶点与BufferGeometry
 
 + 面法向量
 
@@ -1108,3 +992,157 @@ https://blog.csdn.net/zhanxinhang/article/details/6706217
   ```
 
   ![image-20220926212817183](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220926212817183.png)
+
+  
+
+### 5.position和世界坐标(scale同理)
+
+> `position`获得模型在本地坐标系或者说模型坐标系下的三维坐标，
+>
+> 通过模型的`.getWorldPosition()`方法获得该模型在世界坐标下的三维坐标。
+>
+> :star: mesh的世界坐标是mesh位置属性`.position`和mesh父对象group位置属性`.position`的累加。
+>
+> 总结:
+>
+> 所谓本地坐标系，就是相对模型的父对象而言，模型位置属性`.position`表示的坐标值就是以本地坐标系为参考，表示子对象相对本地坐标系原点(0,0,0)的偏移量。
+>
+> Threejs场景Scene是一个树结构，一个模型对象可能有多个父对象节点。世界坐标系默认就是对Threejs整个场景Scene建立一个坐标系，一个模型相对世界坐标系的坐标值就是该模型对象所有父对象以及模型本身位置属性`.position`的叠加。
+
+```js
+var mesh = new THREE.Mesh(geometry, material);
+// mesh的本地坐标设置为(50, 0, 0)
+mesh.position.set(50, 0, 0);
+var group = new THREE.Group();
+// group本地坐标设置和mesh一样设置为(50, 0, 0)
+// mesh父对象设置position会影响得到mesh的世界坐标
+group.position.set(50, 0, 0);
+group.add(mesh);
+scene.add(group);
+
+// .position属性获得本地坐标
+console.log('本地坐标', mesh.position);
+
+// getWorldPosition()方法获得世界坐标
+//该语句默认在threejs渲染的过程中执行,如果渲染之前想获得世界矩阵属性、世界位置属性等属性，需要通过代码更新
+scene.updateMatrixWorld(true);
+var worldPosition = new THREE.Vector3();
+mesh.getWorldPosition(worldPosition);
+console.log('世界坐标', worldPosition);
+```
+
+
+
+## 17.other
+
+### 1.stats.js
+
+> **JavaScript Performance Monitor**
+
+This class provides a simple info box that will help you monitor your code performance.
+
+- **FPS** Frames rendered in the last second. The higher the number the better. 
+  + 每秒帧数
+- **MS** Milliseconds needed to render a frame. The lower the number the better.
+  + 渲染一帧花费时间
+- **MB** MBytes of allocated memory. (Run Chrome with `--enable-precise-memory-info`)
+  + 内存占用量
+- **CUSTOM** User-defined panel support.
+
+### 2.dat.gui
+
+> **gui.add(object, key, min, max, step);**
+>
+> 对象，key，最小值，最大值，单位
+
+```js
+let testObj = {
+    x: 10,
+    y: "20",
+    z: 30,
+    color: '#66ccff',
+};
+
+let gui = new dat.GUI();
+// 折叠
+let f = gui.addFolder('入门');
+f.add(testObj, "x", 5, 175, 1);
+f.add(testObj, "y");
+f.add(testObj, "z");
+f.addColor(testObj, "color");
+f.add(testObj, "type", ['one', 'two', '三']); // 下拉
+f.add(testObj, "speed", {slow: 1, '中速': 20, fast: 50});
+
+.listen()双向绑定
+// 如果你想从外部控制选项，你可以为选项调用 listen 方法，则你改变option时，也会同步到面板里
+```
+
+### 4.Three框选
+
+> https://threejs.org/examples/#misc_boxselection
+>
+> https://blog.csdn.net/qq_40147088/article/details/120860635
+
+### 5.Material.depthTest
+
+> depthTest:深度渲染，俩个物体重合时设为false只渲染前面
+
+用于去除纹理的黑色背景，
+
+
+
+### 8.PBR
+
+> 基于物理引擎模仿光的实际行为，让图像看起来更真实
+
++ 组成部分
+
+![image-20220920213223463](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920213223463.png)
+
++ 灯光属性
+
+  + 1.光线类型
+
+    > 直射光；环境光
+    >
+    > 入射   === >  反射
+
+    ![image-20220920214238414](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920214238414.png)
+
+  + ![image-20220920214417842](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920214417842.png)
+
+![image-20220920214724375](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920214724375.png)
+
+![image-20220920214940190](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920214940190.png)
+
+![image-20220920215556311](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220920215556311.png)
+
+### 9.HDR
+
+> 高动态对比度技术，更广泛的色彩范围，照片效果更好，
+
+### 10.缩略图
+
+> https://github.com/mrdoob/three.js/blob/master/examples/webgl_framebuffer_texture.html
+>
+> https://github.com/mrdoob/three.js/blob/master/examples/webgl_lines_fat.html
+>
+> http://localhost:8080/examples/#webgl_lines_fat_wireframe
+
+### 11.圆锥体指向
+
+> https://github.com/mrdoob/three.js/blob/master/examples/webgl_math_orientation_transform.html
+
+### 12.碰撞检测 + 2d四叉树+3d八叉树
+
+https://blog.csdn.net/zhanxinhang/article/details/6706217
+
+> https://threejs.org/examples/?q=tree#webgl_raycaster_bvh
+
+
+
+### 13.BOX3
+
+> Box3在3D空间中表示一个包围盒。其主要用于表示物体在世界坐标中的边界框。它方便我们判断物体和物体、物体和平面、物体和点的关系等等。
+
++ 

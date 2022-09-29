@@ -1,4 +1,6 @@
-<template><div></div></template>
+<template>
+    <div></div>
+</template>
 
 <script>
 import * as THREE from "three";
@@ -49,7 +51,11 @@ export default {
 
         // position the cube
         cube.position.set(-4, 3, 0);
+        // 声明一个三维向量用来保存世界坐标
+        var worldPosition = new THREE.Vector3();
+        // 执行getWorldPosition方法把模型的世界坐标保存到参数worldPosition中
 
+        console.log(cube.getWorldPosition(worldPosition));
         // add the cube to the scene
         scene.add(cube);
 
@@ -79,4 +85,6 @@ export default {
     },
 };
 </script>
-<style scoped></style>
+<style scoped>
+
+</style>
