@@ -413,11 +413,40 @@ attribute属性 以BoxGeometry为例
 
 > 基于等式的几何体
 
-#### 5.三维文本
+#### 5.曲线曲面⭐
+
+![image-20220929204332219](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220929204332219.png)
+
++ 圆弧线 ArcCurve
+
+  > 圆弧线[ArcCurve](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/curves/ArcCurve)的基类是椭圆弧线[EllipseCurve](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/curves/EllipseCurve)  ; 椭圆弧线的基类是曲线`Curve`
+
+  ```js
+  //参数：    圆弧原心坐标(x,y)； 圆弧半径radius  ； 圆弧起始角度(x,y)
+  var arc = new THREE.ArcCurve(0, 0, 100, 0, 2 * Math.PI);
+  ```
+
+  **方法：**
+
+  + getPoints()
+
+    > 通过方法`.getPoints()`可以从圆弧线按照一定的细分精度返回沿着圆弧线分布的顶点坐标。细分数越高返回的顶点数量越多，自然轮廓越接近于圆形。方法`.getPoints()`的返回值是一个由二维向量[Vector2](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/math/Vector2)或三维向量[Vector3](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/math/Vector3)构成的数组，`Vector2`表示位于同一平面内的点，`Vector3`表示三维空间中一点。
+
+    ```js
+    var arc = new THREE.ArcCurve(0, 0, 100, 0, 2 * Math.PI);
+    //getPoints是基类Curve的方法，返回一个vector2对象作为元素组成的数组
+    var points = arc.getPoints(50);//分段数50，返回51个顶点
+    ```
+
+  + .setFromPoints ( points )
+
+    > 通过该方法可以把数组points中顶点数据提取出来赋值给几何体的顶点位置属性geometry.attributes.position，数组points的元素是二维向量Vector2或三维向量Vector3。
+
+#### 6.三维文本
 
 1. 使用ExtrudeGeometry将二维文本转化为三维
 
-####  6.文字创建
+####  7.文字创建
 
 +  css2DObject   css2DRenderer
 + css3DObject     css3DSprite    css3DRenderer

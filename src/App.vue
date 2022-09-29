@@ -272,6 +272,10 @@ export default {
                         {
                             value: "WorldPosition",
                             label: "世界坐标和本地坐标",
+                        },
+                        {
+                            value: "Curves",
+                            label: "弯曲点线面",
                         }
                     ],
                 },
