@@ -97,6 +97,7 @@ export default {
         scene.add(cube3);
         cube3.position.x = 5;
         cube3.rotation.y = (1 / 3) * Math.PI;
+        console.log(cube3);
 
         // ⭐创建位移贴图,改变物体形状
         // ⭐顶点数必须足够多(180),否则移动效果不明显，无顶点可以移动
