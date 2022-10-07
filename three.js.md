@@ -405,23 +405,106 @@ attribute属性 以BoxGeometry为例
 
 ### 3.高级几何体
 
-#### 1.LatheGeometry（花瓶）
+#### 1.LatheGeometry（二维旋转变为三维）
 
-![image-20220821145904945](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220821145904945.png)
+> 几何体具备旋转特征，比如球体，常见杯子, 
+>
+> `LatheGeometry`可以利用已有的二维数据生成三维顶点数据，二维数据可以通过二维向量对象`Vector2`定义，也可以通过3D曲线或2D线条轮廓生成。 `LatheGeometry`的二维坐标数据默认绕y轴旋转。
+
+![image-20220930141934403](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220930141934403.png)
+
+
 
 #### 2.ExtrudeGeometry（二维拉伸变为三维）
 
-#### 3.TubeGeometry（管状物体）
+```js
+/**
+ * 创建拉伸网格模型
+ */
+var shape = new THREE.Shape();
+/**四条直线绘制一个矩形轮廓*/
+shape.moveTo(0,0);//起点
+shape.lineTo(0,100);//第2点
+shape.lineTo(100,100);//第3点
+shape.lineTo(100,0);//第4点
+shape.lineTo(0,0);//第5点
+var geometry = new THREE.ExtrudeGeometry(//拉伸造型
+    shape,//二维轮廓
+    //拉伸参数
+    {
+        amount:120,//拉伸长度
+        bevelEnabled:false//无倒角
+    }
+);
+```
+
+
+
+#### 3.⭐TubeGeometry（管状物体）
+
+> 通过一条曲线生成一个圆管 ；曲线实现方式
+>
+> 它的本质就是以曲线上顶点为基准，生成一系列曲线等径分布的顶点数据， 具体算法如何实现的可以查看three.js引擎源码。
+>
+> demos / curves
 
 #### 4.ParametricGeometry（波浪平面）
 
 > 基于等式的几何体
 
+#### 5.shape对象和shapeGeometry (轮廓填充)
+
+> 三角形自动填充shape内轮廓和外轮廓中间的中部。
+>
+> 通过下面代码定义了6个顶点坐标，也可以说是5个，最后一个和第一个是重合的，构成一个五边形区域。然后使用这一组二维顶点坐标作为`Shape`的参数构成一个五边形轮廓。把五边形轮廓`Shape`作为`ShapeGeometry`的参数，可以根据轮廓坐标计算出一系列三角形面填充轮廓，形成一个平面几何体。
+
+```js
+// 通过shpae基类path的方法绘制轮廓（本质也是生成顶点）
+var shape = new THREE.Shape();
+// 四条直线绘制一个矩形轮廓
+shape.moveTo(0,0);//起点
+shape.lineTo(0,100);//第2点
+shape.lineTo(100,100);//第3点
+shape.lineTo(100,0);//第4点
+shape.lineTo(0,0);//第5点
+```
+
+![image-20220930155842364](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220930155842364.png)
+
+```js
+// 圆弧与直线连接 ，从左到右，左上角坐标系
+var shape = new THREE.Shape(); //Shape对象
+var R = 50;
+// 绘制一个半径为R、圆心坐标(0, 0)的半圆弧
+shape.absarc(0, 0, R, 0, Math.PI); // x,y中心点 ； 半径  ；起始角 ； 终止角 .默认逆时针
+//从圆弧的一个端点(-R, 0)到(-R, -200)绘制一条直线
+shape.lineTo(-R, -200); // 在当前路径上，从.currentPoint连接一条直线到x,y。
+// 绘制一个半径为R、圆心坐标(0, -200)的半圆弧
+shape.absarc(0, -200, R, Math.PI, 2 * Math.PI);
+//从圆弧的一个端点(R, -200)到(-R, -200)绘制一条直线
+shape.lineTo(R, 0);
+var geometry = new THREE.ShapeGeometry(shape, 30);
+
+
+// 样条曲线生成更多的点
+points = [new THREE,Vector2(10,10),new THREE,Vector2(20,10)]
+var SplineCurve = new THREE.SplineCurve(points)  // 三维曲线
+var shape = new THREE.Shape(SplineCurve.getPoints(300)); // 二维平面形状
+```
+
+**⭐Shape填充 ， Path取消填充**
+
+![image-20220930160336949](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220930160336949.png)
+
+
+
 #### 5.曲线曲面⭐
+
+> **demos / Curves**
 
 ![image-20220929204332219](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220929204332219.png)
 
-+ 圆弧线 ArcCurve
++ **圆弧线 ArcCurve**
 
   > 圆弧线[ArcCurve](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/curves/ArcCurve)的基类是椭圆弧线[EllipseCurve](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/curves/EllipseCurve)  ; 椭圆弧线的基类是曲线`Curve`
 
@@ -435,16 +518,31 @@ attribute属性 以BoxGeometry为例
   + getPoints()
 
     > 通过方法`.getPoints()`可以从圆弧线按照一定的细分精度返回沿着圆弧线分布的顶点坐标。细分数越高返回的顶点数量越多，自然轮廓越接近于圆形。方法`.getPoints()`的返回值是一个由二维向量[Vector2](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/math/Vector2)或三维向量[Vector3](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/math/Vector3)构成的数组，`Vector2`表示位于同一平面内的点，`Vector3`表示三维空间中一点。
-
+  >
+    > **从曲线上批量返回顶点数据**
+  
     ```js
     var arc = new THREE.ArcCurve(0, 0, 100, 0, 2 * Math.PI);
     //getPoints是基类Curve的方法，返回一个vector2对象作为元素组成的数组
-    var points = arc.getPoints(50);//分段数50，返回51个顶点
+  var points = arc.getPoints(50);//分段数50，返回51个顶点
     ```
 
   + .setFromPoints ( points )
-
+  
     > 通过该方法可以把数组points中顶点数据提取出来赋值给几何体的顶点位置属性geometry.attributes.position，数组points的元素是二维向量Vector2或三维向量Vector3。
+  
++ **CatmullRomCurve3**(不规则曲线)
+
+  > 在三维空间中设置5个顶点，输入三维样条曲线[CatmullRomCurve3](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/zh/extras/curves/CatmullRomCurve3)作为参数，然后返回更多个顶点，通过返回的顶点数据，构建一个几何体，通过`Line`可以绘制出来一条沿着5个顶点的光滑样条曲线。
+
++ **贝塞尔曲线**(不规则曲线)
+
+  ![image-20220930095716984](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220930095716984.png)
+
++ **CurvePath**
+
+  > 一个扩展了Curve的抽象基类。多个圆弧线、样条曲线、直线等多个曲线合并成一个曲线。
+  >
 
 #### 6.三维文本
 
@@ -1028,10 +1126,20 @@ let trackballControls = initTrackballControls(camera, renderer);
   ])
   // 索引数据赋值给几何体的index属性
   geometry.index = new THREE.BufferAttribute(indexes, 1); //1个为一组
+  
+/**纹理坐标*/
+   var uvs = new Float32Array([
+   0,0, //图片左下角
+     1,0, //图片右下角
+     1,1, //图片右上角
+     0,1, //图片左上角
+   ]);
+   // 设置几何体attributes属性的位置normal属性
+   geometry.attributes.uv = new THREE.BufferAttribute(uvs, 2); //2个为一组,表示一个顶点的纹理坐标
   ```
-
+  
   ![image-20220926212817183](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220926212817183.png)
-
+  
   
 
 ### 5.position和世界坐标(scale同理)
