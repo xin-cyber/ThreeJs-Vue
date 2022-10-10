@@ -1,0 +1,5 @@
+{
+    "vueCompilerOptions":{
+        "target": 2.7, // 指定vue版本
+    }
+}

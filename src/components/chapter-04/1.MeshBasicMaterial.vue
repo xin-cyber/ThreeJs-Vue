@@ -53,13 +53,13 @@ export default {
             flatShading: true
         });
 
-        let meshMaterial2 = new THREE.MeshBasicMaterial({
-            color: new THREE.Color('pink'),
-            name: 'Basic Material',
-            flatShading: true,
-            side: THREE.DoubleSide
-        });
-        let materialArray = [meshMaterial, meshMaterial2]
+        // let meshMaterial2 = new THREE.MeshBasicMaterial({
+        //     color: new THREE.Color('pink'),
+        //     name: 'Basic Material',
+        //     flatShading: true,
+        //     side: THREE.DoubleSide
+        // });
+        // let materialArray = [meshMaterial, meshMaterial2]
 
         let sphere = new THREE.Mesh(sphereGeometry, meshMaterial);
         let cube = new THREE.Mesh(cubeGeometry, meshMaterial);

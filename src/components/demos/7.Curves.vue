@@ -46,7 +46,7 @@ export default {
         // const ellipse = new THREE.Line(geometry, material); // 椭圆
         // scene.add(ellipse);
 
-        // // ⭐不规则曲线
+        // ⭐不规则曲线
         // let geometry = new THREE.BufferGeometry(); //声明一个几何体对象Geometry
         // // 三维样条曲线  Catmull-Rom算法
         // let curve = new THREE.CatmullRomCurve3([
@@ -68,7 +68,7 @@ export default {
         // scene.add(line); //线条对象添加到场景中
 
 
-        // // ⭐曲线直线组合 不如shape
+        // // ⭐曲线直线组合 不如shape,可不看
         // var geometry = new THREE.BufferGeometry(); //声明一个几何体对象Geometry
         // // 绘制一个U型轮廓
         // var R = 80;//圆弧半径
@@ -104,14 +104,14 @@ export default {
         //     new THREE.Vector3(5, -5, 5),
         //     new THREE.Vector3(10, 0, 10)
         // ]);
-        // var path = new THREE.LineCurve3(new THREE.Vector3(0, 100, 0), new THREE.Vector3(0, 0, 0));
+        // // var path = new THREE.LineCurve3(new THREE.Vector3(0, 100, 0), new THREE.Vector3(0, 0, 0));
         // var tubeGeometry = new THREE.TubeGeometry(path, 20, 2, 8, false); // 可以选择CurvePath
         // var tubeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
         // var tube = new THREE.Mesh(tubeGeometry, tubeMaterial);
         // scene.add(tube);
 
 
-        // // ⭐LatheGeometry旋转几何体
+        // ⭐LatheGeometry旋转几何体
         // var shape = new THREE.Shape();//创建Shape对象
         // var points = [];
         // for (let i = 0; i < 10; i++) {
@@ -124,7 +124,7 @@ export default {
         //     color: 0x0000ff,//三角面颜色
         //     side: THREE.DoubleSide//两面可见
         // });//材质对象
-        // material.wireframe = true;//线条模式渲染(查看细分数)
+        // // material.wireframe = true;//线条模式渲染(查看细分数)
         // var mesh = new THREE.Mesh(geometry, material);//旋转网格模型对象
         // scene.add(mesh);//旋转网格模型添加到场景中
 
@@ -140,11 +140,11 @@ export default {
         // ]
         // // 通过顶点定义轮廓
         // var shape = new THREE.Shape(points);  // 五边形
-        // shape.absarc(0, 0, 100, 0, 2 * Math.PI);//圆弧轮廓
+        // // shape.absarc(0, 0, 100, 0, 2 * Math.PI);//圆弧轮廓
         // // shape可以理解为一个需要填充轮廓
         // // 所谓填充：ShapeGeometry算法利用顶点计算出三角面face3数据填充轮廓
         // var geometry = new THREE.ShapeGeometry(shape, 25);
-        // const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        // const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
         // const mesh = new THREE.Mesh(geometry, material);
         // scene.add(mesh);
 

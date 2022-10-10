@@ -502,6 +502,49 @@ var shape = new THREE.Shape(SplineCurve.getPoints(300)); // 二维平面形状
 
 > **demos / Curves**
 
++ **EllipseCurve**: 二维椭圆曲线
+
++ **CatmullRomCurve3**：不规则曲线
+
++ **TubeGeometry**：管道三维曲线，需要传入curve，例如CatmullRomCurve3，LineCurve3
+
++ **LatheGeometry**：旋转几何体
+
++ **⭐shape和shapeGeometry** : 平面自定义shape
+
+  ```js
+  var ponits = [点坐标]
+  var geometry = new THREE.ShapeGeometry(new THREE.Shape(points) , 25)
+  var mesh = new THREE.Mesh(geometry, material)
+  ```
+
++ **⭐shape和shapeGeometry**
+
+  ```js
+  // ⭐圆弧与直线连接 ，从左到右，左上角坐标系
+  var shape = new THREE.Shape(); //Shape对象
+  var R = 5;
+  // 绘制一个半径为R、圆心坐标(0, 0)的半圆弧
+  shape.absarc(0, 0, R, 0, Math.PI); // x,y中心点 ； 半径  ；起始角 ； 终止角 .默认逆时针
+  //从圆弧的一个端点(-R, 0)到(-R, -10)绘制一条直线
+  shape.lineTo(-R, -10); // 在当前路径上，从.currentPoint连接一条直线到x,y。
+  // 绘制一个半径为R、圆心坐标(0, -10)的半圆弧
+  shape.absarc(0, -10, R, Math.PI, 2 * Math.PI);
+  //从圆弧的一个端点(R, -10)到(-R, -10)绘制一条直线
+  shape.lineTo(R, 0);
+  var geometry = new THREE.ShapeGeometry(shape, 30);
+  var material = new THREE.MeshBasicMaterial({
+      color: 0x0000ff,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.5
+  });
+  var mesh = new THREE.Mesh(geometry, material);
+  scene.add(mesh);
+  ```
+
+  
+
 ![image-20220929204332219](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220929204332219.png)
 
 + **圆弧线 ArcCurve**
@@ -820,7 +863,9 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 
 + **纹理处理**
 
-  > 纹理不会是刚刚好的，通常需要放大缩小，设置magFilter来指定纹理如何放大 ；设置minFilter设置纹理如何缩小；
+  > 来控制在远处或近距离观察时如何过滤纹理 ，换句话说，这些设置控制用于放大或缩小图像的算法。
+  >
+  > 设置magFilter来指定纹理如何放大 ；设置minFilter设置纹理如何缩小；
 
   ![image-20220906223417907](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220906223417907.png)
 
@@ -888,7 +933,7 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 
 ![image-20220915204209214](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220915204209214.png)
 
-![image-20220915204352950](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220915204352950.png)
+![image-20221009174307580](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221009174307580.png)
 
 ## 14.Core
 
@@ -929,6 +974,8 @@ let trackballControls = initTrackballControls(camera, renderer);
 > ⭐数组放在堆中，ArrayBuffer则把数据放在栈中（所以取数据时后者快）
 >
 > 向下需要先设置长度，例如new Float32Array（9）或者new  Float32Array([10.,1.0,1.0,2.0,2.0,2.0])
+>
+> ⭐不能使用push操作
 
 ### 2.Matrix4(矩阵)
 
@@ -947,6 +994,8 @@ let trackballControls = initTrackballControls(camera, renderer);
 ![image-20220829164658843](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220829164658843.png)
 
 ### 3.欧拉角（Euler）and 四元数（Quaternion）
+
+> 欧拉角缺点，在创建动画或进行涉及旋转的数学时会变得很明显。特别是，我们不能将两个欧拉角相加（更著名的是，它们还存在一种叫做万向节锁定的问题）。四元数没有这些缺点。另一方面，它们比欧拉角更难使用，所以现在我们将坚持使用更简单的`Euler`类。
 
 + **Euler**
 
@@ -1127,20 +1176,23 @@ let trackballControls = initTrackballControls(camera, renderer);
   // 索引数据赋值给几何体的index属性
   geometry.index = new THREE.BufferAttribute(indexes, 1); //1个为一组
   
-/**纹理坐标*/
-   var uvs = new Float32Array([
-   0,0, //图片左下角
-     1,0, //图片右下角
-     1,1, //图片右上角
-     0,1, //图片左上角
-   ]);
-   // 设置几何体attributes属性的位置normal属性
-   geometry.attributes.uv = new THREE.BufferAttribute(uvs, 2); //2个为一组,表示一个顶点的纹理坐标
+  /**纹理坐标*/
+     var uvs = new Float32Array([
+     0,0, //图片左下角
+       1,0, //图片右下角
+       1,1, //图片右上角
+       0,1, //图片左上角
+     ]);
+     // 设置几何体attributes属性的位置normal属性
+     geometry.attributes.uv = new THREE.BufferAttribute(uvs, 2); //2个为一组,表示一个顶点的纹理坐标
   ```
-  
+
   ![image-20220926212817183](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220926212817183.png)
+
   
+
   
+
 
 ### 5.position和世界坐标(scale同理)
 
@@ -1148,7 +1200,7 @@ let trackballControls = initTrackballControls(camera, renderer);
 >
 > 通过模型的`.getWorldPosition()`方法获得该模型在世界坐标下的三维坐标。
 >
-> :star: mesh的世界坐标是mesh位置属性`.position`和mesh父对象group位置属性`.position`的累加。
+> :star: mesh的世界坐标是mesh位置属性`.position`和mesh父对象group位置属性`.position`的累加。⭐
 >
 > 总结:
 >
@@ -1156,7 +1208,8 @@ let trackballControls = initTrackballControls(camera, renderer);
 >
 > Threejs场景Scene是一个树结构，一个模型对象可能有多个父对象节点。世界坐标系默认就是对Threejs整个场景Scene建立一个坐标系，一个模型相对世界坐标系的坐标值就是该模型对象所有父对象以及模型本身位置属性`.position`的叠加。
 
-```js
+  ```
+
 var mesh = new THREE.Mesh(geometry, material);
 // mesh的本地坐标设置为(50, 0, 0)
 mesh.position.set(50, 0, 0);
@@ -1176,9 +1229,63 @@ scene.updateMatrixWorld(true);
 var worldPosition = new THREE.Vector3();
 mesh.getWorldPosition(worldPosition);
 console.log('世界坐标', worldPosition);
+  ```
+
+### 6.世界矩阵**matrixWorld**和局部矩阵**matrix**
+
+> 当我们创建网格或任何其他场景对象时，局部矩阵和世界矩阵都会自动创建。
+>
+> 对象父对象是scene,则俩个对象是相同的
+
+```js
+meshA.updateMatrix();
+meshA.updateMatrixWorld();
+获取对象最新的矩阵，或者直接render，所有对象矩阵更新
 ```
 
 
+
+
+
+### 7.贝塞尔曲线
+
+> https://blog.csdn.net/cfan927/article/details/104649623
+>
+> 贝塞尔曲线完全由其控制点决定其形状,　**ｎ个控制点对应着ｎ－１阶的贝塞尔曲线**，并且可以通过递归的方式来绘制
+
++ **一阶曲线**
+
+  ![image-20221008111126089](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221008111126089.png)
+
++ **二阶曲线**
+
++ ![在这里插入图片描述](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/20200304113229429.gif)
+
+  <img src="https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221008112845687.png" alt="image-20221008112845687"  />
+
++ **三阶曲线**
+
+  ![image-20221008113135724](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221008113135724.png)
+  
+  ![img](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/20200304113511298.gif)
+  
++ **四阶曲线**
+
+  ![在这里插入图片描述](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/20200304113852783.gif)
+
++ **五阶曲线**
+
+  <img src="https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/20200304113741561.gif" alt="在这里插入图片描述" style="zoom: 67%;" />
+
++ **n阶曲线**
+
++ > C30 ,排列组合
+
+  ![image-20221008113258904](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221008113258904.png)
+
+递归表示法
+
+![image-20221008113344891](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221008113344891.png)
 
 ## 17.other
 
@@ -1293,3 +1400,7 @@ https://blog.csdn.net/zhanxinhang/article/details/6706217
 > Box3在3D空间中表示一个包围盒。其主要用于表示物体在世界坐标中的边界框。它方便我们判断物体和物体、物体和平面、物体和点的关系等等。
 
 + 
+
+### 14.广告牌（精灵文字）
+
+> http://localhost:8080/manual/#zh/canvas-textures
