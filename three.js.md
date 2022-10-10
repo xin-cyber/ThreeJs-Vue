@@ -963,6 +963,22 @@ let trackballControls = initTrackballControls(camera, renderer);
 
 ## 16 .核心要点
 
+### 0.向量
+
++ Vector2 ： UV ,
++ Vector3：顶点坐标
+
+```js
+向量function
+let v1 = new THREE.Vector3(10,20,15);
+var v1 = p1.clone(); // 返回一个新的对象，和原来对象属性的值一样
+
+var p2 = new THREE.Vector3();
+p2.copy(p1); // p2复制p1向量
+```
+
+
+
 ### 1.Float32Array⭐
 
 ![image-20221007195021696](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221007195021696.png)
