@@ -965,16 +965,57 @@ let trackballControls = initTrackballControls(camera, renderer);
 
 ### 0.向量
 
+> vector : 可以表示标量或者矢量
+
 + Vector2 ： UV ,
-+ Vector3：顶点坐标
++ Vector3：顶点坐标 , 顶点的法向量  , 光线的方向
 
 ```js
 向量function
 let v1 = new THREE.Vector3(10,20,15);
-var v1 = p1.clone(); // 返回一个新的对象，和原来对象属性的值一样
+var v1 = p1.clone(); // ⭐返回一个新的对象，和原来对象属性的值一样
 
 var p2 = new THREE.Vector3();
 p2.copy(p1); // p2复制p1向量
+
+// ⭐.sub()：向量减法运算
+// ⭐.length()：返回向量的长度
+var L = v1.clone().sub(p2).length(); 
+console.log('两点之间距离',L);
+
+
+// ⭐.dot点乘
+// 三角形的三个点坐标p1，p2，p3
+var p1 = new THREE.Vector3(0,0,0);// 点1坐标
+var p2 = new THREE.Vector3(20,0,0);// 点2坐标
+var p3 = new THREE.Vector3(0,40,0);// 点3坐标
+// p1，p2两个点确定一个向量
+var v1 = p1.clone().sub(p2);
+// p1，p3两个点确定一个向量
+var v2 = p1.clone().sub(p3);
+// .dot()计算两个向量点积.length()计算向量长度
+// 返回三角形顶点p1对应夹角余弦值
+var CosineValue = v1.dot( v2 ) /(v1.length()*v2.length())
+console.log('三角形两条边夹角余弦值',CosineValue);
+// .acos()：反余弦函数，返回结果是弧度
+console.log('三角形两条边夹角',Math.acos(CosineValue)*180/Math.PI);
+
+
+// ⭐.cross叉乘
+//三角形面积计算
+function AreaOfTriangle(p1, p2, p3){
+  var v1 = new THREE.Vector3();
+  var v2 = new THREE.Vector3();
+  // 通过两个顶点坐标计算其中两条边构成的向量
+  v1 = p1.clone().sub(p2);
+  v2 = p1.clone().sub(p3);
+
+  var v3 = new THREE.Vector3();
+  // 三角形面积计算
+  v3.crossVectors(v1,v2);
+  var s = v3.length()/2;
+  return s
+}
 ```
 
 
@@ -995,9 +1036,45 @@ p2.copy(p1); // p2复制p1向量
 
 ### 2.Matrix4(矩阵)
 
++ **用法**
+
+  ```js
+  var mat4 = new THREE.Matrix4()
+  // 默认值单位矩阵
+  // 1, 0, 0, 0,
+  // 0, 1, 0, 0,
+  // 0, 0, 1, 0,
+  // 0, 0, 0, 1
+  
+  // .elements
+  mat4.elements   ===> [....]
+  
+  // .set 按行设置元素
+  mat4.set(
+    1, 0, 0, 5,
+    0, 1, 0, 3,
+    0, 0, 1, 9,
+    0, 0, 0, 1
+  )
+  ```
+
+  
+
+  
+
 + **概述**：
 
-> 每一个object3d对象都有一个matrix对象（变换矩阵）旋转缩放平移
+> 每一个object3d对象都有一个三个关联的matrix对象
+>
+> Object3D.matrix: 存储物体的本地变换矩阵，旋转缩放平移。 这是对象相对于其父对象的变换矩阵。
+>
+> Object3D.matrixWorld: 对象的全局或世界变换矩阵。如果对象没有父对象，那么这与存储在矩阵matrix中的本地变换矩阵相同。
+>
+> Object3D.modelViewMatrix: 表示对象相对于摄像机坐标系的变换矩阵， 一个对象的 modelViewMatrix 是物体世界变换矩阵乘以摄像机相对于世界空间变换矩阵的逆矩阵。
+>
+> ![image-20221011143500553](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221011143500553.png)
+>
+> <img src="https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221011144502682.png" alt="image-20221011144502682" style="zoom:150%;" />
 
 ![image-20220829164236064](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220829164236064.png)
 
