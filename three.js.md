@@ -1038,6 +1038,10 @@ function AreaOfTriangle(p1, p2, p3){
 
 + **用法**
 
++ set / 属性  行优先 ； elements列优先
+
++ ![image-20221013152519016](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221013152519016.png)
+
   ```js
   var mat4 = new THREE.Matrix4()
   // 默认值单位矩阵
@@ -1056,15 +1060,33 @@ function AreaOfTriangle(p1, p2, p3){
     0, 0, 1, 9,
     0, 0, 0, 1
   )
+  
+  // .transpose() 转置矩阵
+  var mat4T = mat4.clone()
+  mat4T.transpose() // 改变原矩阵
+  
+  // .multiplyScalar(m) 矩阵的每个元素乘以m
+  mat4.multiplyScalar(10)
+  
+  // 矩阵乘法
+  c.multiplyMatrices(a,b):参数中两个矩阵相乘axb，结果保存在c中
+  a.multiply(b):矩阵相乘axb，结果保存在a
+  a.premultiply(b):矩阵相乘bxa，结果保存在a
+  
+  // getInverse 逆矩阵
+  // mat4I用来保存mat4逆矩阵计算结果
+  // ⭐行列式为零的都不可逆
+  var mat4I = new THREE.Matrix4();
+  mat4I.getInverse(mat4, true);
+  
+  // .determinant() 行列式
+  
+  // 矩阵对象`Matrix4`的`.lookAt()`方法的主要作用就是用于构建相机对象的视图矩阵`.matrixWorldInverse`。
   ```
-
-  
-
-  
 
 + **概述**：
 
-> 每一个object3d对象都有一个三个关联的matrix对象
+> ⭐每一个object3d对象都有一个三个关联的matrix对象
 >
 > Object3D.matrix: 存储物体的本地变换矩阵，旋转缩放平移。 这是对象相对于其父对象的变换矩阵。
 >
@@ -1072,21 +1094,178 @@ function AreaOfTriangle(p1, p2, p3){
 >
 > Object3D.modelViewMatrix: 表示对象相对于摄像机坐标系的变换矩阵， 一个对象的 modelViewMatrix 是物体世界变换矩阵乘以摄像机相对于世界空间变换矩阵的逆矩阵。
 >
-> ![image-20221011143500553](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221011143500553.png)
->
 > <img src="https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221011144502682.png" alt="image-20221011144502682" style="zoom:150%;" />
 
 ![image-20220829164236064](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220829164236064.png)
 
 + **作用**：
 
-  > 旋转3d物体,三阶矩阵
+  > 在WebGL中对一个对象进行平移、旋转或缩放本质就是对对象的顶点坐标进行平移、旋转、缩放矩阵变换。
 
-![image-20220829164414806](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220829164414806.png)
+- 绕x轴旋转`.makeRotationX(theta)`
+- 绕y轴旋转`.makeRotationY(theta)`
+- 绕z轴旋转`.makeRotationZ(theta)`
+- 缩放`.makeScale(Sx,Sy,Sz)`
+- 平移`.makeTranslation(Tx,Ty,Tz)`
+- 剪切`.makeShear`
 
-![image-20220829164658843](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220829164658843.png)
++ ⭐向量矩阵变换`.applyMatrix4()`
 
-### 3.欧拉角（Euler）and 四元数（Quaternion）
+`.applyMatrix4()`是三维向量`Vector3`的一个方法，
+
+```JavaScript
+var T = new THREE.Matrix4()
+// 创建一个平移矩阵，顶点坐标沿着X、Y、Z轴分别平移5,3,9
+T.makeTranslation(5, 3, 9)
+// 三维向量表示一个顶点坐标
+var v1 = new THREE.Vector3(10,10,10);
+// 向量进行矩阵变换
+var v2 = v1.clone().applyMatrix4(T);
+console.log('查看平移后坐标', v2);
+```
+
+顶点进行两次平移变换代码
+
+```JavaScript
+// 创建平移矩阵T1：x轴平移100
+var T1 = new THREE.Matrix4().makeTranslation(100, 0, 0)
+// 创建平移矩阵T2：y轴平移100
+var T2 = new THREE.Matrix4().makeTranslation(0, 100, 0)
+
+// 两个变换矩阵相乘表示顶点先后经过两次
+var M = new THREE.Matrix4()
+M.multiplyMatrices(T2,T1)
+// 三维向量表示一个顶点坐标
+var v1 = new THREE.Vector3(10, 10, 10);
+// 向量进行矩阵变换
+var v2 = v1.clone().applyMatrix4(M);
+console.log('查看平移后坐标', v2);
+```
+
+### 3.投影矩阵、视图矩阵（camera）
+
+> :star: 相机对象本质就是视图矩阵和投影矩阵，顶点坐标经过平移旋转缩放模型变换以后，还需要经过视图、投影变换才能显示到画布上。
+
+![image-20221011143500553](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221011143500553.png)
+
+
+
+### `Matrix4`方法：正投影`.makeOrthographic()`
+
+### 正投影公式：
+
+![image-20221013172616623](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221013172616623.png)
+
+矩阵对象`Matrix4`的方法`.makeOrthographic()`封装了正投影的算法，该方法用来创建一个正投影矩阵，在正投影相机对象`OrthographicCamera`中会调用该方法更新相机对象的投影矩阵属性`.projectionMatrix`
+
+方法参数：.makeOrthographic( left,right,top,bottom,near,far)
+
+### 正投影相机`OrthographicCamera`
+
+正投影相机`OrthographicCamera`类封装调用了矩阵对象`Matrix4`的正投影矩阵变换方法`.makeOrthographic()`。执行该方法用来改变正投影相机对象的投影矩阵属性`.projectionMatrix`。
+
+```JavaScript
+// OrthographicCamera.js源码
+this.projectionMatrix.makeOrthographic( left, right, top, bottom, this.near, this.far )
+```
+
+构造函数`PerspectiveCamera(left,right,top,bottom,near,far)`
+
+正投影相机设置例子
+
+```JavaScript
+var width = window.innerWidth; //窗口宽度
+var height = window.innerHeight; //窗口高度
+var k = width / height; //窗口宽高比
+var s = 150; //三维场景显示范围控制系数，系数越大，显示的范围越大
+//创建相机对象
+var camera = new THREE.OrthographicCamera(-s * k, s * k, s, -s, 1, 1000);
+camera.position.set(200, 300, 200); //设置相机位置
+camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
+```
+
+### 
+
+### `Matrix4`方法：透视投影矩阵`.makePerspective()`
+
+透视投影公式：
+
+![image-20221013173920186](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221013173920186.png)
+
+矩阵对象`Matrix4`的方法`.makePerspective()`封装了透视投影的算法，该方法用来创建一个透视投影矩阵，在透视投影相机对象`PerspectiveCamera`中会调用该方法更新相机对象的投影矩阵属性`.projectionMatrix`。
+
+方法参数：.makePerspective( left,right,top,bottom,near,far)
+
+### 透视投影相机`PerspectiveCamera`
+
+透视投影相机`PerspectiveCamera`类封装调用了矩阵对象`Matrix4`的透视投影矩阵变换方法`.makePerspective()`。执行该方法用来改变透视投影相机对象的投影矩阵属性`.projectionMatrix`。
+
+```JavaScript
+// PerspectiveCamera.js源码
+this.projectionMatrix.makePerspective(...);
+```
+
+构造函数`PerspectiveCamera(fov,aspect,near,far)`
+
+透视投影相机使用例子
+
+```JavaScript
+var width = window.innerWidth; //窗口宽度
+var height = window.innerHeight; //窗口高度
+/**透视投影相机对象*/
+var camera = new THREE.PerspectiveCamera(60, width / height, 1, 1000);
+camera.position.set(200, 300, 200); //设置相机位置
+camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
+```
+
+
+
+### `Matrix4`方法：`.lookAt()`
+
+矩阵对象`Matrix4`的`.lookAt()`方法对图形学中投影矩阵算法进行了封装，也就是通过给定的参数生成变换矩阵，视图矩阵和模型矩阵一样会用于场景中对象的平移旋转等变换，该方法通常用于构建相机对象的视图矩阵`.matrixWorldInverse`属性。
+
+参数：`.lookAt(eye,center, up )`
+
+三个参数都是三维向量对象`Vector3`，eye是视点也就是观察位置，center表示被观察的位置，up表示向上的方向。
+
+### `Object3D`方法`.lookAt(x,y,z)`
+
+`Object3D`类封装了矩阵对象`Matrix4`的`.lookAt()`方法，得到一个新的方法`.lookAt(x,y,z)`,参数表示xyz是相机的目标观察点。
+
+通过`Object3D`对象的`.lookAt(x,y,z)`方法可以改变自身的四元数属性`.quaternion`,四元数属性`.quaternion`和对象角度属性`rotaion`一样表示对象的旋转变换，可以转化为旋转矩阵，进而改变对象的本地矩阵属性`.matrix`和世界矩阵属性`.matrixWorld`。
+
+```JavaScript
+// Object3D.js源码
+// `.lookAt()`方法计算得到的旋转矩阵对象m1改变对象的四元数属性.quaternion
+this.quaternion.setFromRotationMatrix( m1 );
+```
+
+
+
+### 相机对象
+
+透视投影相机`PerspectiveCamera`和正投影相机`OrthographicCamera`的基类是相机对象`Camera`，相机对象的基类是`Object3D`，所以相机对象会继承`Object3D`的`.lookAt(x,y,z)`方法，勇于改变自身的矩阵属性。
+
+```
+Object3D` → `Camera` → `PerspectiveCamera
+Object3D` → `Camera` → `OrthographicCamera
+```
+
+相机对象的视图矩阵属性`matrixWorldInverse`，字面意思是世界矩阵逆矩阵的意思，这可以看书来相机对象的视图矩阵属性就是自身世界矩阵`matrixWorld`的逆矩阵。
+
+:star: 设置相机对象的位置属性和lookAt方法本质就是改变自身的视图矩阵属性`matrixWorldInverse`。
+
+```JavaScript
+var camera = new THREE.OrthographicCamera(...);
+//设置相机位置
+camera.position.set(200, 300, 200);
+//设置相机对象的观察目标的位置
+camera.lookAt(scene.position);
+```
+
+
+
+### 4.欧拉角（Euler）and 四元数（Quaternion）
 
 > 欧拉角缺点，在创建动画或进行涉及旋转的数学时会变得很明显。特别是，我们不能将两个欧拉角相加（更著名的是，它们还存在一种叫做万向节锁定的问题）。四元数没有这些缺点。另一方面，它们比欧拉角更难使用，所以现在我们将坚持使用更简单的`Euler`类。
 
@@ -1174,7 +1353,7 @@ function AreaOfTriangle(p1, p2, p3){
 
 `Object3D`对象角度属性`.rotation`和四元数属性`.quaternion`是相互关联的**⭐一个改变会同时改变另一个**。
 
-### 4.顶点与BufferGeometry
+### 5.顶点与BufferGeometry
 
 + 面法向量
 
@@ -1287,7 +1466,7 @@ function AreaOfTriangle(p1, p2, p3){
   
 
 
-### 5.position和世界坐标(scale同理)
+### 6.position和世界坐标(scale同理)
 
 > `position`获得模型在本地坐标系或者说模型坐标系下的三维坐标，
 >
@@ -1324,7 +1503,7 @@ mesh.getWorldPosition(worldPosition);
 console.log('世界坐标', worldPosition);
   ```
 
-### 6.世界矩阵**matrixWorld**和局部矩阵**matrix**
+### 7.世界矩阵**matrixWorld**和局部矩阵**matrix**
 
 > 当我们创建网格或任何其他场景对象时，局部矩阵和世界矩阵都会自动创建。
 >
@@ -1336,11 +1515,7 @@ meshA.updateMatrixWorld();
 获取对象最新的矩阵，或者直接render，所有对象矩阵更新
 ```
 
-
-
-
-
-### 7.贝塞尔曲线
+### 8.贝塞尔曲线
 
 > https://blog.csdn.net/cfan927/article/details/104649623
 >
