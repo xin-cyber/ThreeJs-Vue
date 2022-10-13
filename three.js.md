@@ -1150,9 +1150,9 @@ console.log('查看平移后坐标', v2);
 
 
 
-### `Matrix4`方法：正投影`.makeOrthographic()`
+**`Matrix4`方法：正投影`.makeOrthographic()`**
 
-### 正投影公式：
+**正投影公式：**
 
 ![image-20221013172616623](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221013172616623.png)
 
@@ -1160,7 +1160,7 @@ console.log('查看平移后坐标', v2);
 
 方法参数：.makeOrthographic( left,right,top,bottom,near,far)
 
-### 正投影相机`OrthographicCamera`
+**正投影相机`OrthographicCamera`**
 
 正投影相机`OrthographicCamera`类封装调用了矩阵对象`Matrix4`的正投影矩阵变换方法`.makeOrthographic()`。执行该方法用来改变正投影相机对象的投影矩阵属性`.projectionMatrix`。
 
@@ -1184,9 +1184,9 @@ camera.position.set(200, 300, 200); //设置相机位置
 camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
 ```
 
-### 
 
-### `Matrix4`方法：透视投影矩阵`.makePerspective()`
+
+**`Matrix4`方法：透视投影矩阵`.makePerspective()`**
 
 透视投影公式：
 
@@ -1196,7 +1196,7 @@ camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
 
 方法参数：.makePerspective( left,right,top,bottom,near,far)
 
-### 透视投影相机`PerspectiveCamera`
+**透视投影相机`PerspectiveCamera`**
 
 透视投影相机`PerspectiveCamera`类封装调用了矩阵对象`Matrix4`的透视投影矩阵变换方法`.makePerspective()`。执行该方法用来改变透视投影相机对象的投影矩阵属性`.projectionMatrix`。
 
@@ -1220,7 +1220,7 @@ camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
 
 
 
-### `Matrix4`方法：`.lookAt()`
+**`Matrix4`方法：`.lookAt()`**
 
 矩阵对象`Matrix4`的`.lookAt()`方法对图形学中投影矩阵算法进行了封装，也就是通过给定的参数生成变换矩阵，视图矩阵和模型矩阵一样会用于场景中对象的平移旋转等变换，该方法通常用于构建相机对象的视图矩阵`.matrixWorldInverse`属性。
 
@@ -1228,7 +1228,7 @@ camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
 
 三个参数都是三维向量对象`Vector3`，eye是视点也就是观察位置，center表示被观察的位置，up表示向上的方向。
 
-### `Object3D`方法`.lookAt(x,y,z)`
+**`Object3D`方法`.lookAt(x,y,z)`**
 
 `Object3D`类封装了矩阵对象`Matrix4`的`.lookAt()`方法，得到一个新的方法`.lookAt(x,y,z)`,参数表示xyz是相机的目标观察点。
 
@@ -1242,9 +1242,11 @@ this.quaternion.setFromRotationMatrix( m1 );
 
 
 
-### 相机对象
+**相机对象**
 
 透视投影相机`PerspectiveCamera`和正投影相机`OrthographicCamera`的基类是相机对象`Camera`，相机对象的基类是`Object3D`，所以相机对象会继承`Object3D`的`.lookAt(x,y,z)`方法，勇于改变自身的矩阵属性。
+
+> object3d 的lookAt 是Matrix的lookat的继续封装
 
 ```
 Object3D` → `Camera` → `PerspectiveCamera
