@@ -959,7 +959,7 @@ document.body.appendChild(renderer.domElement);
 let trackballControls = initTrackballControls(camera, renderer);
 ```
 
-### 
+
 
 ## 16 .核心要点
 
@@ -1270,6 +1270,10 @@ camera.lookAt(scene.position);
 ### 4.欧拉角（Euler）and 四元数（Quaternion）
 
 > 欧拉角缺点，在创建动画或进行涉及旋转的数学时会变得很明显。特别是，我们不能将两个欧拉角相加（更著名的是，它们还存在一种叫做万向节锁定的问题）。四元数没有这些缺点。另一方面，它们比欧拉角更难使用，所以现在我们将坚持使用更简单的`Euler`类。
+>
+> ⭐Euler 和 Quaternion 相互影响，一个改 变另一个也改变
+
+![image-20221015213847596](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221015213847596.png)
 
 + **Euler**
 
@@ -1283,6 +1287,16 @@ camera.lookAt(scene.position);
   
 
 + **Quaternion**
+
+  > 两个四元数相乘可以表示两次旋转的结果
+  >
+  > .multiply 
+  >
+  > **四元数**相对于其他形式的**优点**，大略为：
+  >
+  > 1. 解决**万向节死锁**
+  > 2. 仅需4个浮点数，相比矩阵更轻量
+  > 3. 无论求逆、串联等操作，相比矩阵更高效
 
   ![image-20220829172716828](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220829172716828.png)
 
@@ -1556,6 +1570,121 @@ meshA.updateMatrixWorld();
 递归表示法
 
 ![image-20221008113344891](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221008113344891.png)
+
+### 9. Three 和WebGL封装
+
+#### 1.render
+
+> Three.js渲染器的渲染方法`.render()`，执行该方法就相当于执行WebGL 绘制方法`gl.drawArrays()`。
+>
+> 在原生WebGL代码中，执行绘制方法`gl.drawArrays()`就会在Canvas画布上绘制一帧图片，自然Threejs的渲染方法`.render()`同理，周期性执行 绘制方法`gl.drawArrays()`可以更新帧缓冲区数据，也就是更新Canvas画布显示图像，`.render()`方法同理可以实现一样的效果。
+
++ .domElement : 添加一个canvas dom 元素
+
+  ```js
+  // 局部渲染
+  document.getElementById('pos').appendChild(renderer.domElement);
+  ```
+
++ .setSize 
+
+  > 设置canvas画布宽高
+
+  ```js
+  // pixelRatio：像素比率
+  _pixelRatio = 1,
+  ...
+  this.setSize = function(width, height, updateStyle) {
+  ...
+    _canvas.width = width * _pixelRatio;
+    _canvas.height = height * _pixelRatio;
+  
+    if (updateStyle !== false) {
+  _canvas.style.width = width + 'px';
+  _canvas.style.height = height + 'px';
+    }
+  ...
+  };
+      
+  // 窗口宽高    
+  renderer.setSize(window.innerWidth, window.innerHeight);  
+  ```
+
++ .clear 
+
+  <img src="https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221016194916944.png" alt="image-20221016194916944" style="zoom:50%;" />
+
+  ```js
+  // 学习Three.js与帧缓冲区相关的封装，首先要了解WebGL中帧缓冲区的概念，
+  // 帧缓冲区包含颜色缓冲区、深度缓冲区、模板缓冲区，
+  // 颜色缓冲区存储片元的颜色数据，也就是像素数据，
+  // 深度缓冲存储片元的深度数据，用于WebGL渲染流程中的深度测试环节，被遮挡的片元会被剔除，不会显示在canvas画布上。
+  
+  // 清除颜色缓冲区数据
+  gl.clear(gl.COLOR_BUFFER_BIT)
+  // 清除深度缓冲区数据
+  gl.clear(gl.DEPTH_BUFFER_BIT)
+  // 清除模板缓冲区数据
+  gl.clear(gl.STENCIL_BUFFER_BIT)
+  ```
+
+  WebGLRenderer.js源码对渲染器方法`.clear()`的封装
+
+  ```JavaScript
+  this.clear = function(color, depth, stencil) {
+    // “&” 和 “|” 是位运算操作符
+    var bits = 0;
+  
+    if (color === undefined || color) bits |= _gl.COLOR_BUFFER_BIT;
+    if (depth === undefined || depth) bits |= _gl.DEPTH_BUFFER_BIT;
+    if (stencil === undefined || stencil) bits |= _gl.STENCIL_BUFFER_BIT;
+  
+    _gl.clear(bits);
+  
+  };
+  ```
+
++ .clearDepth()
+
+  > 清除深度缓冲区
+  >
+  > gl.clear(gl.DEPTH_BUFFER_BIT)
+  >
+  > // 清除上一帧深度缓冲区数据，深度测试的时候不会删除被遮挡的片元数据
+
++ .autoClear()
+
+  Three.js渲染器默认情况下，本次执行render方法之前，会把上次执行render方法后帧缓冲区中的数据清除
+
+  autoClear默认值true，设置为false，执行render方法的时候不会自动清除上次渲染帧缓冲区中的数据
+
+  > ⭐设置为false，第二个render渲染时不会清除上一帧画面，也就是第一个render
+  >
+  > clear 清除缓冲区数据，不清楚会溢出
+
+  ```js
+   function render() {
+      // 清除上次执行render()函数得到的两帧图像帧缓冲区中数据
+      renderer.clear(true, true, true);
+  
+      // Three.js渲染器默认情况下，本次执行render方法之前，会把上次执行render方法后帧缓冲区中的数据清除
+      // autoClear默认值true，设置为false，执行render方法的时候不会自动清除上次渲染帧缓冲区中的数据
+      renderer.autoClear = false;
+      // 渲染场景1，得到一帧图像，帧缓冲区中存储片元的颜色、深度等数据
+      renderer.render(scene, camera);
+  
+      // 清除上一帧深度缓冲区数据，深度测试的时候不会删除被遮挡的片元数据
+      renderer.clearDepth();
+  
+      // 第二次渲染场景2，得到新的像素数据
+      renderer.render(scene2, camera); //执行渲染操作
+  
+      requestAnimationFrame(render);
+      mesh2.rotateX(0.01);
+  }
+  ```
+
+  
 
 ## 17.other
 
