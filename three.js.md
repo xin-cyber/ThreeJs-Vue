@@ -1472,7 +1472,7 @@ camera.lookAt(scene.position);
   
   /**纹理坐标*/
      var uvs = new Float32Array([
-     0,0, //图片左下角
+     	 0,0, //图片左下角
        1,0, //图片右下角
        1,1, //图片右上角
        0,1, //图片左上角
@@ -1690,7 +1690,122 @@ meshA.updateMatrixWorld();
   }
   ```
 
-  
+
+#### 2.顶点
+
++ **BufferAttribute**
+
+  > 顶点数据需要传入WebGL API`gl.createBuffer()`创建顶点缓冲区中
+
+  ```js
+  //类型数组创建顶点数据
+  var vertices = new Float32Array([
+    0, 0, 0, //顶点1坐标
+    50, 0, 0, //顶点2坐标
+    0, 100, 0, //顶点3坐标
+    0, 0, 10, //顶点4坐标
+    0, 0, 100, //顶点5坐标
+    50, 0, 10, //顶点6坐标
+  ]);
+  // 创建属性缓冲区对象表示一组顶点坐标
+  // 参数3表示类型化数组vertices中的顶点数据3个为一组，表示一个顶点的xyz坐标
+  geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3))
+  ```
+
+#### 3.**⭐解析几何体流程**
+
+![Threejs解析流程图](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/Threejs%E8%A7%A3%E6%9E%90%E6%B5%81%E7%A8%8B%E5%9B%BE.png)
+
+**原生WebGL**
+
+原生WebGL通过`gl.createBuffer()`创建一个顶点缓冲区对象，用来存储顶点位置、顶点颜色、顶点法向量等数据。如果你理解了这一段代码，自然就很容易理解Three.js的几何体对象和相应的缓冲区。
+
+```JavaScript
+// 顶点位置数据
+var data=new Float32Array([0.5,0.5,0.3...]);
+ // 创建缓冲区buffer，传入顶点位置数据data
+var buffer=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
+gl.vertexAttribPointer(aposLocation,3,gl.FLOAT,false,0,0);
+```
+
+**`Geometry`转化为`BufferGeometry`**
+
+通过`BufferGeometry.setFromObject(object)`方法可以把参数可以把object模型对象的几何体geometry转化为BufferGeometry，点模型Points和线模型Line使用一套解析转化规则，网格模型Mesh使用一种转化规则。
+
+对于网格模型的几何体Geometry转化为BufferGeometry的时候，需要先把Geometry对象转化为直接几何体对象DirectGeometry，然后再转化为BufferGeometry对象。
+
+**相关函数**
+
+WebGLAttributes.js、WebGLGeometries.js和WebGLObjects.js是工厂函数，执行这三个函数都会返回一个具有特定方法的对象，WebGLObjects.js会调用WebGLGeometries对象的方法，WebGLGeometries.js会调用WebGLAttributes对象的方法。
+
+<img src="https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/%E8%A7%A3%E6%9E%90%E8%A7%84%E5%88%99.png" alt="解析规则" style="zoom: 67%;" />
+
++ **WebGLAttributes.js**
+
+`.update(BufferAttribute)`方法
+
+解析BufferAttribute对象，也就是说从BufferAttribute对象的`.array`属性提取顶点数据，把顶点数据传入WebGL顶点缓冲区，对`gl.createBuffer()`、`gl.bufferData()`等WebGL API进行了封装。
+
++ **WebGLGeometries.js**
+
+`.get()`方法
+
+参数:`.get(Object,Object.geometry)`
+
+如果Object.geometry是BufferGeometry直接返回，如果是Geometry，会转化为BufferGeometry，点线模型和网格模型的Geometry转化规则不同，所以参数需要传入Object，代码需要判断Object是Points和Line还是Mesh。
+
+`.update(BufferGeometry)`方法
+
+通过BufferGeometry的`.index`和`.attributes`属性，获得包含顶点数据的BufferAttribute对象，然后BufferAttribute作为参数调用`WebGLAttributes.update()`方法，提取顶点数据并传入顶点缓冲区。
+
++ **WebGLObjects.js**
+
+`.update(Object)`方法
+
+从模型对象Object提取几何体数据，也就是模型的几何体属性 `Object.geometry`，然后调用WebGLGeometries.get()方法，并把Object和Object.geometry作为参数，直接get方法后返回BufferGeometry，然后调用WebGLGeometries.update()方法，把BufferGeometry作为参数。
+
++ **WebGLRenderer.js**
+
+场景中遍历获得的对象object，如果是Points、Line或Mesh模型，调用WebGLObjects.update()方法，并把object作为参数。
+
++ **WebGLRenderer.js**
+
+```JavaScript
+import {WebGLAttributes} from './webgl/WebGLAttributes.js';
+import {WebGLGeometries} from './webgl/WebGLGeometries.js';
+import {WebGLObjects} from './webgl/WebGLObjects.js';
+
+var attributes, geometries, objects;
+
+attributes = new WebGLAttributes(_gl);
+// WebGLAttributes作为WebGLGeometries参数
+geometries = new WebGLGeometries(_gl, attributes, info);
+// WebGLGeometries作为WebGLObjects参数
+objects = new WebGLObjects(geometries, info);
+
+
+function projectObject(object, camera, sortObjects) {
+...
+else if (object.isMesh || object.isLine || object.isPoints) {
+var geometry = objects.update(object);
+}
+...
+  // 递归算法：遍历对象
+var children = object.children;
+for (var i = 0, l = children.length; i < l; i++) {
+projectObject(children[i], camera, sortObjects);
+}
+}
+// 渲染方法中调用projectObject
+this.render = function(scene, camera, renderTarget, forceClear) {
+...
+// 递归遍历场景对象，对于其中的点、线和网格模型需要解析它们的几何体，提取顶点数据，并传入顶点缓冲区
+projectObject(scene, camera, _this.sortObjects);
+...
+}
+```
 
 ## 17.other
 
