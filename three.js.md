@@ -596,7 +596,7 @@ var shape = new THREE.Shape(SplineCurve.getPoints(300)); // 二维平面形状
 +  css2DObject   css2DRenderer
 + css3DObject     css3DSprite    css3DRenderer
 
-### 4.旋转平移缩放
+#### 8.旋转平移缩放
 
 ![image-20220927204459899](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220927204459899.png)
 
@@ -613,7 +613,91 @@ mesh.rotateOnAxis(axis,Math.PI/8);//绕axis轴旋转π/8
 // 旋转方法改变的是表示模型角度状态的角度属性.rotation或者四元数属性.quaternion。
 ```
 
+### 4.层级模型封装
 
+> 根节点场景对象`Scene`和它的子孙对象构成的树结构。
+
++ **基类Object3D**
+
+  > 基类`Object3D`封装了用于构建树结构的方法`.add()`和属性`.children`
+  >
+  > 场景对象`Scene`、组对象`Group`、网格Mesh、点Points、线Line等模型对象基类是`Object3D`
+
+  网格模型插入组对象，组对象插入场景中。
+
+  ```JavaScript
+  var leftEyeMesh = new THREE.Mesh();
+  var rightEyeMesh = new THREE.Mesh();
+  
+  var headGroup = new THREE.Group();
+  headGroup.add(leftEyeMesh, rightEyeMesh);
+  
+  scene.add(headGroup);
+  console.log('查看场景子对象',scene.children);
+  console.log('查看headGroup的子对象',headGroup.children);
+  ```
+
++ ### WebGL渲染器函数projectObject
+
+  WebGLRenderer.js源码,在render函数中会调用projectObject函数
+
+  ```JavaScript
+  function projectObject(object, camera, sortObjects) {
+  ...
+  // 封装了递归算法，可以用来遍历树结构对象，比如场景对象Scene
+    var children = object.children;
+    // 递归算法遍历场景对象
+    for (var i = 0, l = children.length; i < l; i++) {
+  projectObject(children[i], camera, sortObjects);
+    }
+  }
+  ```
+
+  WebGLRenderer.js源码,projectObject函数会递归遍历场景对象进行分类
+
+  ```JavaScript
+  this.render=function(){
+    ...
+    // 遍历场景对象，并对场景对象中的节点进行分类，比如光源对象，比如模型对象
+    projectObject(scene, camera, _this.sortObjects);
+    ...
+  }
+  ```
+
+  projectObject函数对象递归遍历到的子对象节点进行分类处理，然后WebGL渲染器在对象分类好的不同对象进行渲染器解析，关于进一步的渲染解析过程这里不讲解。
+
+  ```JavaScript
+  // currentRenderList对象用于存储点、线和和网格模型的对象
+  var currentRenderList = renderLists = new WebGLRenderLists();
+  currentRenderList = renderLists.get(scene, camera);
+  // currentRenderList对象用于存储光源、点精灵等对象
+  var currentRenderStaterenderStates = new WebGLRenderStates();
+  currentRenderState = renderStates.get(scene, camera);
+  
+  // 对象Scene的后代节点对象进行分类处理
+  function projectObject(object, camera, sortObjects) {
+  ...
+    if (visible) {
+  // 判断对象是不是光源对象，是的话插入WebGL渲染状态对象的state属性中
+  if (object.isLight) {
+    //光源信息插入到currentRenderState对象的.state.lightsArray属性中
+    currentRenderState.pushLight(object);
+  }
+  // 判断对象是不是精灵对象
+  else if (object.isSprite) {
+  //光源信息插入到currentRenderState对象的.state.spritesArray属性中
+  currentRenderState.pushSprite(object);
+  }
+   else if (object.isMesh || object.isLine || object.isPoints) {
+    // 把模型对象相关信息批量存储到currentRenderList对象
+    currentRenderList.push(object, geometry, material, _vector3.z, null);
+  }
+  
+    }
+  }
+  ```
+
+  
 
 ## 8.精灵和粒子
 
@@ -1535,6 +1619,105 @@ console.log('世界坐标', worldPosition);
 meshA.updateMatrix();
 meshA.updateMatrixWorld();
 获取对象最新的矩阵，或者直接render，所有对象矩阵更新
+```
+
+<img src="https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/%E6%9C%AC%E5%9C%B0%E7%9F%A9%E9%98%B5%E5%92%8C%E4%B8%96%E7%95%8C%E7%9F%A9%E9%98%B5.jpg" alt="本地矩阵和世界矩阵" style="zoom: 44%;" />
+
+**更新本地矩阵属性`.updateMatrix()`**
+
+执行`Object3D`的`.updateMatrix()`方法可以提取位置`.position`、缩放`.scale`和四元数`.quaternion`的属性值转化为变换矩阵设置本地矩阵属性`.matrix`。
+
+```JavaScript
+// Object3D.js源码
+updateMatrix: function () {
+  // 把位置、四元数、缩放属性转化为平移、旋转、缩放矩阵，三个矩阵的乘积是本地矩阵
+  this.matrix.compose( this.position, this.quaternion, this.scale );
+  this.matrixWorldNeedsUpdate = true;
+},
+    
+// Matrix4.js源码
+// 通过属性值设置变换矩阵
+compose: function ( position, quaternion, scale ) {
+  // 四元数矩阵转化为旋转矩阵，然后改变本地矩阵
+  this.makeRotationFromQuaternion( quaternion );
+  // 缩放属性转化为缩放矩阵，然后改变本地矩阵
+  this.scale( scale );
+  // 位置属性转化为平移矩阵，然后改变本地矩阵
+  this.setPosition( position );
+  return this;
+},
+    
+// 一个网格模型对象，基类是Object3D
+var mesh = new THREE.Mesh()
+// 缩放网格模型
+mesh.scale.set(900,900,900)
+// 位置、角度、缩放属性值更新到矩阵属性matrix
+mesh.updateMatrix();
+console.log('查看本地矩阵属性matrix',mesh.matrix.elements);
+```
+
+**更新世界矩阵属性`.updateMatrixWorld()`**
+
+调用`.updateMatrixWorld()`方法首先会更新对象的本地矩阵属性，然后更新对象的世界矩阵属性。
+
+`.updateMatrixWorld()`方法封装了递归算法，会遍历对象的所有子对象，对象本身和
+
+```JavaScript
+// Object3D.js源码
+updateMatrixWorld: function ( force ) {
+  // 更新对象的本地矩阵属性
+  if ( this.matrixAutoUpdate ) this.updateMatrix();
+  ...
+  if ( this.parent === null ) {
+// 如果一个对象没有父对象，也就是树结构对象的根节点对象，世界矩阵就等于本地矩阵
+this.matrixWorld.copy( this.matrix );
+
+  } else {
+// 更新对象的世界矩阵，父对象的世界矩阵和对象本地矩阵的乘积
+this.matrixWorld.multiplyMatrices( this.parent.matrixWorld, this.matrix );
+  }
+  ...
+ // 通过递归算法遍历一个对象的所有子对象，执行与根对象一样的操作更新本地和世界矩阵属性
+  var children = this.children;
+  for ( var i = 0, l = children.length; i < l; i ++ ) {
+children[ i ].updateMatrixWorld( force );
+  }
+},
+```
+
+**WebGL渲染器**
+
+场景对象的`.autoUpdate`属性默认值是true，执行`.render()`方法的时候`scene.updateMatrixWorld()`默认执行，也就是说执行 Threejs执行渲染器渲染方法的时候，场景对象所有子孙对象的世界矩阵属性和本地矩阵属性才会更新。
+
+```JavaScript
+// WebGLRenderer.js源码
+this.render=function(){
+  ...
+  // WebGL渲染器中执行场景对象的updateMatrixWorld()方法，更新场景和场景所有子孙对象的本地矩阵
+  if (scene.autoUpdate === true) scene.updateMatrixWorld();
+  ...
+}
+```
+
+**世界坐标和本地坐标**
+
+位置属性`.position`表示本地坐标，也就是说该对象相对父对象的偏移位置。通过`Object3D`的`.getWorldPosition()`方法可以返回一个模型的世界坐标，是模型对象相对坐标原点的位置坐标，也就是该对象位置属性`.position`及其所有祖宗对象的`.position`相加。
+
+```JavaScript
+var worldPosition = new THREE.Vector3();
+mesh.getWorldPosition(worldPosition)
+console.log('世界坐标',worldPosition);
+console.log('本地坐标',mesh.position);
+// Object3D.js源码
+getWorldPosition: function ( target ) {
+  if ( target === undefined ) {
+console.warn( 'THREE.Object3D: .getWorldPosition() target is now required' );
+target = new Vector3();
+  }
+  this.updateMatrixWorld( true );
+  通过矩阵对象setFromMatrixPosition方法从世界矩阵中提取平移矩阵分量，然后转化为position属性
+  return target.setFromMatrixPosition( this.matrixWorld );
+},
 ```
 
 ### 8.贝塞尔曲线
