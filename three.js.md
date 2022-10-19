@@ -1990,6 +1990,116 @@ projectObject(scene, camera, _this.sortObjects);
 }
 ```
 
++ **对象分类**
+
+  > Three.js渲染器执行渲染方法`.render()`时候会遍历场景对象，然后对场景对象的后代进行分类，然后把同类的对象进行集中存储，然后再渲染分类好的对象。
+
+  <img src="https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/%E6%B8%B2%E6%9F%93%E5%99%A8%E6%B8%B2%E6%9F%93%E5%87%BD%E6%95%B0.png" alt="渲染器渲染函数" style="zoom: 50%;" />
+
+<img src="https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/%E5%AF%B9%E8%B1%A1%E5%88%86%E7%B1%BB.png" alt="对象分类" style="zoom:50%;" />
+
+#### 4.点线绘制模式
+
+<img src="https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/%E6%A8%A1%E5%9E%8B%E5%AF%B9%E5%BA%94%E7%BB%98%E5%88%B6%E6%A8%A1%E5%BC%8F.png" alt="模型对应绘制模式" style="zoom: 50%;" />
+
+Three.js点Points、线Line、网格Mesh模型都有几何体geometry数据，对于这些不同类别的模型对象Threejs渲染的时候调用WebGL绘制函数`gl.drawArrays()`或`gl.drawElements()`的时候系统设置的绘制模式不同。
+
+学习本节课的内容需要先简单阅读以下源码：
+
+- WebGLRenderer.js源码封装的的`.renderBufferDirect()`方法
+- WebGLBufferRenderer.js源码
+- WebGLIndexedBufferRenderer.js源码
+
+**WebGLRenderer.js**
+
+WebGLRenderer.js封装了WebGL绘制函数`gl.drawArrays( mode, start, count );`  ⭐无索引index
+
+`.setMode()`方法,设置`gl.drawArrays();`的绘制模式mode。
+
+```
+.render()`方法，封装了WebGL API`gl.drawArrays();
+```
+
+**WebGLIndexedBufferRenderer.js**
+
+WebGLIndexedBufferRenderer.js封装了WebGL绘制函数`gl.drawElements();`  ⭐有索引index
+
+`.setMode()`方法,设置`gl.drawElements();`的绘制模式mode。
+
+```
+.render()`方法，封装了WebGL API`gl.drawElements();
+```
+
+**`.renderBufferDirect()`方法**
+
+执行`.renderBufferDirect()`方法会调用WebGL绘制函数`gl.drawArrays()`或`gl.drawElements()`绘制顶点数据，渲染点Points、线Line、网格Mesh模型的时候，在执行绘制函数之前需要根据模型的类别设置绘制函数的绘制模式mode。
+
+```JavaScript
+import {WebGLBufferRenderer} from './webgl/WebGLBufferRenderer.js';
+import {WebGLIndexedBufferRenderer} from './webgl/WebGLIndexedBufferRenderer.js';
+bufferRenderer = new WebGLBufferRenderer(_gl, extensions, info);
+indexedBufferRenderer = new WebGLIndexedBufferRenderer(_gl, extensions, info);
+this.renderBufferDirect = function(camera, fog, geometry, material, object, group) {
+...
+
+  var renderer = bufferRenderer;
+
+  // 如果存在顶点索引数据，把渲染器设置为WebGLIndexedBufferRenderer
+  if (index !== null) {
+  attribute = attributes.get(index);
+  renderer = indexedBufferRenderer;
+  renderer.setIndex(attribute);
+  }
+  ...
+  if (object.isMesh) {
+  // wireframe默认false
+  if (material.wireframe === true) {
+// 开启材质线框显示效果，使用线绘制模式gl.LINES
+state.setLineWidth(material.wireframeLinewidth * getTargetPixelRatio());
+renderer.setMode(_gl.LINES);
+  } else {
+// 网格模型对象具有drawMode属性，默认值为TrianglesDrawMode
+switch (object.drawMode) {
+  case TrianglesDrawMode:
+renderer.setMode(_gl.TRIANGLES);
+break;
+  case TriangleStripDrawMode:
+renderer.setMode(_gl.TRIANGLE_STRIP);
+break;
+  case TriangleFanDrawMode:
+renderer.setMode(_gl.TRIANGLE_FAN);
+break;
+}
+  }
+} else if (object.isLine) {
+  var lineWidth = material.linewidth;
+  if (lineWidth === undefined) lineWidth = 1; // Not using Line*Material
+  state.setLineWidth(lineWidth * getTargetPixelRatio());
+  if (object.isLineSegments) {
+// LineSegments模型对象
+renderer.setMode(_gl.LINES);
+  } else if (object.isLineLoop) {
+// LineLoop模型对象
+renderer.setMode(_gl.LINE_LOOP);
+  } else {
+// Line模型对象
+renderer.setMode(_gl.LINE_STRIP);
+  }
+} else if (object.isPoints) {
+ // 点模型对象Points
+  renderer.setMode(_gl.POINTS);
+}else if (object.isPoints) {
+  // 点模型对象使用点绘制模式
+  renderer.setMode(_gl.POINTS);
+
+}
+...
+
+// 设置好绘制模式后，调用WebGLRenderer.js封装的render函数，相当于执行`gl.drawArrays();`
+renderer.render(drawStart, drawCount);
+}
+```
+
 ## 17.other
 
 ### 1.stats.js
