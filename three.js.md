@@ -313,7 +313,107 @@ scene.add(points); //点对象添加到场景
   >
   > displacementMapScale设置这个图突出来部分的比例
 
+#### 7.ShaderMaterial 和 RawShaderMaterial
 
+> 主要用于需要自定义着色器的场景。
+
+### WebGLRenderer.js
+
+```JavaScript
+import {ShaderLib} from './shaders/ShaderLib.js';
+import {WebGLPrograms} from './webgl/WebGLPrograms.js';
+programCache = new WebGLPrograms(_this, extensions, capabilities);
+
+function initMaterial(material, fog, object) {
+  // 如果材质是ShaderMaterial或RawShaderMaterial，返回parameters对象属性shaderID的值是未定义undefined
+  // 返回一个parameters对象，具有shaderID属性，通过shaderID的属性值可以获得材质对象对应的着色器代码。
+  var parameters = programCache.getParameters(material, lights.state, shadowsArray, ...object);
+
+  // 判断shaderID是否有具体值
+  if (parameters.shaderID) {
+    // 通过shaderID键对应的值，作为ShaderLib对象的键名获得相应的值，uniforms对象、定点着色器代码、片元着色器代码
+    var shader = ShaderLib[parameters.shaderID];
+    // threejs定义的材质对象
+    materialProperties.shader = {
+      name: material.type,
+      uniforms: UniformsUtils.clone(shader.uniforms),
+      vertexShader: shader.vertexShader,
+      fragmentShader: shader.fragmentShader
+    };
+
+  } else {
+    // 自定义材质对象⭐shadermaterial
+    materialProperties.shader = {
+      name: material.type,
+      uniforms: material.uniforms,
+      vertexShader: material.vertexShader,
+      fragmentShader: material.fragmentShader
+    };
+
+  }
+}
+
+```
+
+### WebGLPrograms.js
+
+如果材质是ShaderMaterial或RawShaderMaterial，返回parameters对象属性shaderID的值是未定义undefined
+
+```JavaScript
+function WebGLPrograms( renderer, extensions, capabilities ) {
+      var shaderIDs = {
+      MeshDepthMaterial: 'depth',
+      MeshDistanceMaterial: 'distanceRGBA',
+      MeshNormalMaterial: 'normal',
+      MeshBasicMaterial: 'basic',
+      MeshLambertMaterial: 'lambert',
+      MeshPhongMaterial: 'phong',
+      MeshToonMaterial: 'phong',
+      MeshStandardMaterial: 'physical',
+      MeshPhysicalMaterial: 'physical',
+      LineBasicMaterial: 'basic',
+      LineDashedMaterial: 'dashed',
+      PointsMaterial: 'points',
+      ShadowMaterial: 'shadow'
+    };
+    this.getParameters = function (material, lights,...){
+      // 如果材质是ShaderMaterial或RawShaderMaterial，返回值shaderID是未定义undefined，因为shaderIDs对象没有这两个属性
+      var shaderID = shaderIDs[ material.type ];
+
+      var parameters = {
+        // 该属性用于判断材质对象
+      shaderID: shaderID,
+      ...
+      };
+
+      return parameters;
+      }
+    }
+    
+```
+
+**RawShaderMaterial**
+
+> 以下属性不会自动声明
+
+![image-20221023220722013](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221023220722013.png)
+
+RawShaderMaterial和ShaderMaterial相同之处在于需要程序员自定义着色器代码，`\src\renderers\shaders`目录下的.glsl文件不会提供，不同之处在于执行WebGLProgram.js封装的WebGLProgram函数时候，给着色器代码添加的前缀不同，ShaderMaterial和其它材质对象的着色器代码添加的前缀相同，而RawShaderMaterial不同。
+
+```JavaScript
+if ( material.isRawShaderMaterial ) {
+      // 顶点着色器前缀
+      prefixVertex = [
+        customDefines
+      ].filter( filterEmptyLine ).join( '\n' );
+      // 片元着色器前缀
+      prefixFragment = [
+        customExtensions,
+        customDefines
+      ].filter( filterEmptyLine ).join( '\n' );
+    }
+    
+```
 
 ## 7.Geometry
 
@@ -1118,7 +1218,52 @@ function AreaOfTriangle(p1, p2, p3){
 >
 > ⭐不能使用push操作
 
-### 2.Matrix4(矩阵)
+### 2.Matrix4(矩阵)⭐
+
++ **几何意义⭐**
+
+  > 向量是基向量的线性组合，矩阵是基向量的集合。
+
+  我们常见的三维坐标系由X、Y、Z三个坐标轴组成，基向量就是`x,y,z`，他们定义了轴的方向和单位向量的长度。例如`（2,5,8）`其实就是在基向量`x`方向取2个单位长度，在基向量`y`方向取5个单位长度，在基向量`z`方向取8个单位长度，三个分量交汇的地方就是`(2,5,8)`。转化称为通用的公式，则如下图所示。
+  ![这里写图片描述](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/20180901141211801)
+  在此基础上，将矩阵解释为基向量集合，即每一行都是一组基向量。具体看下图。假设在世界坐标系下的向量[x,y,z]与矩阵相乘，我们发现最后的结果将(x,y,z)在新的基向量(p,q,r)下进行了描述。我们可以发现其中的关键点：如果把矩阵的每一行解释为坐标系的基向量，那么向量与该矩阵相乘，就相当于对向量做了一次坐标转换，从原本的世界坐标系下转换到由基向量(p,q,r)组成的新坐标系下了。
+
+  ![这里写图片描述](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/20180901142023101)
+
+  从这一点看，“转换”和“乘法”确实有千丝万缕的联系，这也就是为啥3D数学基础中最常见的运算是矩阵乘法了。当然，其实矩阵就是表达坐标变换的数学运算。下面我们将继续深入的了解矩阵的形式。
+
+  # 二、侧面解释
+
+  > 矩阵的每一行都能解释为转换后的基向量，矩阵可以代表变换。
+
+  通过刚才的方式可以看出，如果将矩阵的行向量解释为基向量，可以让通过乘法对向量完成一次坐标变换，变换到新的基向量描述的坐标空间下。下面通过另外一个侧面再次理解矩阵行是基向量，矩阵是基向量的组合，**⭐矩阵可以代表一种变换。⭐**
+
+  对于一个任意的3×3的矩阵，用一组基向量[1，0，0], [0，1，0], [0，0，1]乘以该任意矩阵。我们发现结果非常有意思，用[1,0,0]刚好取出了矩阵的第一行，也就是单位向量映射到新的坐标空间后，其在新的向量基[m11,m12,m13]上的比例大小。后面两行也有同样的结果。这从侧面验证了**“⭐矩阵的每一行都能解释为转换后的基向量”⭐**。
+  ![这里写图片描述](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/2018090119092282)
+
+  # 三、矩阵与变换
+
+  > 在这种解释的基础上，那我们可以有下面两条非常重要的推论。
+
+  > - 矩阵所代表的变换可以被形象化的解释
+  > - 由已知变换去反向建立矩阵的可能
+
+  其中，第一点（矩阵所代表的变换可以被形象化的解释）已经有非常经典的例子，每每说到这个点必提的一个例子。下面重温这个例子。![这里写图片描述](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/20180901192035304)
+  按照前面部分矩阵的每一行都能解释为转换后的基向量的思想，这个矩阵中有基向量p=[2,1]和基向量q=[-1,2]。假设变换之前的坐标系就是世界坐标系，世界坐标系的基向量分别是x轴和y轴，如下图左侧中横向与竖向垂直的灰色方格所示，每一格代表一个单位长度。
+
+  而新的基向量p和q构成了一个与原坐标系并不重合的新的坐标系，如下图所示，长度较长的两个深黑色基向量是矩阵对应的新基向量。需要注意的是，新的基向量的单位长度也与原世界坐标系中的单位长度不一样了，原来世界坐标系的基向量的单位长度就是灰色方格的边长，现在新基向量的长度是图中深黑色箭头的长度，是以前基向量长度的`根号5`倍。
+  ![这里写图片描述](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/20180901192405938)
+  对比上图中的两组向量基，从原参考系中的向量基(x轴和y轴)变成了后面的向量p和向量q，其实可以从图中看出该矩阵代表的变化就是绕原点逆时针旋转26°，并且出现一定比例的缩放。缩放的效果我们需要借助一个图案来看。从图中我们看到一个梯形的图案原本的大小和位置，经过矩阵作用之后，图案进行了放大和旋转。
+  ![这里写图片描述](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/20180901193510220)
+  当然，你肯定很好奇，为什么与这个基向量组成的矩阵相乘，整个图案都放大和旋转了呢？《3d数学基础》提出了偏转盒的概念，在二维平面当中，偏转盒是由基向量作为相邻两边组成的平行四边形。原来的基向量与新的基向量对比，进行了旋转和放大，对应的偏转盒也进行一样的旋转和放缩即可。如上图图案所示，其实图案就是在一个偏转盒中，盒子进行了需旋转和放大，带动其中的图片一起进行了旋转和放大。
+
+  从2D的平面偏转盒衍生到立体空间，偏转盒也变成了三维立体偏转盒，或者是由三个相互垂直的向量基组成的三脚架。仔细观察我们还可以发现，三脚架组成的偏移盒在长宽高三个维度上发生的缩放尺度是不一样的。高度上发生的放大是最大的，而z轴宽度上没有变化。这是因为对应红线框中的转换矩阵决定的。高度y轴对应的基向量是[1.250,1.250,0]，其对应的向量的模式最大的，发生的放大也就是最大的，而x轴方向的向量基模＜1尺度变小；z轴基向量模等于1，对应的大小尺度不变。
+  ![这里写图片描述](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/20180901194616605)
+
+  \#四、写在最后：旋转矩阵
+  旋转是线性变换中是最常见的一种变换方式，在旋转过程中，不发生形变，不发生尺度放缩，也没有反射和镜像。在二维当中的旋转相对比较简单，通过偏转盒就可以直观观察。在三维空间当中通过三脚架确实也可以直观观察，但是涉及到绕三个轴进行旋转，情况就变得非常复杂。以下内容参考[文章1](https://www.cnblogs.com/meteoric_cry/p/7987548.html)和[文章2](https://www.cnblogs.com/zhoug2020/p/7842808.html)。此处仅讨论在三维空间中最简单的一种旋转，绕坐标轴进行旋转。绕任意轴和任意点进行旋转的问题之后再做讨论。
+
+  原文地址https://blog.csdn.net/loongkingwhat/article/details/82286761?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.control&dist_request_id=aaef825d-3edb-40d7-be6c-8cad5ff4f758&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.control
 
 + **用法**
 
@@ -2099,6 +2244,730 @@ renderer.setMode(_gl.LINE_STRIP);
 renderer.render(drawStart, drawCount);
 }
 ```
+
+#### 5.material 和shader
+
+<img src="https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/Material%E4%B8%8Eshader.jpg" alt="Material与shader" style="zoom: 50%;" />
+
+- 点材质PointsMaterial：顶点着色器文件points_vert.glsl、片元着色器文件points_frag.glsl
+
+- 基础网格材质MeshBasicMaterial：顶点着色器文件meshbasic_vert.glsl、片元着色器文件meshbasic_frag.glsl
+
+- 高光网格材质MeshPhongMaterial：顶点着色器文件meshphong_vert.glsl、片元着色器文件meshphong_frag.glsl
+
+  ### shaders目录简介
+
+  着色器代码文件目录是`three.js-master\src\renderers\shaders`，shaders目录下有两个着色器代码的文件ShaderChunk和ShaderLib。
+
+  ShaderChunk目录下的着色器代码文件.glsl都是具有特定功能的模块，ShaderLib目录下的着色器文件会通过`#include <ShaderChunk中着色器文件名>`调用ShaderChunk目录下特定功能的着色器代码块构建出来具有具有特定功能的顶点着色器文件和片元着色器文件。
+
+  - 点材质PointsMaterial：顶点着色器文件points_vert.glsl、片元着色器文件points_frag.glsl
+  - 基础网格材质MeshBasicMaterial：顶点着色器文件meshbasic_vert.glsl、片元着色器文件meshbasic_frag.glsl
+  - 高光网格材质MeshPhongMaterial：顶点着色器文件meshphong_vert.glsl、片元着色器文件meshphong_frag.glsl
+
+  ShaderChunk.js：用来获得ShaderChunk和ShaderLib文件中的着色器代码
+
+  ShaderLib.js：设置好点、线、网格材质对应的uniforms变量值、顶点着色器代码、片元着色器代码
+
+  UniformsLib.js、UniformsUtils.js：着色器中uniform变量对应的值
+
+  <img src="https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221022230959441.png" alt="image-20221022230959441" style="zoom:67%;" />
+
+  ### WebGLRenderer.js
+
+  通过`WebGLPrograms`对象的方法`.getParameters()`返回一个parameters对象，返回的parameters对象的`shaderID`属性保留了材质对象类型type的信息，通过材质对象信息可以在ShaderLib对象中获得材质对象对应的着色器代码。
+
+  ```JavaScript
+  import {ShaderLib} from './shaders/ShaderLib.js';
+  import {WebGLPrograms} from './webgl/WebGLPrograms.js';
+  programCache = new WebGLPrograms(_this, extensions, capabilities);
+  
+  function initMaterial(material, fog, object) {
+  
+    // 返回一个parameters对象，具有shaderID属性，通过shaderID的属性值可以获得材质对象对应的着色器代码。
+    var parameters = programCache.getParameters(material, lights.state, shadowsArray, ...object);
+  
+    // 通过shaderID键对应的值，作为ShaderLib对象的键名获得相应的值，uniforms对象、定点着色器代码、片元着色器代码
+    var shader = ShaderLib[parameters.shaderID];
+  
+    materialProperties.shader = {
+    name: material.type,
+    uniforms: UniformsUtils.clone(shader.uniforms),
+    vertexShader: shader.vertexShader,
+    fragmentShader: shader.fragmentShader
+    };
+    // 处理着色器代码、编译着色器代码、返回程序对象program
+    program = programCache.acquireProgram(material, materialProperties.shader, parameters, code);
+  }
+  ```
+
+  ### WebGLPrograms.js
+
+  构造函数`WebGLPrograms`封装了`.getParameters()`、`.getProgramCode()`、`.acquireProgram()`等方法和`.programs`属性。
+
+  ```JavaScript
+  function WebGLPrograms( renderer, extensions, capabilities ) {
+    var shaderIDs = {
+    MeshDepthMaterial: 'depth',
+    MeshDistanceMaterial: 'distanceRGBA',
+    MeshNormalMaterial: 'normal',
+    MeshBasicMaterial: 'basic',
+    MeshLambertMaterial: 'lambert',
+    MeshPhongMaterial: 'phong',
+    MeshToonMaterial: 'phong',
+    MeshStandardMaterial: 'physical',
+    MeshPhysicalMaterial: 'physical',
+    LineBasicMaterial: 'basic',
+    LineDashedMaterial: 'dashed',
+    PointsMaterial: 'points',
+    ShadowMaterial: 'shadow'
+  };
+  this.getParameters = function (material, lights,...){
+    // 通过材质对象.type值，从shaderIDs提取相应的属性值
+    var shaderID = shaderIDs[ material.type ];
+  
+    var parameters = {
+  // 该属性用于判断材质对象
+    shaderID: shaderID,
+    precision: precision,
+    vertexColors: material.vertexColors,
+    numSpotLights: lights.spot.length,
+    numRectAreaLights: lights.rectArea.length,
+    numHemiLights: lights.hemi.length,
+    };
+  
+  return parameters;
+  }
+  }
+  ```
+
+  ### **处理流程**
+
+  ![着色器处理流程](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/%E7%9D%80%E8%89%B2%E5%99%A8%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B.jpg)
+
+  #### 1.acquireProgram方法
+
+  ```js
+  import {ShaderLib} from './shaders/ShaderLib.js';
+  import {WebGLPrograms} from './webgl/WebGLPrograms.js';
+  programCache = new WebGLPrograms(_this, extensions, capabilities);
+  
+  function initMaterial(material, fog, object) {
+  
+    // 返回一个parameters对象，具有shaderID属性，通过shaderID的属性值可以获得材质对象对应的着色器代码。
+    var parameters = programCache.getParameters(material, lights.state, shadowsArray, ...object);
+  
+    // 通过shaderID键对应的值，作为ShaderLib对象的键名获得相应的值，uniforms对象、定点着色器代码、片元着色器代码
+    var shader = ShaderLib[parameters.shaderID];
+  
+    materialProperties.shader = {
+    name: material.type,
+    uniforms: UniformsUtils.clone(shader.uniforms),
+    vertexShader: shader.vertexShader,
+    fragmentShader: shader.fragmentShader
+    };
+    // ⭐处理着色器代码、编译着色器代码、返回程序对象program⭐
+    program = programCache.acquireProgram(material, materialProperties.shader, parameters, code);⭐
+  }
+  ```
+
+  #### 2.WebGLPrograms.js
+
+  构造函数`WebGLPrograms`封装了`.getParameters()`、`.getProgramCode()`、`.acquireProgram()`等方法和`.programs`属性。
+
+  - `.getParameters()`方法：和ShaderLib.js封装的`ShaderLib`对象组合使用获得一个材质对象对应的着色器代码和uniforms对象。
+  - `.acquireProgram()`方法：调用WebGLProgram构造函数，编译顶点和片元着色器代码，并创建返回对应的程序对象Program。
+
+  ```JavaScript
+  function WebGLPrograms( renderer, extensions, capabilities ) {
+      ...
+        this.acquireProgram = function ( material, shader, parameters, code ) {
+          program = new WebGLProgram( renderer, extensions, code, material, shader, parameters );
+          programs.push( program );
+          return program;
+        };
+      }
+      ...
+      
+  ```
+
+  #### 3.WebGLProgram.js
+
+  `WebGLProgram.js`封装了`gl.attachShader()`、`gl.deleteShader()`、`gl.createProgram()`、`gl.linkProgram()`等原生WebGL API。
+
+  阅读WebGLProgram.js的源码需要对JavaScript语言的正则表达式和字符串的处理方法有一定的理解。
+
+  批量处理着色器代码：把着色器代码块中预先编写的表示光源数量的符号替换为具体的数字
+
+  ```JavaScript
+  // 替换灯的数量
+      function replaceLightNums( string, parameters ) {
+      // NUM_DIR_LIGHTS等字符出现在了.glsl文件着色器代码中，需要替换为具体的数字才能作为着色器代码使用。
+          return string
+              .replace( /NUM_DIR_LIGHTS/g, parameters.numDirLights )
+              .replace( /NUM_SPOT_LIGHTS/g, parameters.numSpotLights )
+              .replace( /NUM_RECT_AREA_LIGHTS/g, parameters.numRectAreaLights )
+              .replace( /NUM_POINT_LIGHTS/g, parameters.numPointLights )
+              .replace( /NUM_HEMI_LIGHTS/g, parameters.numHemiLights );
+      }
+      
+  ```
+
+  把.glsl文件中`#include <common>`等字符串替换为相应.glsl文件中的代码字符串
+
+  ```JavaScript
+  function parseIncludes( string ) {
+      // “#include <着色模块名字>”对应的正则表达式
+          var pattern = /^[ \t]*#include +<([\w\d.]+)>/gm;
+  
+          function replace( match, include ) {
+              var replace = ShaderChunk[ include ];
+              return parseIncludes( replace );
+          }
+      // 参数string，也就是着色器代码字符串，执行replace方法
+          return string.replace( pattern, replace );
+  
+      }
+      
+  ```
+
+  顶点着色器前缀字符串prefixVertex，会和.glsl文件提供的顶点着色器代码拼接在一起。 通过`WebGLPrograms.js`封装的`.getParameters()`方法可以从材质对象提取相关的信息，返回一个包含材质信息的对象parameters，比如透明度、材质颜色等信息，着色器前缀会从parameters对象提取材质信息信息合成着色器代码。
+
+  ```JavaScript
+  // JavaScript数组对象的.join()方法会把数组中的字符串元素拼接成一个字符串返回
+      prefixVertex = [
+        'precision ' + parameters.precision + ' float;',// precision highp float;
+        'precision ' + parameters.precision + ' int;',// precision highp int;
+  
+        parameters.map ? '#define USE_MAP' : '',
+        parameters.envMap ? '#define USE_ENVMAP' : '',
+        // 材质vertexColors属性，默认值THREE.NoColors，查看\src\Three.js 可以知道是0
+        // 如果材质属性设置了顶点渲染，属性值是THREE.VertexColors，着色器代码插入#define USE_COLOR   
+        // 如果材质属性没设置顶点渲染：着色器代码中不会出现带预定义
+        parameters.vertexColors ? '#define USE_COLOR' : '',
+  
+        parameters.flatShading ? '#define FLAT_SHADED' : '',//#define FLAT_SHADED   是否平面着色
+  
+        // 声明顶点着色器代码用到的uniform变量
+        'uniform mat4 modelMatrix;',//模型矩阵
+        'uniform mat4 modelViewMatrix;',
+        'uniform mat4 projectionMatrix;',//投影矩阵
+        'uniform mat4 viewMatrix;',//视图矩阵
+        'uniform mat3 normalMatrix;',
+        'uniform vec3 cameraPosition;',
+        // 声明顶点着色器代码用到的顶点变量attribute
+        'attribute vec3 position;',//顶点位置数据
+        'attribute vec3 normal;',//顶点法向量数据
+        'attribute vec2 uv;',//顶点UV坐标数据
+  
+        '\n'
+  
+      ].filter( filterEmptyLine ).join( '\n' );
+      
+  ```
+
+  片元着色器前缀字符串，会和.glsl文件提供的顶点着色器代码拼接在一起。
+
+  ```JavaScript
+  prefixFragment = [
+      // 片元精度定义
+        'precision ' + parameters.precision + ' float;',
+        'precision ' + parameters.precision + ' int;',
+        parameters.map ? '#define USE_MAP' : '',
+        parameters.envMap ? '#define USE_ENVMAP' : '',
+      // 视图矩阵   相机矩阵
+        'uniform mat4 viewMatrix;',
+        'uniform vec3 cameraPosition;',
+      ].filter( filterEmptyLine ).join( '\n' );
+      
+  ```
+
+  顶点和片元着色器代码字符串的处理流程
+
+  ```JavaScript
+  function WebGLProgram( renderer,..., shader, parameters ) {
+        // 预定义
+        var defines = material.defines;
+        // \shaders\ShaderLib目录下.glsl文件中顶点着色器、片元着色器代码字符串
+          var vertexShader = shader.vertexShader;
+        var fragmentShader = shader.fragmentShader;
+  
+        // 把顶点着色器中“#include <着色模块名字>”字符串替换为相应的着色器代码
+        vertexShader = parseIncludes( vertexShader );
+        // 把着色器代码中表示各种光源数量的字符串替换为表示该类光源对象数量的数字
+        vertexShader = replaceLightNums( vertexShader, parameters );
+        // 把着色器代码中表示剪裁平面数量相关的字符串替换为具体的数字
+        vertexShader = replaceClippingPlaneNums( vertexShader, parameters );
+  
+        // 片元着色器代码和顶点着色器代码一样要进行类似的处理
+        fragmentShader = parseIncludes( fragmentShader );
+        fragmentShader = replaceLightNums( fragmentShader, parameters );
+        fragmentShader = replaceClippingPlaneNums( fragmentShader, parameters );
+  
+        vertexShader = unrollLoops( vertexShader );
+        fragmentShader = unrollLoops( fragmentShader );
+  
+        // .glsl文件中着色器代码字符串经过处理后与对应的着色器前缀字符串拼接
+        var vertexGlsl = prefixVertex + vertexShader;
+        var fragmentGlsl = prefixFragment + fragmentShader;
+  
+        // 处理完成的着色器代码进行编译处理，创建并返回对应的程序对象
+        var glVertexShader = WebGLShader( gl, gl.VERTEX_SHADER, vertexGlsl );
+          var glFragmentShader = WebGLShader( gl, gl.FRAGMENT_SHADER, fragmentGlsl );
+        var program = gl.createProgram();
+        gl.attachShader( program, glVertexShader );
+        gl.attachShader( program, glFragmentShader );
+        gl.linkProgram( program );
+      }
+      
+  ```
+
+  WebGLProgram对象的属性
+
+  ```JavaScript
+  this.name = shader.name;
+  this.id = programIdCount ++;
+  this.code = code;
+  this.usedTimes = 1;
+  this.program = program;
+  // WebGLShader函数返回值，顶点着色器对象
+  this.vertexShader = glVertexShader;
+  // WebGLShader函数返回值，片元着色器对象
+  this.fragmentShader = glFragmentShader;
+      
+  ```
+
+  ### WebGLShader.js
+
+  WebGLShader.js封装了`gl.createShader()`、`gl.shaderSource()`、`gl.compileShader()`等原生WebGL API。
+
+  执行`WebGLShader`函数可以返回一个`gl.createShader()`创建的着色器对象。
+
+  ```JavaScript
+  // WebGLShader.js源码
+      function WebGLShader( gl, type, string ) {
+        // type是gl.VERTEX_SHADER：创建顶点着色器对象
+        // type是gl.FRAGMENT_SHADER：创建片元着色器对象
+          var shader = gl.createShader( type );
+        // 引入顶点或片元着色器源代码string
+          gl.shaderSource( shader, string );
+        // 编译顶点或片元着色器
+          gl.compileShader( shader );
+        // 返回着色器对象
+          return shader;
+      }
+      
+  ```
+
+  WebGLProgram.js源码中会调用`WebGLShader`函数创建一个着色器对象。
+
+  ```JavaScript
+  function WebGLProgram( renderer,... material, shader, parameters ) {
+        // 创建顶点着色器对象
+        var glVertexShader = WebGLShader( gl, gl.VERTEX_SHADER, vertexGlsl );
+        // 创建一个片元着色器对象
+        var glFragmentShader = WebGLShader( gl, gl.FRAGMENT_SHADER, fragmentGlsl );
+      }
+      
+  ```
+
+  # 着色器字符串处理—材质属性、光源数量
+
+  ![着色器处理流程](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/%E7%9D%80%E8%89%B2%E5%99%A8%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B.jpg)
+
+  材质的部分属性控制着着色器部分代码的生成，.glsl文件一些字符串表示某种光源对象的数量，需要替换为表示该光源的数量的数字。
+
+  ### WebGLLights.js
+
+  把光源对象按照种类进行分类，比如点光源一组、方向光源一组。
+
+  ### WebGLRenderer.js
+
+  通过`WebGLPrograms`对象的方法`.getParameters()`返回一个parameters对象，获得材质对象、渲染器对象、光源数量的信息。
+
+  ```JavaScript
+  import {WebGLPrograms} from './webgl/WebGLPrograms.js';
+    programCache = new WebGLPrograms(_this, extensions, capabilities);
+    function initMaterial(material, fog, object) {
+  
+      // 获得currentRenderState对象.lights属性的值：WebGLLights对象
+      var lights = currentRenderState.state.lights;
+  
+      // 参数lights.state:WebGLLights对象的state属性包含了各类光源分类的集合，可以获得每一种光源的数量
+      var parameters = programCache.getParameters(material, lights.state, shadowsArray, ...object);
+  
+    }
+    
+  ```
+
+  ### WebGLPrograms.js
+
+  从材质对象、currentRenderState.state.lights提取信息设置为parameters对象属性的值。
+
+  ```JavaScript
+  // 参数lights：currentRenderState.state.lights.state
+    this.getParameters = function ( material, lights... ) {
+    // parameters：参数
+    // 着色器id号、precision精度、贴图map、vertexColors顶点渲染、numPointLights点光源数量...
+    // 从不同的对象提取数据   shaderID、材质对象、灯光对象、渲染器对象
+      var parameters = {
+        // JavaScript语法：!null=true  !200=false
+        // map为null，!! material.map返回false，否则true
+        map: !! material.map,
+        envMap: !! material.envMap,
+        // 获得材质vertexColors属性的值，默认是常量THREE.NoColors，也就是0（视频中错误纠正）
+        // 查看\src\Three.js 文件可以知道THREE.NoColors、THREE.VertexColors表示的值
+        vertexColors: material.vertexColors,
+        ...
+        // 获得光源对象数量
+        numDirLights: lights.directional.length,
+        numPointLights: lights.point.length,
+        numSpotLights: lights.spot.length,
+        numRectAreaLights: lights.rectArea.length,
+        numHemiLights: lights.hemi.length,
+        ...
+      };
+      return parameters;
+    };
+    
+  ```
+
+  ### WebGLProgram.js
+
+  .glsl文件着色器字符串插入代码
+
+  ```JavaScript
+  prefixVertex = [
+    ...
+      parameters.map ? '#define USE_MAP' : '',
+      parameters.envMap ? '#define USE_ENVMAP' : '',
+      // 材质vertexColors属性，默认值THREE.NoColors，查看\src\Three.js 可以知道是0
+      // 如果材质属性设置了顶点渲染，属性值是THREE.VertexColors，着色器代码插入#define USE_COLOR   
+      // 如果材质属性没设置顶点渲染：着色器代码中不会出现带预定义
+      parameters.vertexColors ? '#define USE_COLOR' : '',
+    ...
+    ].filter( filterEmptyLine ).join( '\n' );
+    
+  ```
+
+  批量处理着色器代码：把着色器代码块中预先编写的表示光源数量的符号替换为具体的数字
+
+  ```JavaScript
+  // 替换灯的数量
+    function replaceLightNums( string, parameters ) {
+    // NUM_DIR_LIGHTS等字符出现在了.glsl文件着色器代码中，需要替换为具体的数字才能作为着色器代码使用。
+        return string
+            .replace( /NUM_DIR_LIGHTS/g, parameters.numDirLights )
+            .replace( /NUM_SPOT_LIGHTS/g, parameters.numSpotLights )
+            .replace( /NUM_RECT_AREA_LIGHTS/g, parameters.numRectAreaLights )
+            .replace( /NUM_POINT_LIGHTS/g, parameters.numPointLights )
+            .replace( /NUM_HEMI_LIGHTS/g, parameters.numHemiLights );
+    }
+    
+  ```
+
+#### 6.顶点变量attribute传值
+
+![BufferGeometry与attribute变量名](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/BufferGeometry%E4%B8%8Eattribute%E5%8F%98%E9%87%8F%E5%90%8D.png)
+
+**WebGL API**
+
+通过WebGL方法gl.getAttribLocation()可以从程序对象program获得attribute变量的索引地址，用于传值
+
+```JavaScript
+<script id="vertexShader" type="x-shader/x-vertex">
+  //attribute声明vec4类型变量apos
+  attribute vec4 apos;
+  // attribute声明顶点颜色变量
+  attribute vec4 a_color;
+  //顶点法向量变量
+  attribute vec4 a_normal;
+<script>
+
+var aposLocation = gl.getAttribLocation(program,'apos');
+var a_color = gl.getAttribLocation(program,'a_color');
+var a_normal = gl.getAttribLocation(program,'a_normal');
+    
+```
+
+通过gl.vertexAttribPointer()方法把顶点缓冲区顶点数据传值给变量a_normal
+
+```JavaScript
+ // 创建缓冲区normalBuffer，传入顶点法向量数据normalData
+    var normalBuffer=gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER,normalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER,normalData,gl.STATIC_DRAW);
+    // 传值
+    gl.vertexAttribPointer(a_normal,3,gl.FLOAT,false,0,0);
+    gl.enableVertexAttribArray(a_normal);
+    
+```
+
+**WebGLProgram.js**
+
+通过gl.getProgramParameter()计算程序对象对应着色器中uniform变量和attribute变量的个数。
+
+```JavaScript
+// 表示顶点数据attribute变量数量
+    var n = gl.getProgramParameter( program, gl.ACTIVE_ATTRIBUTES );
+    // uniform变量个数
+    var n = gl.getProgramParameter( program, gl.ACTIVE_UNIFORMS );
+    
+```
+
+通过gl.getActiveAttrib( program, i )获得程序对象着色器第i+1个attribute变量的相关信息，返回值是一个对象，对象`.name`属性是attribute属性的变量名。
+
+```JavaScript
+var info = gl.getActiveAttrib( program, i );
+    
+var info = gl.getActiveAttrib( program, 0 );
+    console.log('第1个attribute变量的信息',info);
+    console.log('attribute变量名字',info.name);
+    
+```
+
+通过gl.getActiveUniform( program, i )获得程序对象着色器第i+1个uniform变量的相关信息，返回值是一个对象，对象`.name`属性是uniform属性的变量名。
+
+```JavaScript
+var info = gl.getActiveUniform( program, i );
+```
+
+通过getAttributes方法从程序对象获得attribute变量的索引地址
+
+```JavaScript
+// 通过该函数获得着色器中所有attribute变量的索引地址
+    function fetchAttributeLocations( gl, program ) {
+        var attributes = {};
+      // 获得程序对象attribute变量个数
+        var n = gl.getProgramParameter( program, gl.ACTIVE_ATTRIBUTES );
+
+      // 循环遍历获得所有attribute变量
+        for ( var i = 0; i < n; i ++ ) {
+        // 获得程序对象着色器第i+1个attribute变量的相关信息，返回值是一个对象
+            var info = gl.getActiveAttrib( program, i );
+        // `.name`属性是attribute属性的变量名 
+            var name = info.name;
+        // 获得attribute变量索引地址，用于传值
+            attributes[ name ] = gl.getAttribLocation( program, name );
+        }
+      // 返回一个对象，包含了全部attribute变量的索引地址
+        return attributes;
+    }
+    // 通过WebGLProgram的getAttributes方法调用fetchAttributeLocations函数
+    this.getAttributes = function () {
+      if ( cachedAttributes === undefined ) {
+        cachedAttributes = fetchAttributeLocations( gl, program );
+      }
+      return cachedAttributes;
+    };
+    
+```
+
+**WebGLRenderer.js**
+
+`setupVertexAttributes`函数封装了`gl.vertexAttribPointer()`用于attribute变量传值。
+
+```JavaScript
+    function setupVertexAttributes(material, program, geometry) {
+        // 获得几何体相关顶点数据
+        var geometryAttributes = geometry.attributes;
+        // 获得着色器中所有attribute变量的索引地址
+        var programAttributes = program.getAttributes();// uv position normal
+
+        // 遍历programAttributes对象
+        for (var name in programAttributes) {
+            // 获得名为name的attribute变量索引地址
+            var programAttribute = programAttributes[name];
+            // gl.getAttribLocation()本质上的返回值是数字，表示第几个attribute变量
+            if (programAttribute >= 0) {
+                // 根据name确定对应的包含顶点数据的BufferAttribute对象
+                // 比如geometry.attributes.position
+                var geometryAttribute = geometryAttributes[name];
+
+                if (geometryAttribute !== undefined) {
+
+                    var normalized = geometryAttribute.normalized;
+                    var size = geometryAttribute.itemSize;
+                    // WebGLAttributes.js封装的get方法，返回值是对象：
+                    //  {
+                    // buffer: buffer,
+                    // type: type,
+                    // bytesPerElement: array.BYTES_PER_ELEMENT,
+                    // version: attribute.version
+                    // }
+                    var attribute = attributes.get(geometryAttribute);
+
+                    if (attribute === undefined) continue;
+                    // 获得WebGLAttributes.js创建的顶点缓冲区
+                    var buffer = attribute.buffer;
+                    // 顶点缓冲区数据类型
+                    var type = attribute.type;
+                    // 类型数组中每个元素所占用的字节数
+                    var bytesPerElement = attribute.bytesPerElement;
+            ...
+                    // 绑定激活当前顶点缓冲区
+                    _gl.bindBuffer(_gl.ARRAY_BUFFER, buffer);
+                    // programAttribute：attribute变量索引地址
+                    _gl.vertexAttribPointer(programAttribute, size, type, normalized, 0, 0);
+                    ...
+                }
+            }
+    }
+
+    this.renderBufferDirect = function(camera, fog, geometry, material, object, group) {
+      var program = setProgram(camera, fog, material, object);
+        // 调用函数setupVertexAttributes自动传值
+      setupVertexAttributes(material, program, geometry);
+    }
+    
+```
+
+#### 7.uniform传值-获得变量索引地址
+
+如果你想知道Three.js着色器中的uniform变量是如何传值的，首先要了解Three.js顶点和片元着色器中的uniform变量有哪些。
+
+**WebGLProgram.js中uniform变量**
+
+顶点着色器前缀字符串prefixVertex，会和.glsl文件提供的顶点着色器代码拼接在一起。
+
+```JavaScript
+prefixVertex = [
+    ...
+    'uniform mat4 modelMatrix;',//模型矩阵
+    'uniform mat4 modelViewMatrix;',// 模型视图矩阵
+    'uniform mat4 projectionMatrix;',// 投影矩阵
+    'uniform mat4 viewMatrix;',// 视图矩阵
+    'uniform mat3 normalMatrix;',// 法线矩阵
+    'uniform vec3 cameraPosition;',
+    ...
+  ]
+  
+```
+
+片元着色器前缀字符串，会和.glsl文件提供的顶点着色器代码拼接在一起。
+
+```JavaScript
+prefixFragment = [
+    ...
+    'uniform mat4 viewMatrix;',// 视图矩阵
+    'uniform vec3 cameraPosition;',
+    ...
+  ]
+  
+```
+
+**.glsl中uniform变量**
+
+材质对象的一些属性对应的uniform变量，threejs渲染的时候会自动解析材质对象属性，获得属性值传值给相应的uniform变量
+
+```JavaScript
+// map_pars_fragment.glsl文件
+// 该变量对应材质对象的颜色贴图map属性，threejs系统会自动解析材质对象提取map的属性值，传值给该变量
+  uniform sampler2D map;
+  
+// 声明一个法线贴图变量
+  uniform sampler2D normalMap;
+// normalScale变量对应材质的normalScale属性，表达深浅程度
+  uniform vec2 normalScale;
+  
+```
+
+lights_pars_begin.glsl文件主要是与光源相关的uniform变量，THree.js一个光源对象有多个新信息构成，所以着色器中通过`struct`关键字声明一个结构体，更多的着色器知识可以参考着色器GLSL语言语法。
+
+```JavaScript
+  // NUM_DIR_LIGHTS表示：方向光光源数量，
+  // threejs生成着色器代码的时候会进行替换，threejs系统会统计方向光光源的数量，然后使用这个数量替换NUM_DIR_LIGHTS
+  #if NUM_DIR_LIGHTS > 0
+  // 方向光结构体定义
+      struct DirectionalLight {
+          vec3 direction;// 光源方向
+          vec3 color;// 光源颜色
+          int shadow;
+          float shadowBias;
+          float shadowRadius;
+          vec2 shadowMapSize;
+      };
+    // uniform关键字声明一个数组变量directionalLights，元素个数NUM_DIR_LIGHTS
+    // 数组元素的是struct关键字定义的结构体DirectionalLight
+    // 数组每个元素对应Threejs场景中一个方向光源对象
+      uniform DirectionalLight directionalLights[ NUM_DIR_LIGHTS ];
+
+    // 声明一个函数从方向光提取光源数据，比如颜色、方向等
+    // 输入：方向光结构体DirectionalLight声明的变量   几何体上下文结构体GeometricContext声明的变量geometry
+    // 输出：入射光结构体IncidentLight声明的变量directLight    该结构体在common.glsl模块中声明
+      void getDirectionalDirectLightIrradiance( const in DirectionalLight directionalLight, const in GeometricContext geometry, out IncidentLight directLight ) {
+          directLight.color = directionalLight.color;
+          directLight.direction = directionalLight.direction;
+          directLight.visible = true;
+      }
+  #endif
+  
+```
+
+**WebGLUniforms.js**
+
+封装了一系列与uniform变量传值相关的方法，比如`.setValue()`方法可以用于直接传递某个uniform变量的值。
+
+```JavaScript
+function WebGLUniforms( gl, program, renderer ) {
+  // 继承map、seq属性
+      UniformContainer.call( this );
+
+      this.renderer = renderer;
+  // 获得uniform变量的数量
+      var n = gl.getProgramParameter( program, gl.ACTIVE_UNIFORMS );
+
+      for ( var i = 0; i < n; ++ i ) {
+      // 返回第i+1个uniform变量的相关信息的集合info，info对象包含name、type、size属性
+          var info = gl.getActiveUniform( program, i ),
+          // 通过变量在着色器中的名字返回uniform变量的引用地址
+          // 获得名为info.name的uniform变量的索引地址
+          addr = gl.getUniformLocation( program, info.name );
+
+      // 对uniform变量的索引地址等信息进行处理
+          parseUniform( info, addr, this );
+
+      }
+
+  }
+
+  WebGLUniforms.prototype.setValue = function ( gl, name, value ) {
+
+      var u = this.map[ name ];
+
+      if ( u !== undefined ) u.setValue( gl, value, this.renderer );
+
+  };
+  
+```
+
+**WebGLRenderer.js**
+
+```JavaScript
+function setProgram(camera, fog, material, object) {
+    // 编译着色器得到程序对象，从程序对象提取获得uniforms对象p_uniforms
+    // WebGLProgram.js封装的.getUniforms()方法
+    p_uniforms = program.getUniforms();
+
+
+    // uniform传值——从相机对象获得相关的矩阵属性
+    // 投影矩阵传值
+    p_uniforms.setValue(_gl, 'projectionMatrix', camera.projectionMatrix);
+    // 视图矩阵传值
+    p_uniforms.setValue(_gl, 'viewMatrix', camera.matrixWorldInverse);
+
+    // uniform传值——从对象获得相关矩阵属性，查看Object3D文档
+    // 模型视图矩阵传值
+    p_uniforms.setValue(_gl, 'modelViewMatrix', object.modelViewMatrix);
+    // 法线矩阵传值
+    p_uniforms.setValue(_gl, 'normalMatrix', object.normalMatrix);
+    // 模型矩阵传值，对象的世界矩阵属性就是传递给着色器的模型矩阵
+    p_uniforms.setValue(_gl, 'modelMatrix', object.matrixWorld);
+  }
+  
+```
+
+Threejs渲染的时候会通过WebGLUniforms.js方法自动批量传值材质对象的属性对应的uniform变量和光源对象对应的uniform变量。
 
 ## 17.other
 

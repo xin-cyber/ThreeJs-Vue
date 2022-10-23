@@ -84,6 +84,7 @@ export default {
         camera.position.y = 40;
         camera.position.z = 30;
         camera.lookAt(scene.position);
+        console.log(camera);
 
         // add subtle ambient lighting
         let ambienLight = new THREE.AmbientLight(0x353535);
