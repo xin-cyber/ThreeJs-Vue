@@ -2971,11 +2971,156 @@ Threejs渲染的时候会通过WebGLUniforms.js方法自动批量传值材质对
 
 
 
-## 17.WebGL
+## 17.WebGL着色器
 
-### 1.
+### 1.ShaderMaterial 和 RawShaderMaterial
 
+> GPU的顶点着色器单元用来处理顶点位置、顶点颜色、顶点向量等等顶点数据，顶点着色器代码运行在GPU的顶点着色器单元
+>
+> 片元着色器单元用来处理片元(像素)数据 , 片元着色器代码运行在片元着色器单元。
+>
+> ShaderMaterial对象具有两个用来设置自定义着色器代码的属性，顶点着色器属性`vertexShader`和片元着色器属性`fragmentShader`，顶点着色器属性`vertexShader`的属性值是顶点着色器代码字符串，片元着色器属性`fragmentShader`的属性值是片元着色器代码字符串。
 
+通过three.js的着色器材质构造函数ShaderMaterial编写着色器代码和原生WebGL中编写着色器代码语法上是一样的，不同的地方在于更加方便，有些代码不用自己写，Three.js渲染器会帮你自动设置一些代码，比如声明一些常见的变量，通常来说在顶点着色器中把表示顶点的位置数据的变量`position`赋值给着色器内置变量`gl_Position`，需要首先声明`attribute vec3 position;`,如果使用`ShaderMaterial`构造函数，则不用程序员手动声明`position`变量，Three.js渲染器后自动帮你拼接一段该代码，
+
+具体的原理可以参考路径`three.js-master\src\renderers\webgl\WebGLProgram.js`下的`WebGLProgram.js`代码模块，Threejs渲染器在渲染场景的时候从ShaderMaterial提取着色器代码后，会拼接一段前缀字符串，然后才会传入GPU中执行，前缀包含一些常用的`attribute`变量和`uniform`变量
+
+```html
+// 顶点着色器
+<script id="vertexShader" type="x-shader/x-vertex">
+  // 使用ShaderMaterial类，顶点位置变量position无需声明，顶点着色器可以直接调用
+  // attribute vec3 position;
+  void main(){
+     // 逐顶点处理：顶点位置数据赋值给内置变量gl_Position
+     gl_Position = vec4( position, 1.0 );
+  }
+</script>
+
+// 片元着色器
+<script id="fragmentShader" type="x-shader/x-fragment">
+  void main() {
+    // 逐片元处理：每个片元或者说像素设置为红色
+    gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+  }
+</script>
+
+var material = new THREE.ShaderMaterial({
+  vertexShader: document.getElementById('vertexShader').textContent,
+  fragmentShader: document.getElementById('fragmentShader').textContent,
+});
+```
+
+> 在原生WebGL代码中，如果顶点或片元着色器代码如果声明了一个变量，比如顶点着色器中声明了一个顶点位置变量`attribute vec3 position;`，需要通过WebGL API把JavaScript中的几何体顶点位置数据传递给顶点着色器中的顶点位置变量`position`，这样的话，CPU执行顶点着色器代码的时候才能够处理顶点数据。
+
+使用ShaderMaterial API的好处就是这个过程Three.js渲染器系统会自动解析几何体对象`Geometry`中顶点位置、颜色、法向量等数据，然后传递给着色器中的相应变量。具体的解析过程可以参考路径`three.js-master\src\renderers\`下的渲染器代码`WebGLRenderer.js`文件和路径`three.js-master\src\renderers\webgl`下面多个three.js文件
+
+WebGL渲染器在解析模型几何体中顶点数据的时候，`Geometry`类型的几何体会自动转化为缓冲类型的几何体`BufferGeometry`, BufferGeometry几何体对象具有`.attributes`属性，`BufferGeometry.attributes`具有顶点位置、顶点法向量、顶点uv坐标等属性，对应着色器中相应的attribute变量。
+
+```js
+var geometry = new THREE.BufferGeometry(); //创建一个Buffer类型几何体对象
+var vertices = new Float32Array([
+  0.6, 0.2, 0, //顶点1坐标
+  0.7, 0.6, 0, //顶点2坐标
+  0.8, 0.2, 0, //顶点3坐标
+  -0.6, -0.2, 0, //顶点4坐标
+  -0.7, -0.6, 0, //顶点5坐标
+  -0.8, -0.2, 0, //顶点6坐标
+]);
+// 创建属性缓冲区对象  3个为一组，表示一个顶点的xyz坐标
+var attribue = new THREE.BufferAttribute(vertices, 3);
+// 设置几何体attributes属性的位置属性
+geometry.addAttribute( 'position', attribue );
+```
+
++ **RawShaderMaterial**
+
+  > 着色器中使用的一些常见attribute或uniform变量，原生着色器材质对象RawShaderMaterial需要程序员手动编写，系统不会自动化添加变量声明的前缀。
+
+  ```html
+  <script id="vertexShader" type="x-shader/x-vertex">
+    attribute vec3 position;
+    void main(){
+  gl_Position = vec4( position, 1.0 );
+    }
+  </script>
+  ```
+
+### 2.着色器矩阵变换
+
+> 本节课讲解如何通过`ShaderMaterial`编写顶点矩阵变换的代码，Three.js的渲染器解析场景和相机参数进行渲染的时候，会从模型对象获得几何体顶点对应的模型矩阵`modelMatrix`，从相机对象获得视图矩阵`viewMatrix`和投影矩阵`projectionMatrix`，在着色器中通过获得模型矩阵、视图矩阵、投影矩阵对顶点位置坐标进行矩阵变换。
+
++ ## 模型变换
+
+  模型矩阵包含了一个几何体的旋转、平移、缩放变换。
+
+  如果你有基本的图形学和线性代数知识，应该知道几何平移、缩放、旋转变换都是几何变换的一部分，几何变换可以使用线性代数的矩阵来表示，平移对应一个平移矩阵，旋转一个对应旋转矩阵，一个几何体经过了多次旋转、平移等几何变换，每一个变换都有一个对应的矩阵可以表示，**⭐所有几何变换对应矩阵的乘积⭐**就是一个复合矩阵，可以称为**模型矩阵**`modelMatrix`。
+
+  ### 着色器使用模型矩阵
+
+  使用ShaderMaterial编写着色器代码的时候，模型矩阵`modelMatrix`不用程序员手动声明，Three.js渲染器 系统渲染的时候会自动往ShaderMaterial顶点着色器字符串中插入一句`uniform mat4 modelMatrix;`
+
+  ```JavaScript
+  <script id="vertexShader" type="x-shader/x-vertex">
+    // uniform mat4 modelMatrix;//不需要声明
+    void main(){
+      // 模型矩阵modelMatrix对顶点位置坐标进行模型变换
+      gl_Position = modelMatrix*vec4( position, 1.0 );
+    }
+  </script>
+  ```
+
+  ### `modelMatrix`变量数据传递
+
+  查看网格模型Mesh的基类`Object3D`可知道网格模型有一个本地矩阵属性`.matrix`，`.matrix`的属性值是一个Three.js的矩阵对象`Matrix4`。对网格模型进行平移、旋转、缩放等几何变换都会改变网格模型本地矩阵属性`.matrix`的属性值。
+
+  ```JavaScript
+  mesh.rotateY(Math.PI/6);
+  mesh.rotateX(Math.PI/6);
+  ```
+
+  如果网格模型mesh有一个父对象，父对象的几何变换同样会传递到网格模型，**⭐也就是说顶点着色器中默认的模型矩阵变量`modelMatrix`对应的不是网格模型自身的几何变换，而是网格模型的自身以及它所有父对象的几何变换⭐**，一个网格模型自身以及父对象所有的几何变换，会体现在自己的世界矩阵属性`.matrixWorld`上。 （modelMatrix = matrixWorld ）
+
+  一个网格模型mesh都包含一个几何体Geometry，一个几何体中有一系列的顶点位置数据，这些顶点位置数据需要传递给着色器中顶点位置变量position，同样着色器中`uniform`关键字声明的模型矩阵变量modelMatrix也需要传递矩阵数据。
+
+  Three.js渲染器渲染的时候会自动从一个Threejs的模型对象提取它世界矩阵属性`.matrixWorld`的属性值，然后传递给着色器的模型矩阵变量modelMatrix，这个过程不需要程序员设置，Three.js系统会自动完成。如果你编写WebGL原生代码都知道需要调用WebGL的相关API完成数据的传递过程，比较麻烦，对于开发者来说不太友好，为了开发者更好的编写着色器代码，Three.js引擎封装了这些WebGL API。
+
+  ## 视图矩阵和投影矩阵
+
+  > 控制器改变相机参数
+  >
+  > 相机参数，lookat,改变相机投影矩阵 , 相机位置影响相机视图矩阵（世界矩阵逆矩阵）
+  >
+  > 相机视图矩阵和投影矩阵，和物体的模型矩阵（three,世界矩阵）影响物体位置
+
+  相机对象本质上就是存储视图矩阵和投影矩阵的信息的一个对象，基类`Camera`的`.matrixWorldInverse`属性对应的就是着色器中视图矩阵变量`viewMatrix`，基类`Camera`的投影矩阵属性`.projectionMatrix`对应着色器中的投影矩阵变量`projectionMatrix`。
+
+  使用ShaderMaterial构造函数自定义顶点着色器的时候，视图矩阵`viewMatrix`和投影矩阵`projectionMatrix`一样不需要手动声明，WebGL渲染器会通过`WebGLProgram.js`模块自动声明这两个变量，在顶点着色器代码中插入`uniform mat4 viewMatrix;`和`uniform mat4 projectionMatrix;`。
+
+  Three.js渲染器执行`renderer.render(scene, camera)`的时候，会解析相机对象的信息，把相机的矩阵数据自动传递给着色器中的视图矩阵变量`viewMatrix`和投影矩阵变量`projectionMatrix`。
+
+  ```html
+  <script id="vertexShader" type="x-shader/x-vertex">
+    void main(){
+  	gl_Position = projectionMatrix*viewMatrix*modelMatrix*vec4( position, 1.0 );
+    }
+  </script>
+  ```
+
+  模型矩阵和视图矩阵构成的复合矩阵称为模型视图矩阵，简称模视矩阵`modelViewMatrix`,模视矩阵和模型、视图、投影矩阵的使用方式是一样，系统会在着色器代码自动声明该变量，同时把相关的矩阵数据传递给该变量。
+
+  ```JavaScript
+  <script id="vertexShader" type="x-shader/x-vertex">
+    void main(){
+  	gl_Position = projectionMatrix*modelViewMatrix*vec4( position, 1.0 );
+    }
+  </script>
+  ```
+
+  ### WebGL坐标系
+
+  在原生WebGL编程的时候，WebGL坐标系的z轴垂直canvas画布，x和y轴分别对应于canvas画布的水平和竖直方向，你可以发现能够显示在canvas画布上的顶点坐标范围是[-1,1]，如果顶点的xyz某个分量上的坐标值不在-1~1区间内会被剪裁掉不显示。
+
+  平时编写Three.js应用程序程序，默认情况下，在Three.js系统中一个模型对应的顶点要经过模型、视图和投影变换后才会在canvas画布上显示出来，如果一个顶点的坐标向量经过一系列的矩阵变换后超出了[-1,1]范围，就不会显示在canvas画布上，平时编程的时候，你可以能会遇到相机参数设置不合适看不到场景中模型的情况，因为视图、投影矩阵的值是由相机的具体参数决定的，相机参数不合适，视图、投影矩阵就会对模型进行不合理的缩放和偏移，导致canvas画布上看不到场景中的模型。
 
 ## 18.other
 

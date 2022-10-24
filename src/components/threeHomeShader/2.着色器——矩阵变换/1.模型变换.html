@@ -22,7 +22,7 @@
     // uniform mat4 modelMatrix;//不需要声明
     void main(){
       // 模型矩阵modelMatrix对顶点位置坐标进行模型变换
-      gl_Position = modelMatrix*vec4( position, 1.0 );
+       gl_Position = modelMatrix*vec4( position, 1.0 );
     }
   </script>
   <script id="fragmentShader" type="x-shader/x-fragment">
@@ -48,8 +48,8 @@
     scene.add(mesh);
     // 对网格模型进行旋转操作
     // 着色器模型矩阵变量modelMatrix的数据来自模型的世界矩阵属性matrixWorld
-    mesh.rotateY(Math.PI/6);
-    mesh.rotateX(Math.PI/6);
+    mesh.rotateY(Math.PI / 6);
+    mesh.rotateX(Math.PI / 6);
     // 查看网格模型的世界矩阵属性
     console.log(mesh.matrixWorld);
     /**
@@ -81,7 +81,7 @@
     }
     render();
     //创建控件对象  相机对象camera作为参数   控件可以监听鼠标的变化，改变相机对象的属性
-    var controls = new THREE.OrbitControls(camera,renderer.domElement);
+    var controls = new THREE.OrbitControls(camera, renderer.domElement);
   </script>
 </body>
 
