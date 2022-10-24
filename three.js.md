@@ -2969,7 +2969,15 @@ function setProgram(camera, fog, material, object) {
 
 Threejs渲染的时候会通过WebGLUniforms.js方法自动批量传值材质对象的属性对应的uniform变量和光源对象对应的uniform变量。
 
-## 17.other
+
+
+## 17.WebGL
+
+### 1.
+
+
+
+## 18.other
 
 ### 1.stats.js
 
