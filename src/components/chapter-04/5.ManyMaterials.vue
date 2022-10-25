@@ -28,7 +28,7 @@ export default {
         // spotLight.castShadow = true;
         // scene.add(spotLight);
 
-        let group = new THREE.Mesh();
+        let group = new THREE.Group();
         // add all the rubik cube elements
         // 立方体12个面，(三角面)，每俩俩一组渲染一种材质
         let mats = [];
@@ -105,4 +105,5 @@ export default {
 };
 </script>
 <style scoped>
+
 </style>

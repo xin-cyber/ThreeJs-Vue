@@ -2247,6 +2247,85 @@ renderer.render(drawStart, drawCount);
 
 #### 5.material 和shader
 
++ **Mesh**
+  + wireframe  ==> gl.LINES
+  + 默认  ==> gl.TRIANGLES
++ **Line**
+  + LineSegments ===>  gl.LINES
+  + LineLoop ===>  gl.LINE_LOOP
+  + 默认 ===> gl.LINE_STRIP
++ **Points**
+  + gl.POINTS
++ **Sprite**
+  + gl.TRIANGLES
++ **isInstancedBufferGeometry**
+
+```js
+WebGLRenderer.js		
+		if ( object.isMesh ) {
+
+			if ( material.wireframe === true ) {
+
+				state.setLineWidth( material.wireframeLinewidth * getTargetPixelRatio() );
+				renderer.setMode( _gl.LINES );
+
+			} else {
+
+				renderer.setMode( _gl.TRIANGLES );
+
+			}
+
+		} else if ( object.isLine ) {
+
+			let lineWidth = material.linewidth;
+
+			if ( lineWidth === undefined ) lineWidth = 1; // Not using Line*Material
+
+			state.setLineWidth( lineWidth * getTargetPixelRatio() );
+
+			if ( object.isLineSegments ) {
+
+				renderer.setMode( _gl.LINES );
+
+			} else if ( object.isLineLoop ) {
+
+				renderer.setMode( _gl.LINE_LOOP );
+
+			} else {
+
+				renderer.setMode( _gl.LINE_STRIP );
+
+			}
+
+		} else if ( object.isPoints ) {
+
+			renderer.setMode( _gl.POINTS );
+
+		} else if ( object.isSprite ) {
+
+			renderer.setMode( _gl.TRIANGLES );
+
+		}
+
+		if ( object.isInstancedMesh ) {
+
+			renderer.renderInstances( drawStart, drawCount, object.count );
+
+		} else if ( geometry.isInstancedBufferGeometry ) {
+
+			const instanceCount = Math.min( geometry.instanceCount, geometry._maxInstanceCount );
+
+			renderer.renderInstances( drawStart, drawCount, instanceCount );
+
+		} else {
+
+			renderer.render( drawStart, drawCount );
+
+		}
+```
+
+
+
 <img src="https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/Material%E4%B8%8Eshader.jpg" alt="Material与shader" style="zoom: 50%;" />
 
 - 点材质PointsMaterial：顶点着色器文件points_vert.glsl、片元着色器文件points_frag.glsl
