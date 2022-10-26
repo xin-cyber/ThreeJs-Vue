@@ -157,8 +157,8 @@ export default {
                             label: "自定义几何体",
                         },
                         {
-                            value: "Lights",
-                            label: "Lights",
+                            value: "ShapeGeometry",
+                            label: "ShapeGeometry",
                         },
                     ],
                 },
@@ -277,6 +277,16 @@ export default {
                             value: "Curves",
                             label: "弯曲点线面",
                         }
+                    ],
+                },
+                {
+                    value: "websiteDemos",
+                    label: "websiteDemos",
+                    children: [
+                        {
+                            value: "LineFat",
+                            label: "Line2;缩略图",
+                        },
                     ],
                 },
             ],

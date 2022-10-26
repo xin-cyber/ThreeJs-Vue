@@ -317,7 +317,7 @@ scene.add(points); //点对象添加到场景
 
 > 主要用于需要自定义着色器的场景。
 
-### WebGLRenderer.js
+**WebGLRenderer.js**
 
 ```JavaScript
 import {ShaderLib} from './shaders/ShaderLib.js';
@@ -355,7 +355,7 @@ function initMaterial(material, fog, object) {
 
 ```
 
-### WebGLPrograms.js
+**WebGLPrograms.js**
 
 如果材质是ShaderMaterial或RawShaderMaterial，返回parameters对象属性shaderID的值是未定义undefined
 
@@ -620,6 +620,10 @@ var shape = new THREE.Shape(SplineCurve.getPoints(300)); // 二维平面形状
 
 + **⭐shape和shapeGeometry**
 
+  > chpater-05 / ShapeGeometry.vue
+  >
+  > **class Shape extends Path**
+  
   ```js
   // ⭐圆弧与直线连接 ，从左到右，左上角坐标系
   var shape = new THREE.Shape(); //Shape对象
@@ -638,11 +642,11 @@ var shape = new THREE.Shape(SplineCurve.getPoints(300)); // 二维平面形状
       side: THREE.DoubleSide,
       transparent: true,
       opacity: 0.5
-  });
+});
   var mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
   ```
-
+  
   
 
 ![image-20220929204332219](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20220929204332219.png)
@@ -797,7 +801,161 @@ mesh.rotateOnAxis(axis,Math.PI/8);//绕axis轴旋转π/8
   }
   ```
 
-  
+
+### 5.⭐第四范式点边Line2 ，缩略图
+
+> websiteDemos / LIneFat
+
+> http://49.233.0.30:8092/?from=login&instance=vp82tcw6ug8&workspaceId=1
+> taoye  123456
+
+**点**
+
+```js
+ const nodeInfo = nodeStates[node.id];
+const typeSettings = nodeTypeSettings[nodeInfo.type];
+const sizeSettings = nodeSizeSettings[nodeInfo.size];
+const text = node.label;
+
+const canvas = document.createElement('canvas');
+const context = canvas.getContext('2d');
+if (!context) throw Error(`Do not get canvas's context`);
+
+let fontSize = 80;
+
+if (typeSettings.fontScale) {
+    fontSize *= typeSettings.fontScale;
+}
+
+const textToSphere = 50;
+const leftPadding = 20;
+
+let sphereSize = sizeSettings.sphereSize;
+
+if (typeSettings.imageExtraScale) {
+    sphereSize *= typeSettings.imageExtraScale;
+}
+
+const font = `normal ${fontSize}px Arial`;
+context.font = font;
+
+// get size data (height depends only on font size)
+const metrics = context.measureText(text);
+const textWidth = metrics.width;
+
+const totalWidth = Math.max(textWidth, sphereSize) + leftPadding * 2;
+
+const totalHeight = fontSize + textToSphere + sphereSize;
+
+canvas.width = totalWidth;
+canvas.height = totalHeight;
+
+if (imageMap)
+    context.drawImage(
+        imageMap[nodeInfo.type],
+        (totalWidth - sphereSize) / 2,
+        fontSize + textToSphere,
+        sphereSize,
+        sphereSize,
+    );
+
+context.font = font;
+context.fillStyle = typeSettings.fontColorHex;
+
+context.shadowColor = 'black';
+context.shadowOffsetY = 10;
+context.shadowBlur = 30;
+context.fillText(text, (totalWidth - textWidth) / 2, fontSize);
+
+const texture = new THREE.Texture();
+texture.image = canvas;
+texture.minFilter = THREE.LinearFilter;
+texture.needsUpdate = true;
+
+const spriteMaterial = new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true,
+    opacity: nodeStates[node.id].hidden ? DEFAULT_CONSTANTS.hiddenOpacity : 1,
+});
+const sprite = new THREE.Sprite(spriteMaterial);
+// console.log(canvas.width);
+// console.log(canvas.height);
+
+const yScale = totalHeight / 30;
+sprite.center.set(0.5, sphereSize / 2 / totalHeight);
+sprite.scale.set((yScale * canvas.width) / canvas.height, yScale, 1);
+
+return sprite;
+```
+
+**边** Line2
+
+```js
+import * as THREE from 'three';
+import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
+import { Line2 } from 'three/examples/jsm/lines/Line2';
+
+export const createFatLine = (
+    color: number,
+    opacity: number,
+    lineWidth: number,
+    resolutionWidth: number,
+    resolutionHeight: number,
+) => {
+    const geometry = new LineGeometry();
+    geometry.setPositions([0, 0, 0, 0, 0, 0]);
+    // geometry.setColors([255, 0, 0, 255, 0, 0]);
+
+    const mat = new LineMaterial({
+        color: color,
+        linewidth: lineWidth,
+        transparent: true,
+    });
+
+    (mat.uniforms as any).opacity.value = opacity;
+    mat.resolution.set(resolutionWidth, resolutionHeight);
+
+    const line = new Line2(geometry, mat);
+    // line.computeLineDistances();
+    // line.scale.set(1, 1, 1);
+    return line;
+};
+
+export const updateFatLinePosition = (line: Line2, source: THREE.Vector3, target: THREE.Vector3) => {
+    const geometry = line.geometry as LineGeometry;
+    geometry.setPositions([source.x, source.y, source.z, target.x, target.y, target.z]);
+};
+
+export const createLine = (color: number, opacity: number, lineWidth: number) => {
+    const lineGeometry = new THREE.BufferGeometry();
+    const mat = new THREE.LineBasicMaterial({
+        color,
+        transparent: opacity < 1,
+        opacity,
+    });
+
+    return new THREE.Line(lineGeometry, mat);
+};
+
+export const updateLinePosition = (line: THREE.Line, source: THREE.Vector3, target: THREE.Vector3) => {
+    const geometry = line.geometry as LineGeometry;
+    geometry.setPositions([source.x, source.y, source.z, target.x, target.y, target.z]);
+};
+
+// Shorten line from end by shortenBy
+export const shortenLine = (start: THREE.Vector3, end: THREE.Vector3, shortenBy: number) => {
+    const line = new THREE.Line3(start, end);
+    const distance = line.distance();
+    const newEnd = new THREE.Vector3();
+
+    line.at((distance - shortenBy) / distance, newEnd);
+    return newEnd;
+};
+
+```
+
+
 
 ## 8.精灵和粒子
 
