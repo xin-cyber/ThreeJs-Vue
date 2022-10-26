@@ -3282,7 +3282,7 @@ geometry.addAttribute( 'position', attribue );
   </script>
   ```
 
-### 2.着色器矩阵变换
+### 2.着色器 — 矩阵变换
 
 > 本节课讲解如何通过`ShaderMaterial`编写顶点矩阵变换的代码，Three.js的渲染器解析场景和相机参数进行渲染的时候，会从模型对象获得几何体顶点对应的模型矩阵`modelMatrix`，从相机对象获得视图矩阵`viewMatrix`和投影矩阵`projectionMatrix`，在着色器中通过获得模型矩阵、视图矩阵、投影矩阵对顶点位置坐标进行矩阵变换。
 
@@ -3296,7 +3296,7 @@ geometry.addAttribute( 'position', attribue );
 
   使用ShaderMaterial编写着色器代码的时候，模型矩阵`modelMatrix`不用程序员手动声明，Three.js渲染器 系统渲染的时候会自动往ShaderMaterial顶点着色器字符串中插入一句`uniform mat4 modelMatrix;`
 
-  ```JavaScript
+  ```html
   <script id="vertexShader" type="x-shader/x-vertex">
     // uniform mat4 modelMatrix;//不需要声明
     void main(){
@@ -3355,9 +3355,156 @@ geometry.addAttribute( 'position', attribue );
 
   ### WebGL坐标系
 
-  在原生WebGL编程的时候，WebGL坐标系的z轴垂直canvas画布，x和y轴分别对应于canvas画布的水平和竖直方向，你可以发现能够显示在canvas画布上的顶点坐标范围是[-1,1]，如果顶点的xyz某个分量上的坐标值不在-1~1区间内会被剪裁掉不显示。
+  canvas画布上的顶点坐标范围是[-1,1]，如果顶点的xyz某个分量上的坐标值不在-1~1区间内会被剪裁掉不显示。
 
-  平时编写Three.js应用程序程序，默认情况下，在Three.js系统中一个模型对应的顶点要经过模型、视图和投影变换后才会在canvas画布上显示出来，如果一个顶点的坐标向量经过一系列的矩阵变换后超出了[-1,1]范围，就不会显示在canvas画布上，平时编程的时候，你可以能会遇到相机参数设置不合适看不到场景中模型的情况，因为视图、投影矩阵的值是由相机的具体参数决定的，相机参数不合适，视图、投影矩阵就会对模型进行不合理的缩放和偏移，导致canvas画布上看不到场景中的模型。
+  默认情况下，在Three.js系统中一个模型对应的顶点要经过模型、视图和投影变换后才会在canvas画布上显示出来，如果一个顶点的坐标向量经过一系列的矩阵变换后超出了[-1,1]范围，就不会显示在canvas画布上，平时编程的时候，你可以能会遇到相机参数设置不合适看不到场景中模型的情况，因为视图、投影矩阵的值是由相机的具体参数决定的，相机参数不合适，视图、投影矩阵就会对模型进行不合理的缩放和偏移，导致canvas画布上看不到场景中的模型。
+
+### 3.着色器 — uniform
+
+> 顶点着色器和片元着色器都可以使用uniform
+
+通常关键字`attribute`用来声明一些几何体顶点数据，例如顶点位置数据、顶点法向量数据....，
+
+`uniform`关键字通常用来声明模型矩阵、光源颜色、光源位置等变量。
+
+Three.js渲染器渲染场景的时候，几何体的顶点位置、法向量等数据，系统会自动传递给着色器中`attribute`关键字声明的对应顶点变量。
+
+着色器中`uniform`关键字声明的模型矩阵`modelMatrix`、视图矩阵`viewMatrix`、投影矩阵`projectionMatrix`等Three.js系统定义的uniform变量，Threejs系统会自动从对应的Threejs对象中解析数据并自动传递。比如视图矩阵的值Three.js系统会从相机对象中获得具体的值，然后传递给`viewMatrix`变量。
+
+**自定义`uniform`变量数据传递**
+
+如果程序员在着色器中任意命名自定义了一个uniform变量,如果需要给该uniform变量传递数据，在原生WebGL中需要特定的WebGL API来传递数据，在Three.js中不需要这样，只需要在着色器材质对象的`ShaderMaterial`的属性`.uniforms`中定义一个属性，属性名字和着色器中uniform变量保持一致，对于程序员而言只需要保持名字一致，至于数据传递过程，Three.js系统会自动帮你完成。
+
+**属性`.uniforms`使用案例**
+
+片元着色器中通过uniform关键字声明了一个颜色变量color，为了给该变量传递数据在ShaderMaterial对象的uniforms属性中定义了一个名为color的属性，按照Three.js系统uniform变量数据自动传递的机制，如果你在着色器代码中自定义声明了多个uniform变量，只要名字和ShaderMaterial对象中uniform数据的名字保持一直就可以正确完成数据传递。
+
+```JavaScript
+<!-- 片元着色器 -->
+<script id="fragmentShader" type="x-shader/x-fragment">
+  // color变量数据来自ShaderMaterial的uniforms属性的color属性
+  uniform vec3 color;
+  void main() {
+     // gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+     gl_FragColor = vec4(color,1.0);
+  }
+</script>
+```
+
+ShaderMaterial的uniforms属性代码
+
+```JavaScript
+var material = new THREE.ShaderMaterial({
+  //定义uniforms属性，uniforms的属性和着色器中的uniform变量相对应
+  uniforms:{
+    // 颜色属性clor对应片元着色器代码中uniform声明的color变量
+    color:{value:new THREE.Color(0xff0000)}
+  },
+  // 顶点着色器
+  vertexShader: document.getElementById('vertexShader').textContent,
+  // 片元着色器
+  fragmentShader: document.getElementById('fragmentShader').textContent,
+});
+```
+
+**数据类型**
+
+着色器声明的uniform变量数据类型要和着色器材质对象的`ShaderMaterial`的属性`.uniforms`的属性的属性值数据类型保持一致。例如`value:new THREE.Color(0xff0000)`对应的着色器中数据类型是`vec3` ，   `value:new THREE.Matrix4()`对应的着色器中数据类型是`mat4`。
+
+`value`的值和和着色器数据类型的对应关系可以参考Threejs文档core分类下的[Uniform](http://www.yanhuangxueyuan.com/threejs/docs/index.html#api/core/Uniform)
+
+### 4.着色器 — 光照计算
+
+为了更好的渲染效果，一般都会对网格模型进行光照计算,光照计算的相关算法是对生活中光线漫反射、镜面反射等光学现象的模拟，如果你不了解光照计算的一些算法可以去学习一下原生的WebGL教程和图形学方面的知识。
+
+前面说过Three.js的材质对象本质上都是着色器代码，有些材质支持光照计算，有些材质不支持光照计算，比如基础网格材质`MeshBasicMaterial`,有些材质支持光照计算，支持光照计算的材质具体的算法也不尽相同,兰伯特网格材质`MeshLambertMaterial`、高光网格材质`MeshPhongMaterial`、标准网格材质`MeshStandardMaterial` 。
+
+**平行光模型**
+
+本节课通过一个平行光的案例来进一步让大家认识着色器材质对象ShaderMaterial的使用。
+
+**顶点着色器**
+
++ **系统自动声明的变量**
+
+使用ShaderMaterial构造函数自定义着色器的时候,顶点法向量变量`normal`和顶点位置变量`position`一样不用手动声明，Three.js渲染器系统会通过WebGLPrograms.js模块自动声明`attribute vec3 normal`。
+
+- `geometry.attributes.position`对应着色器中`position`变量
+- `geometry.attributes.normal`对应着色器中`normal`变量
+
+```JavaScript
+var geometry = new THREE.BoxBufferGeometry(0.5, 0.5, 0.5);
+    // 查看几何体的顶点位置、顶点法向量数据
+    console.log(geometry.attributes);   
+```
+
+法向量矩阵`normalMatrix`和模型矩阵`modelMatrix`一样不需要手动声明系统会自动声明，可以直接在main函数中使用。顶点的位置进行了旋转等变换，顶点的法向量方向肯定会发生变化，所以需要一个法向量矩阵对顶点法向量进行变换，Threejs渲染器模块会根据顶点位置的相关变换矩阵计算`normalMatrix`的值。
+
+```glsl
+<script id="vertexShader" type="x-shader/x-vertex">
+      //varying声明顶点法向量插值后变量
+      varying vec3 v_normal;
+      void main(){
+        // normalMatrix法向量矩阵：模型的顶点进行了模型变换，顶点的法向量要跟着变化
+        // 顶点的法向量执行⭐插值计算
+        v_normal=normalMatrix*normal;  // 每个顶点的法向量
+        // 模型矩阵modelMatrix
+        gl_Position = modelMatrix*vec4( position, 1.0 );
+      }
+</script>
+    
+```
+
+**片元着色器**⭐
+
+片元着色器代码中包含了平行光漫反射计算的光照模型算法。光线的入射角不同,反射的强度不同，一个立方的表面法线方向不相同，与平行光的夹角不同，每个面的明暗就不同。关于光照模型更多的知识可以学习原生WebGL教程和图形学。
+
+```glsl
+<script id="fragmentShader" type="x-shader/x-fragment">
+      // 声明一个颜色变量表示网格模型颜色
+      uniform vec3 u_color;
+      // 顶点法向量插值后的结果，一个片元数据对应一个法向量数据
+      varying vec3 v_normal;
+      // uniform声明平行光颜色变量
+      uniform vec3 u_lightColor;
+      //平行光方向变量
+      uniform vec3 u_lightDirection;
+      void main() {
+        // 法向量归一化
+        vec3 norlmal2 = normalize(v_normal);
+        // 计算平行光方向向量和片元法向量的点积
+        // 不同的入射角度反射强度不同
+        // 余铉值cos
+        float dot = dot(u_lightDirection, norlmal2); // 每个片元/像素 的法向量
+        // 计算反射后的颜色  光线颜色*物体颜色*dot
+        vec3 reflectedLight = u_lightColor * u_color * dot;
+        // 反射颜色赋值给内置变量gl_FragColor
+        gl_FragColor = vec4(reflectedLight,1.0);
+      }
+</script>
+    
+```
+
+**uniforms定义**
+
+```JavaScript
+// 定义材质对象的uniforms属性，传递着色器中uniform变量对应的值
+    uniforms: {
+      // 网格模型颜色
+      u_color: {
+        value: new THREE.Color(0xff0000)
+      },
+      // 平行光光源颜色
+      u_lightColor: {
+        value: new THREE.Color(0xffffff)
+      },
+      // 平行光的方向
+      u_lightDirection: {
+        value: new THREE.Vector3(-1.0, -1.0, 1.0).normalize()
+      },
+    },
+    
+```
 
 ## 18.other
 
