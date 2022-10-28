@@ -752,7 +752,7 @@ mesh.rotateOnAxis(axis,Math.PI/8);//绕axis轴旋转π/8
     var children = object.children;
     // 递归算法遍历场景对象
     for (var i = 0, l = children.length; i < l; i++) {
-  projectObject(children[i], camera, sortObjects);
+  	 projectObject(children[i], camera, sortObjects);
     }
   }
   ```
@@ -1016,7 +1016,7 @@ let sprite = new THREE.Sprite(material);
 
 - OBJ / MTL
 
-  > OBJ定义几何体，MTL定义材质，基于文本的材质
+  > OBJ定义几何体，MTL定义材质，基于文本的材质              
   >
   > ps：blender导出OBJ / MTL 文件
 
@@ -2175,7 +2175,8 @@ target = new Vector3();
       mesh2.rotateX(0.01);
   }
   ```
-
+  
+  ![image-20221027153116114](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221027153116114.png)
 
 #### 2.顶点
 
@@ -3284,6 +3285,8 @@ geometry.addAttribute( 'position', attribue );
 
 ### 2.着色器 — 矩阵变换
 
+> webGL***⭐观测到的经过矩阵变换三维图形的坐标 = <投影矩阵> x <视图矩阵> x <模型矩阵> 图形的原始坐标***
+
 > 本节课讲解如何通过`ShaderMaterial`编写顶点矩阵变换的代码，Three.js的渲染器解析场景和相机参数进行渲染的时候，会从模型对象获得几何体顶点对应的模型矩阵`modelMatrix`，从相机对象获得视图矩阵`viewMatrix`和投影矩阵`projectionMatrix`，在着色器中通过获得模型矩阵、视图矩阵、投影矩阵对顶点位置坐标进行矩阵变换。
 
 + ## 模型变换
@@ -3415,6 +3418,8 @@ var material = new THREE.ShaderMaterial({
 
 ### 4.着色器 — 光照计算
 
+> 链接 ： [优雅的学习webgl(5)—webgl中的光照和反射变换 · Issue #54 · forthealllight/blog (github.com)](https://github.com/forthealllight/blog/issues/54)
+
 为了更好的渲染效果，一般都会对网格模型进行光照计算,光照计算的相关算法是对生活中光线漫反射、镜面反射等光学现象的模拟，如果你不了解光照计算的一些算法可以去学习一下原生的WebGL教程和图形学方面的知识。
 
 前面说过Three.js的材质对象本质上都是着色器代码，有些材质支持光照计算，有些材质不支持光照计算，比如基础网格材质`MeshBasicMaterial`,有些材质支持光照计算，支持光照计算的材质具体的算法也不尽相同,兰伯特网格材质`MeshLambertMaterial`、高光网格材质`MeshPhongMaterial`、标准网格材质`MeshStandardMaterial` 。
@@ -3458,6 +3463,8 @@ var geometry = new THREE.BoxBufferGeometry(0.5, 0.5, 0.5);
 **片元着色器**⭐
 
 片元着色器代码中包含了平行光漫反射计算的光照模型算法。光线的入射角不同,反射的强度不同，一个立方的表面法线方向不相同，与平行光的夹角不同，每个面的明暗就不同。关于光照模型更多的知识可以学习原生WebGL教程和图形学。
+
+> 以boxgeometry为例，attribute的normal每个面四个点法向量是一样的，所以每个面颜色一样⭐
 
 ```glsl
 <script id="fragmentShader" type="x-shader/x-fragment">

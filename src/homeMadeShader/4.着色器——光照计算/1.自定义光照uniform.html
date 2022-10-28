@@ -26,7 +26,7 @@
     //varying声明顶点法向量插值后变量
     varying vec3 v_normal;
     void main(){
-      // normalMatrix法向量矩阵：模型的顶点进行了模型变换，顶点的法向量要跟着变化
+      // normalMatrix法向量矩阵：模型的顶点进行了模型变换，顶点的法向量要跟着变化,3x3矩阵
       // 顶点的法向量执行插值计算
       v_normal=normalMatrix*normal;
       // 模型矩阵modelMatrix

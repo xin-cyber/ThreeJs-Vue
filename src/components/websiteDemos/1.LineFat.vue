@@ -30,10 +30,9 @@ export default {
         animate();
 
         function init() {
-
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setClearColor(0x000000, 0.0);
+            renderer.setClearColor(0x000000, 1);
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
@@ -71,7 +70,6 @@ export default {
                 // t - 曲线上的位置。必须在[0,1]范围内 ;  optionalTarget — (可选) 如果需要, 结果将复制到此向量中，否则将创建一个新向量。
                 // 返回曲线上给定位置的点。
                 positions.push(point.x, point.y, point.z);
-
                 color.setHSL(t, 1.0, 0.5);
                 colors.push(color.r, color.g, color.b);
 
@@ -88,7 +86,7 @@ export default {
 
                 color: 0xffffff,
                 linewidth: 5, // in world units with size attenuation, pixels otherwise
-                vertexColors: true,
+                vertexColors: true, // 使用attribute颜色
 
                 //resolution:  // to be set by renderer, eventually
                 dashed: false,
@@ -108,7 +106,7 @@ export default {
             geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
             geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
-            matLineBasic = new THREE.LineBasicMaterial({ vertexColors: true });
+            matLineBasic = new THREE.LineBasicMaterial({ vertexColors: true }); // vertexColors使用顶点着色，即attribute中的color
             matLineDashed = new THREE.LineDashedMaterial({ vertexColors: true, scale: 2, dashSize: 1, gapSize: 1 });
 
             line1 = new THREE.Line(geo, matLineBasic);
@@ -155,7 +153,7 @@ export default {
 
             // main scene
 
-            renderer.setClearColor(0x000000, 0);
+            renderer.setClearColor(0x000000, 1);
 
             renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
 
