@@ -76,7 +76,7 @@
     // 创建一个大气层几何体，注意比地球几何体的半径略大一些
     var geometry = new THREE.SphereBufferGeometry(100.1, 30, 30); //球体
     var texture = textureLoader.load('./大气.png');
-    // 设置重复的作用是：能够让一个效果循环
+    // 设置重复的作用是：能够让一个效果循环,⭐⭐uv坐标大于1时冲突，需要设置循环效果
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
 
@@ -146,13 +146,13 @@
       // 更新uniforms中时间，这样就可以更新着色器中time变量的值
       material.uniforms.time.value += deltaTime;
 
-      group.rotateY(-0.005)
+      // group.rotateY(-0.005)
       renderer.render(scene, camera); //执行渲染操作
       requestAnimationFrame(render); //请求再次执行渲染函数render，渲染下一帧
     }
     render();
     //创建控件对象  相机对象camera作为参数   控件可以监听鼠标的变化，改变相机对象的属性
-    var controls = new THREE.OrbitControls(camera,renderer.domElement);
+    var controls = new THREE.OrbitControls(camera, renderer.domElement);
   </script>
 </body>
 

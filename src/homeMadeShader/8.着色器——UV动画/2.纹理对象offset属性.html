@@ -100,15 +100,15 @@
     // 渲染函数
     function render() {
       // 每次渲染对纹理对象进行偏移，不停的偏移纹理，就产生了动画的效果
-      texture.offset.x -= 0.001;
-      texture.offset.y += 0.001;
-      group.rotateY(-0.005)
+      texture.offset.x -= 0.0001;
+      texture.offset.y += 0.0001;
+      // group.rotateY(-0.005)
       renderer.render(scene, camera); //执行渲染操作
       requestAnimationFrame(render); //请求再次执行渲染函数render，渲染下一帧
     }
     render();
     //创建控件对象  相机对象camera作为参数   控件可以监听鼠标的变化，改变相机对象的属性
-    var controls = new THREE.OrbitControls(camera,renderer.domElement);
+    var controls = new THREE.OrbitControls(camera, renderer.domElement);
   </script>
 </body>
 

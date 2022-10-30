@@ -66,12 +66,13 @@
       transparent: true,
       opacity: 0.7,
     });
+    console.log(earthMaterial);
     var earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
     // 地球网格模型插入组对象中
     group.add(earthMesh);
 
     // 创建一个大气层几何体，注意比地球几何体的半径略大一些
-    var geometry = new THREE.SphereBufferGeometry(100.1, 30, 30); //球体
+    var geometry = new THREE.SphereBufferGeometry(101, 30, 30); //球体
     var texture = textureLoader.load('./大气.png');
     // 自定义顶点着色器对象
     var material = new THREE.ShaderMaterial({
@@ -88,6 +89,7 @@
       // 开启透明度
       transparent: true,
     });
+    console.log(material);
     // 创建大气层网格模型
     var mesh = new THREE.Mesh(geometry, material);
     group.add(mesh); //大气层网格模型对象插入组对象中
@@ -133,7 +135,7 @@
     }
     render();
     //创建控件对象  相机对象camera作为参数   控件可以监听鼠标的变化，改变相机对象的属性
-    var controls = new THREE.OrbitControls(camera,renderer.domElement);
+    var controls = new THREE.OrbitControls(camera, renderer.domElement);
   </script>
 </body>
 

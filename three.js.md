@@ -3513,6 +3513,392 @@ var geometry = new THREE.BoxBufferGeometry(0.5, 0.5, 0.5);
     
 ```
 
+### 5.着色器 — 颜色插值计算
+
+创建一个缓冲类型的几何体`BufferGeometry`，然后给该几何体Geometry对象设置顶点位置数据和顶点颜色数据，顶点颜色和顶点位置。
+
+把几何体作为网格模型Mesh的参数，也就是使用三角形模式渲染几何体，6个顶点构成2个三角形，每个三角形有三个顶点，每个顶点有一个颜色，三角形中间的颜色是三个顶点颜色插值计算的结果，整个三角形会显示为彩色。
+
+```html
+<body>
+  <!-- 顶点着色器 -->
+  <script id="vertexShader" type="x-shader/x-vertex">
+    // attribute vec3 position;
+    // 使用ShaderMaterial API的时候顶点颜色变量和顶点位置变量一样不需要手动声明
+    // attribute vec3 color;
+
+    // varying关键字声明一个变量表示顶点颜色插值后的结果
+    varying vec3 vColor;
+    void main(){
+      // 顶点颜色数据进行插值计算
+      vColor = color;
+      // 投影矩阵projectionMatrix、视图矩阵viewMatrix、模型矩阵modelMatrix
+      gl_Position = projectionMatrix*viewMatrix*modelMatrix*vec4( position, 1.0 );
+    }
+  </script>
+  <!-- 片元着色器 -->
+  <script id="fragmentShader" type="x-shader/x-fragment">
+    // 顶点片元化后有多少个⭐片元(像素)⭐就有多少个颜色数据vColor
+    varying vec3 vColor;
+    void main() {
+      //把插值后的到颜色数据赋值给对应的片元
+       gl_FragColor = vec4(vColor,1.0);
+    }
+  </script>
+  <script>
+    /**
+     * 创建场景对象Scene
+     */
+    var scene = new THREE.Scene();
+
+     //声明一个缓冲几何体对象，然后自定义顶点位置和颜色数据
+     var geometry = new THREE.BufferGeometry();
+     //类型数组创建顶点位置position数据
+     var vertices = new Float32Array([
+       0, 0, 0, //顶点1坐标
+       50, 0, 0, //顶点2坐标
+       0, 100, 0, //顶点3坐标
+
+       0, 0, 10, //顶点4坐标
+       0, 0, 100, //顶点5坐标
+       50, 0, 10, //顶点6坐标
+     ]);
+     // 创建属性缓冲区对象
+     var attribue = new THREE.BufferAttribute(vertices, 3); //3个为一组，作为一个顶点的xyz坐标
+     // 设置几何体attributes属性的位置position属性
+     geometry.attributes.position = attribue;
+
+     //类型数组创建顶点颜色color数据
+     var colors = new Float32Array([
+       1, 0, 0, //顶点1颜色
+       0, 1, 0, //顶点2颜色
+       0, 0, 1, //顶点3颜色
+
+       1, 1, 0, //顶点4颜色
+       0, 1, 1, //顶点5颜色
+       1, 0, 1, //顶点6颜色
+     ]);
+     // 设置几何体attributes属性的颜色color属性
+     //3个为一组,表示一个顶点的颜色数据RGB
+     geometry.attributes.color = new THREE.BufferAttribute(colors, 3);
+
+    var material = new THREE.ShaderMaterial({
+      // 顶点着色器
+      vertexShader: document.getElementById('vertexShader').textContent,
+      // 片元着色器
+      fragmentShader: document.getElementById('fragmentShader').textContent,
+      //以顶点颜色为准进行渲染
+      vertexColors: THREE.VertexColors,
+      // 双面可见
+      side:THREE.DoubleSide,
+    });
+    var mesh = new THREE.Mesh(geometry, material); //网格模型对象
+    scene.add(mesh);
+    /**
+     * 相机设置
+     */
+    var width = window.innerWidth; //窗口宽度
+    var height = window.innerHeight; //窗口高度
+    var k = width / height; //窗口宽高比
+    var s = 150; //三维场景显示范围控制系数，系数越大，显示的范围越大
+    //创建相机对象
+    var camera = new THREE.OrthographicCamera(-s * k, s * k, s, -s, 1, 1000);
+    camera.position.set(200, 300, 200); //设置相机位置
+    camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
+
+    // 查看相机对象的视图矩阵和投影矩阵属性
+    console.log(camera.projectionMatrix);
+    console.log(camera.matrixWorldInverse);
+
+
+    /**
+     * 创建渲染器对象
+     */
+    var renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer.setSize(width, height); //设置渲染区域尺寸
+    document.body.appendChild(renderer.domElement); //body元素中插入canvas对象
+
+    // 渲染函数
+    function render() {
+      renderer.render(scene, camera); //执行渲染操作
+      requestAnimationFrame(render); //请求再次执行渲染函数render，渲染下一帧
+    }
+    render();
+    //创建控件对象  相机对象camera作为参数   控件可以监听鼠标的变化，改变相机对象的属性
+    var controls = new THREE.OrbitControls(camera,renderer.domElement);
+  </script>
+</body>
+
+</html>
+
+```
+
+### 6.着色器 — 纹理贴图
+
+```html
+<html lang="en">
+<body>
+  <!-- 顶点着色器 -->
+  <script id="vertexShader" type="x-shader/x-vertex">
+    // attribute vec3 position;
+    // attribute vec3 color;
+    // 系统自动声明顶点纹理坐标变量uv 
+    // attribute vec2 uv;
+
+    // varying关键字声明一个变量表示顶点纹理坐标插值后的结果
+    varying vec2 vUv;
+    void main(){
+      // 顶点纹理坐标uv数据进行插值计算
+      vUv = uv;
+      // 投影矩阵projectionMatrix、视图矩阵viewMatrix、模型矩阵modelMatrix
+      gl_Position = projectionMatrix*viewMatrix*modelMatrix*vec4( position, 1.0 );
+    }
+  </script>
+  <!-- 片元着色器 -->
+  <script id="fragmentShader" type="x-shader/x-fragment">
+    // 声明一个纹理对象变量
+    uniform sampler2D texture;
+    // 顶点片元化后有多少个片元就有多少个纹理坐标数据vUv
+    varying vec2 vUv;
+    void main() {
+       //内置函数texture2D通过纹理坐标vUv获得贴图texture的像素值
+       gl_FragColor = texture2D( texture, vUv ); 
+       //计算RGB三个分量光能量之和，也就是亮度
+       float luminance = 0.299*tColor.r+0.587*tColor.g+0.114*tColor.b; // ⭐灰度图公式，系数和等于1
+       //逐片元赋值，RGB相同均为亮度值，用黑白两色表达图片的明暗变化
+       gl_FragColor = vec4(luminance,luminance,luminance,1);
+    }
+  </script>
+  <script>
+    /**
+     * 创建场景对象Scene
+     */
+    var scene = new THREE.Scene();
+    /**
+     * 创建网格模型
+     */
+    // var geometry = new THREE.BoxBufferGeometry(100, 100, 100); //立方体
+     // var geometry = new THREE.PlaneBufferGeometry(204, 102); //矩形平面
+    var geometry = new THREE.SphereBufferGeometry(60, 25, 25); //球体
+
+    // 查看几何体的顶点数据
+    console.log(geometry.attributes);
+    // 顶点纹理坐标attributes.uv的itemSize属性值是2，意味着顶点纹理坐标是二维向量
+    // 查看几何体顶点纹理坐标数据uv
+    console.log(geometry.attributes.uv);
+
+    // 自定义顶点着色器对象
+    var material = new THREE.ShaderMaterial({
+      uniforms: {
+        // texture对应片元着色器中uniform声明的texture变量
+        texture: {
+          // 加载纹理贴图返回Texture对象作为texture的值
+          // Texture对象对应着色器中sampler2D数据类型变量
+          value: new THREE.TextureLoader().load('./Earth.png')
+        },
+      },
+      // 顶点着色器
+      vertexShader: document.getElementById('vertexShader').textContent,
+      // 片元着色器
+      fragmentShader: document.getElementById('fragmentShader').textContent,
+    });
+    var mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+    /**
+     * 相机设置
+     */
+    var width = window.innerWidth; //窗口宽度
+    var height = window.innerHeight; //窗口高度
+    var k = width / height; //窗口宽高比
+    var s = 150; //三维场景显示范围控制系数，系数越大，显示的范围越大
+    //创建相机对象
+    var camera = new THREE.OrthographicCamera(-s * k, s * k, s, -s, 1, 1000);
+    camera.position.set(200, 300, 200); //设置相机位置
+    camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
+    /**
+     * 创建渲染器对象
+     */
+    var renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer.setSize(width, height); //设置渲染区域尺寸
+    document.body.appendChild(renderer.domElement); //body元素中插入canvas对象
+
+    // 渲染函数
+    function render() {
+      renderer.render(scene, camera); //执行渲染操作
+      requestAnimationFrame(render); //请求再次执行渲染函数render，渲染下一帧
+    }
+    render();
+    //创建控件对象  相机对象camera作为参数   控件可以监听鼠标的变化，改变相机对象的属性
+    var controls = new THREE.OrbitControls(camera,renderer.domElement);
+  </script>
+</body>
+</html>
+```
+
+### 7.着色器 — UV动画
+
+通过自定着色器代码的方式实现UV动画。
+
+**Texture偏移属性`offset`实现UV动画**
+
+`.wrapS`定义了纹理如何水平包裹，并对应于UV映射中的U.
+
+`.wrapT`这定义了纹理垂直包裹的方式，与UV映射中的V相对应.
+
+```JavaScript
+var texture = textureLoader.load('./大气.png');
+// 设置重复的作用是：能够让一个效果循环
+texture.wrapS = THREE.RepeatWrapping;
+texture.wrapT = THREE.RepeatWrapping;
+```
+
+渲染函数周期性执行的过程中，Three.js纹理对象`Texture`的偏移属性`offset`两个分量x和y递增或递减。
+
+```JavaScript
+// 渲染函数
+function render() {
+  // 每次渲染对纹理对象进行偏移，不停的偏移纹理，就产生了动画的效果
+  texture.offset.x -= 0.001;
+  texture.offset.y += 0.001;
+  group.rotateY(-0.005)
+  renderer.render(scene, camera); //执行渲染操作
+  requestAnimationFrame(render); //请求再次执行渲染函数render，渲染下一帧
+}
+```
+
+**着色器中uniform变量更新**
+
+片元着色器中声明的一个时间变量time
+
+```JavaScript
+// 声明一个时间变量用来控制UV动画
+uniform float time;
+// 声明一个纹理对象变量
+uniform sampler2D texture;
+// 顶点片元化后有多少个片元就有多少个纹理坐标数据vUv
+varying vec2 vUv;
+void main() {
+  vec2 newT= vUv + vec2( -0.02, 0.02 ) * time;
+  //通过偏移后的纹理坐标newT采样像素
+  gl_FragColor = texture2D( texture, newT );
+  // 大气层整体透明度增加
+  gl_FragColor.a *=0.6;
+}
+uniforms: {
+  // 对应片元着色器中的时间变量time
+  time: {
+	value: 0.0
+  },
+},
+```
+
+在渲染函数中不停地更新ShaderMaterial对象uniforms属性的时间变量time的值，每次执行新的渲染，Threejs系统会自动更新片元着色器中的时间变量time的值。
+
+```JavaScript
+// 创建一个时钟对象Clock
+var clock = new THREE.Clock();
+// 渲染函数
+function render() {
+  // 获得两次渲染的时间间隔deltaTime
+  var deltaTime = clock.getDelta();
+
+  // 更新uniforms中时间，这样就可以更新着色器中time变量的值
+  material.uniforms.time.value += deltaTime;
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(render);
+}
+```
+
+### 7.着色器——着色器模块.glsl调用
+
+路径`three.js-master\src\renderers\shaders`下，
+
++ ShaderChunk文件中有大量具有特定功能的着色器代码块.glsl，
+
++ ShaderLib文件夹下面的着色器文件是对ShaderChunk文件中的着色器代码块进行调用组合得到一个新的着色器代码，新的着色器文件是一个完整的顶点着色器或片元着色器代码这些完成的顶点或片元着色器代码和Three.js的点材质、线线材质或网格材质是一一对应的。
+
++ 比如顶点着色器文件`meshphong_vert.glsl`和片元着色器文件`meshphong_frag.glsl`对应的是高光网格材质`MeshPhongMaterial`，顶点着色器文件`points_vert.glsl`和片元着色器文件`points_frag.glsl`对应的是点材质`PointsMaterial`。
+
+使用`ShaderMaterial`自定义着色器代码的时候，可以手动编写着色器代码，也可以调用ShaderChunk文件和ShaderLib文件夹下面的着色器代码模块。
+
+如果想很好的复用three.js的着色器代码块，至少应该阅读下着色器源码，对每一个文件有一个大致的认识。
+
+**顶点位置矩阵变换**
+
+手动编写顶点位置`position`进行投影矩阵、相机矩阵、视图矩阵变换的着色器代码。
+
+```glsl
+void main(){
+  // 投影矩阵projectionMatrix、视图矩阵viewMatrix、模型矩阵modelMatrix
+  gl_Position = projectionMatrix*viewMatrix*modelMatrix*vec4( position, 1.0 );
+
+  // modelViewMatrix等价于viewMatrix*modelMatrix
+  // gl_Position = projectionMatrix*modelViewMatrix*vec4( position, 1.0 );
+}
+```
+
+**调用project_vertex.glsl文件**
+
+调用ShaderChunk文件夹下的project_vertex.glsl文件，注意该着色器块文件中的代码依赖着色器文件begin_vertex.glsl。这里也给大家提醒，ShaderChunk文件夹下的着色器模块之间既有一定的独立性，有些着色器代码块有依赖别的着色器代码块。如果想更好的使用这些着色器代码块或者理解Three.js系统原理，阅读每一句着色器代码的工作肯定是要做的。
+
+```glsl
+void main(){
+  //模块功能：拷贝顶点位置变量值 ，⭐模块引用
+  #include <begin_vertex> 
+
+  // 模块功能：投影视图模型矩阵变换
+  #include <project_vertex>
+}
+```
+
+**begin_vertex.glsl：**
+
+```glsl
+//拷贝顶点位置变量值
+vec3 transformed = vec3( position );
+```
+
+**project_vertex.glsl：**
+
+```glsl
+// 模型视图矩阵对顶点位置数据进行变换
+// modelViewMatrix：模型视图矩阵，模型矩阵和视图矩阵的复合矩阵
+vec4 mvPosition = modelViewMatrix * vec4( transformed, 1.0 );
+// projectionMatrix：相机的投影矩阵
+gl_Position = projectionMatrix * mvPosition;
+```
+
+
+
+**map_pars_fragment.glsl：**
+
+使用仅仅使用该模块，注意设置预定义`#define USE_MAP;`。
+
+变量名保持一致 map
+
+![image-20221030204135678](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221030204135678.png)
+
+```glsl
+内部代码：
+#ifdef USE_MAP
+// 直接声明一个纹理贴图变量
+	uniform sampler2D map;
+
+#endif
+```
+
+**uv_pars_fragment.glsl：**
+
+```glsl
+// 如果使用了任何纹理贴图，就需要进行纹理坐标的插值计算，也就是说需要使用varying关键字声明变量vUv
+#if defined( USE_MAP )  || defined( USE_NORMALMAP ) || defined( USE_SPECULARMAP ) ...
+// 片元着色器中：声明一个变量vUv用于插值计算
+	varying vec2 vUv;
+
+#endif
+```
+
 ## 18.other
 
 ### 1.stats.js
