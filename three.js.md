@@ -3735,7 +3735,7 @@ var geometry = new THREE.BoxBufferGeometry(0.5, 0.5, 0.5);
 </html>
 ```
 
-### 7.着色器 — UV动画
+### 8.着色器 — UV动画
 
 通过自定着色器代码的方式实现UV动画。
 
@@ -3810,7 +3810,7 @@ function render() {
 }
 ```
 
-### 7.着色器——着色器模块.glsl调用
+### 9.着色器——着色器模块.glsl调用
 
 路径`three.js-master\src\renderers\shaders`下，
 
@@ -3897,6 +3897,161 @@ gl_Position = projectionMatrix * mvPosition;
 	varying vec2 vUv;
 
 #endif
+```
+
+### 10.着色器 — 系统uniforms模块调用UniformsLib
+
+本节课用到两个API`THREE.UniformsUtils`和`THREE.UniformsLib`,关于这两个API的使用，官方文档并没有详细介绍，如果想了解它们的使用规则，建议听课简单了解，或者阅读相应的源码，这两个API的所在的文件目录是`\three.js-master\src\renderers\shaders`。`THREE.UniformsUtils`提供了一个方法`.merge()`可以组合`THREE.UniformsLib`提供的uniforms代码块或者自定义的uniforms属性。
+
++ `THREE.UniformsLib`
+
+访问uniforms代码common块，`THREE.UniformsLib["common"]`或者`THREE.UniformsLib.common`访问方式都可以。执行后获得相应的值，可以作为`.merge()`参数数组的元素。
+
+```JavaScript
+{
+  // 对应材质对象的颜色color属性
+  diffuse: { value: new Color( 0xeeeeee ) },
+  // 透明度变量
+  opacity: { value: 1.0 },
+  // 颜色贴图变量
+  map: { value: null },
+  uvTransform: { value: new Matrix3() },
+
+  alphaMap: { value: null },
+
+}
+```
+
+或者
+
++ **方法`.merge()`**
+
+方法`THREE.UniformsUtils.merge()`的作用是拷贝组合THREE.UniformsLib调用的模块代码。 `.merge()`的参数是一个数组，数组的元素满足格式：
+
+```JavaScript
+// 自定义uniform变量属性写在一个对象中
+  {
+    time: {
+      value: 0.3
+    },
+    opacity: {
+      value: 0.6
+    },
+  }
+```
+
+`THREE.UniformsLib`代码块可以和自定义的uniform属性组合使用。
+
+```JavaScript
+uniforms: THREE.UniformsUtils.merge([
+  THREE.UniformsLib["common"],
+  THREE.UniformsLib["fog"],
+  {
+// 自定义uniform变量写在一个对象中
+    time: {
+      value: 0.3
+    },
+    opacity: {
+      value: 0.6
+    },
+  }
+]),
+```
+
+### 11.着色器 — 模仿系统的材质对象
+
+`MeshPhongMaterial`、`PointsMaterial`等three.js的材质材质对象本质上都是着色器代码，本节课就通过自定义着色器`ShaderMaterial`调用Threejs系统的着色器库和uniforms库来模仿这些材质对象。
+
++ **UniformsLib.js**
+
+包含一些常见uniform变量对应的属性和属性值
+
+```JavaScript
+THREE.UniformsLib.common,
+THREE.UniformsLib.specularmap,
+THREE.UniformsLib.envmap,
+...
+```
+
++ **UniformsUtils.js**
+
+方法`.merge()`用来赋值组合UniformsLib.js中提供的一些uniforms块。
+
+```JavaScript
+uniforms: THREE.UniformsUtils.merge([
+  THREE.UniformsLib.points,
+  THREE.UniformsLib.fog,
+]),
+```
+
++ **ShaderChunk.js**
+
+通过`THREE.ShaderChunk`可以获得ShaderChunk和ShaderLib文件下面的所有着色器文件.glsl代码。 比如`THREE.ShaderChunk.points_vert`返回ShaderLib文件下points_vert.glsl文件中着色器代码字符串，该着色器代码是点材质对象`PointsMaterial`的顶点着色器；比如`THREE.ShaderChunk.meshphong_frag`返回ShaderLib文件下meshphong_frag.glsl文件中着色器代码字符串，该着色器代码是高光网格材质对象`MeshPhongMaterial`的片元着色器；
+
++ **ShaderLib.js**
+
+该代码模块设置了每一种Three.js材质对象的顶点着色器、片元着色器和uniform变量对应的属性和值。
+
++ **模仿`PointsMaterial`**
+
+  > ShaderChunk 可以访问所有着色器代码
+
+  ![image-20221031212142749](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221031212142749.png)
+
+```JavaScript
+var material = new THREE.ShaderMaterial({
+    // 调用UniformsLib.js文件中的uniform变量代码块
+    uniforms: THREE.UniformsUtils.merge([
+    THREE.UniformsLib.points,
+    THREE.UniformsLib.fog,
+  ]),
+  // 获得ShaderLib文件下着色器文件points_vert.glsl代码
+  vertexShader: THREE.ShaderChunk.points_vert,
+  // 获得ShaderLib文件下着色器文件points_frag.glsl代码
+  fragmentShader: THREE.ShaderChunk.points_frag
+});
+
+// 重置uniform变量对应属性的值
+// 点尺寸设置
+material.uniforms.size.value=20.0;
+// 点颜色数据设置
+material.uniforms.diffuse.value.setRGB(1,0,0)
+```
+
++ **模仿`MeshPhongMaterial`**
+
+```JavaScript
+var material = new THREE.ShaderMaterial({
+  // 调用UniformsLib.js文件中的uniform变量代码块
+  uniforms: THREE.UniformsUtils.merge([
+  THREE.UniformsLib.common,
+  THREE.UniformsLib.specularmap,
+  THREE.UniformsLib.envmap,
+  THREE.UniformsLib.aomap,
+  THREE.UniformsLib.lightmap,
+  THREE.UniformsLib.emissivemap,
+  THREE.UniformsLib.bumpmap,
+  THREE.UniformsLib.normalmap,
+  THREE.UniformsLib.displacementmap,
+  THREE.UniformsLib.gradientmap,
+  THREE.UniformsLib.fog,
+  THREE.UniformsLib.lights,
+  {
+    emissive: { value: new THREE.Color( 0x000000 ) },
+    specular: { value: new THREE.Color( 0x111111 ) },
+    shininess: { value: 30 }
+  }
+  ]),
+  // 获得ShaderLib文件下着色器文件meshphong_vert.glsl代码
+  vertexShader: THREE.ShaderChunk.meshphong_vert,
+  // 获得ShaderLib文件下着色器文件meshphong_frag.glsl代码
+  fragmentShader: THREE.ShaderChunk.meshphong_frag
+});
+
+// phong受光照影响,ShaderMaterial的lights属性需要设置为true，默认是false
+material.lights = true;
+// 设置材质颜色
+material.uniforms.diffuse.value.setRGB(1.0, 1.0, 0.0)
 ```
 
 ## 18.other
