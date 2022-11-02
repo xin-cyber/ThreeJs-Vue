@@ -4054,6 +4054,83 @@ material.lights = true;
 material.uniforms.diffuse.value.setRGB(1.0, 1.0, 0.0)
 ```
 
+### 12.着色器——自动提取光源对象信息
+
+Three.js有点光源、环境光等等各种常见光源对象，一个应用中会有多个光源对象，在渲染的过程中，Threejs渲染器会自动从这些光源对象提取光源的颜色、位置等信息传值给着色器中的uniform变量。
+
+本节课通过自定义着色器材质`ShaderMaterial`API来演示光源对象的自动化传值过程。
+
++ **着色器**
+
+片元着色器中声明点光源、平行光源、方向光源等等光源对应的所有uniform变量。
+
+```JavaScript
+// 大多数着色器模块依赖该模块，该模块定义了大多数通用的常量、变量和函数
+#include <common>
+// 光照计算的一些相关算法函数
+#include <bsdfs>
+// 声明点光源、环境光、方向光等等光源的uniform变量
+// <lights_pars_begin>模块依赖<bsdfs>和<common>
+#include <lights_pars_begin>
+```
+
++ **访问光源信息**
+
+lights_pars_begin中声明一些光源相关的变量，比如一个光源对象的所有属性对应一个自定义结构体，所有方向光光源对象作为着色器中一个数组变量的元素。
+
+访问第一个方向光源的方向`directionalLights[0].direction`,访问第二个方向光光源的颜色`directionalLights[1].color`
+
++ **uniforms属性**
+
+调用`THREE.UniformsLib["lights"]`设置ShaderMaterial材质对象的uniforms属性。该属性设置后，光源对象相关的值value都是空的，只要设置`material.lights = true;`，这些光源对象相关的uniform变量对应的值value，Threejs渲染器系统会自动帮你从Threejs光源对象中提取相关的信息。具体的提取过程可以阅读`three.js-master\src\renderers\webgl`目录下`WebGLLights.js`等源码模块了解。
+
+### 13.着色器——phong网格材质二次开发
+
+通过着色器材质`ShaderMaterial`编写着色器代码自定义一个材质对象，保证材质对象实现高光网格材质`MeshPhongMaterial`的功能，同时增加灰度计算的功能。
+
++ 实现思路
+
+完全重新编写`ShaderMaterial`的着色器代码比较麻烦，可以复制Three.js高光网格材质`MeshPhongMaterial`对应的顶点着色器代码meshphong_vert.glsl和片元着色器代码meshphong_frag.glsl，然后在复制的代码基础上进行改写。灰度计算代码属于片元着色器代码，所以只需要修改片元着色器代码meshphong_frag.glsl即可。
+
+```JavaScript
+var material = new THREE.ShaderMaterial({
+  // 通过THREE.ShaderLib获得MeshPhongMaterial材质对象的uniforms值
+  // 用于给着色器中的uniform变量传值
+  uniforms: THREE.ShaderLib['phong'].uniforms,
+  // 顶点着色器
+  vertexShader: THREE.ShaderChunk['meshphong_vert'],
+  // 片元着色器
+  fragmentShader: document.getElementById('fragmentShader').textContent,
+});
+```
+
++ **meshphong_frag.glsl修改**
+
+复制meshphong_frag.glsl着色器代码，然后增加一个灰度计算的功能
+
+```glsl
+<script id="fragmentShader" type="x-shader/x-fragment">
+#define PHONG
+uniform vec3 diffuse;
+...
+uniform float opacity;
+#include <common>
+...
+...
+#include <envmap_fragment>
+// 原来的给片元赋值的代码注释，重新编写加入灰度计算功能
+// gl_FragColor = vec4( outgoingLight, diffuseColor.a );
+
+//计算RGB三个分量光能量之和，也就是亮度
+float luminance = 0.299*outgoingLight.r+0.587*outgoingLight.g+0.114*outgoingLight.b;
+//逐片元赋值，RGB相同均为亮度值，用黑白两色表达图片的明暗变化
+gl_FragColor = vec4(luminance,luminance,luminance,diffuseColor.a);
+
+...
+...
+</script>
+```
+
 ## 18.other
 
 ### 1.stats.js
