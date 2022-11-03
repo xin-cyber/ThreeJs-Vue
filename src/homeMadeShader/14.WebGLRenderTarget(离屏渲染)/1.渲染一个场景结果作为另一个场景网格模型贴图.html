@@ -99,10 +99,10 @@
     // 渲染函数
     function render() {
       // 设置当前渲染场景的背景
-      renderer.setClearColor(0xff0000, 1);
+      renderer.setClearColor(0xff00ff, 1);
       //渲染到自定义的帧缓冲区(WebGL渲染目标对象)
       // 设置特定target的时候，render渲染结果不会显示在canvas画布上
-      renderer.render(scene, camera,target); //执行渲染操作
+      renderer.render(scene, camera, target); //执行渲染操作 一张图片作为第二个场景的纹理贴图
       // 设置当前渲染场景的背景
       renderer.setClearColor(0x000000, 1);
       // 参数3没有指定渲染目标，渲染到canvas画布对应的帧缓冲区，绘制节显示到画布上

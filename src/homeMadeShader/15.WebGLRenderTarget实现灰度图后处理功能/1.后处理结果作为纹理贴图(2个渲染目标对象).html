@@ -107,7 +107,7 @@
       vertexShader: document.getElementById('vertexShader').textContent,
       // 片元着色器
       fragmentShader: document.getElementById('fragmentShader').textContent,
-      transparent:true,
+      transparent: true,
     });
     var mesh1 = new THREE.Mesh(geometry1, material1); //网格模型对象
     scene1.add(mesh1); //网格模型添加到场景中
@@ -162,15 +162,15 @@
     // 渲染函数
     function render() {
       // 设置当前渲染场景的背景
-      renderer.setClearColor(0xff0000, 1);
+      renderer.setClearColor(0xf00ff0, 1);
       //渲染到自定义的帧缓冲区(WebGL渲染目标对象)
       // 渲染结果保存到对象target0
-      renderer.render(scene, camera,target0); //执行渲染操作
+      renderer.render(scene, camera, target0); //执行渲染操作
 
       // 设置当前渲染场景的背景
-      renderer.setClearColor(0xffff00, 1);
+      renderer.setClearColor(0x00fff0, 1);
       // 渲染结果保存到对象target1
-      renderer.render(scene1, camera1,target1); //执行渲染操作
+      renderer.render(scene1, camera1, target1); //执行渲染操作
 
       // 设置当前渲染场景的背景
       renderer.setClearColor(0x000000, 1);

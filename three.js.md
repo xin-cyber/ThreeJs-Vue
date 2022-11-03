@@ -4131,6 +4131,105 @@ gl_FragColor = vec4(luminance,luminance,luminance,diffuseColor.a);
 </script>
 ```
 
+### 14. WebGLRenderTarget(离屏渲染)
+
+WebGL渲染目标对象`WebGLRenderTarget`实现了WebGL的离屏渲染功能，如果你有一定的WebGL或OpenGL基础，对帧缓冲区、离线渲染、后处理等概念应该是不陌生的。
+
+**`.render()`方法**
+
+WebGL渲染器WebGLRenderer渲染方法`.render()`的参数`( Scene, Camera, WebGLRenderTarget, forceClear )`.
+
+- Scene:要渲染的场景对象
+- Camera:场景对象对应的相机对象
+- WebGLRenderTarget:如果参数指定了WebGL渲染目标WebGLRenderTarget，渲染的图像结果保存到该对象，或者说保存到GPU自定义帧缓冲区中，不会显示到canvas画布上； 如果没有指定渲染目标，也就是没有该参数，渲染结果会直接显示到canvas画布上，或者说渲染结果保存到canvas画布对应的默认帧缓冲区中.
+
+**无渲染目标(Canvas显示)**
+
+执行下面代码会把场景scene的渲染结果保存到canvas画布对应的默认帧缓冲区中，形象点说就是可以直接显示到Cnavas画布上，显示器会自动读取CPU默认帧缓冲区上面的图像数据显示。
+
+```JavaScript
+  renderer.render(scene, camera);
+var renderer = new THREE.WebGLRenderer();
+renderer.setSize(width, height);
+// 渲染结果canvas元素插入到body元素中
+document.body.appendChild(renderer.domElement);
+// .domElement属性返回的一个canvas画布对象，保存了render方法的渲染结果
+console.log(renderer.domElement);
+```
+
+**有渲染目标(Canvas不显示)**
+
+执行下面代码WebGL渲染器的渲染结果，也就是一张图像，不会直接显示在Canvas画布上，从Three.js的角度阐述，渲染结果的RGBA像素数据存储到了WebGL渲染目标对象`WebGLRenderTarget`中，通过目标对象的纹理属性`.texture`可以获得渲染结果的RGBA像素数据，也就是一个Three.js的纹理对象`THREE.Texture`，可以作为材质对象颜色贴图属性`map`的属性值；从原生WebGL的角度阐述，就是渲染结果的RGBA像素值存储到了GPU一个自定义的帧缓冲区中，屏幕默认不会直接读取该缓冲区中的像素数据，通过WebGL的特定API可以获取，更多的信息可以百度WebGL或OpenGL离屏渲染。
+
+```JavaScript
+// 创建一个WebGL渲染目标对象WebGLRenderTarget
+// 设置渲染结果(一帧图像)的像素为500x500
+var target = new THREE.WebGLRenderTarget(500, 500);
+// 设置特定target的时候，render渲染结果不会显示在canvas画布上
+renderer.render(scene, camera,target); //执行渲染操作
+```
+
+ **`.texture`**
+
+通过WebGL渲染目标`WebGLRenderTarget`的纹理属性`.texture`可以获得WebGL渲染器的渲染结果，该属性返回的结果是一个纹理对象`THREE.Texture`，可以作为材质Material对象颜色贴图属性`map`的属性。
+
+```JavaScript
+var material = new THREE.MeshLambertMaterial({
+  // WebGL渲染目标对象属性.texture返回一张纹理贴图，也就是scene在camera下的渲染结果
+  map: target.texture,
+});
+```
+
+### 15.WebGLRenderTarget实现灰度图后处理功能
+
+这节课主要内容是把WebGL渲染目标对象`WebGLRenderTarget`和自定义着色器材质对象`ShaderMaterial`结合实现后处理功能。
+
+**灰度计算后处理**
+
+场景Scene对象的渲染结果保存到渲染目标对象target中
+
+```JavaScript
+var target = new THREE.WebGLRenderTarget(500, 500);
+
+renderer.render(scene, camera,target);
+```
+
+`target.texture`从渲染目标对象target获得渲染结果，然后通过`ShaderMaterial`对象把渲染结果传值给片元着色器中uniform定义的变量texture，然后进行灰度计算后处理。
+
+```JavaScript
+// 自定义顶点着色器对象
+var material2 = new THREE.ShaderMaterial({
+  uniforms: {
+    // texture对应顶点着色器中uniform声明的texture变量
+    texture: {
+      // WebGL渲染目标对象属性.texture返回一张纹理贴图
+      value: target.texture
+    },
+  },
+  // 顶点着色器
+  vertexShader: document.getElementById('vertexShader').textContent,
+  // 片元着色器
+  fragmentShader: document.getElementById('fragmentShader').textContent,
+});
+```
+
+材质对象material2是场景2中一个网格模型的纹理贴图，通过render渲染方法把后处理灰度效果显示出来
+
+```JavaScript
+renderer.render(scene2, camera2);
+```
+
+**创建多个WebGL渲染目标对象**
+
+可以创建多个WebGL渲染目标对象分别保存一个WebGL渲染器的渲染结果，满足一个应用需要在GPU上临时保存多个后处理效果，而不显示在Canvas画布上。
+
+```JavaScript
+// 创建一个WebGL渲染目标对象target0，像素500X500
+var target0 = new THREE.WebGLRenderTarget(500, 500);
+// 创建一个WebGL渲染目标对象target1，像素300X500
+var target1 = new THREE.WebGLRenderTarget(500, 500);
+```
+
 ## 18.other
 
 ### 1.stats.js
