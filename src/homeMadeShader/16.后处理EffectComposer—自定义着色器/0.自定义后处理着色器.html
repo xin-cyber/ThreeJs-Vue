@@ -5,11 +5,11 @@
   <meta charset="UTF-8">
   <title>作者博客：百度"three.js 郭隆邦"</title>
   <style>
-    body{
-            margin: 0;
-            overflow: hidden;//隐藏body窗口区域滚动条
-        }
-    </style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
   <!--引入three.js三维引擎-->
   <script src="http://www.yanhuangxueyuan.com/versions/threejsR92/build/three.js"></script>
   <!-- 引入threejs扩展控件OrbitControls.js-->
@@ -122,12 +122,12 @@
 
     // 渲染函数
     function render() {
-       // 使用后处理模块EffectComposer，可通过该对象的render方法调用渲染器的render方法
+      // 使用后处理模块EffectComposer，可通过该对象的render方法调用渲染器的render方法
       composer.render();
       requestAnimationFrame(render);
     }
     render();
-    var controls = new THREE.OrbitControls(camera,renderer.domElement); //创建控件对象
+    var controls = new THREE.OrbitControls(camera, renderer.domElement); //创建控件对象
   </script>
 </body>
 

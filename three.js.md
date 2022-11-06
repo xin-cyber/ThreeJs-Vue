@@ -4230,6 +4230,234 @@ var target0 = new THREE.WebGLRenderTarget(500, 500);
 var target1 = new THREE.WebGLRenderTarget(500, 500);
 ```
 
+### 16.后处理EffectComposer—自定义着色器
+
+3D场景和相机设置好后，执行渲染器渲染相机下的场景，渲染结果就是一张图片，周期性地执行渲染器渲染方法，一帧一帧图片就构成了动画效果。 后处理简单的说，可以理解为处理图片，比如把一张彩色图变成灰度图，或者给一张图片或者图片场景中一个物体添加一个一个边框...
+
+`EffectComposer.js`封装了WebGL渲染目标`WebGLRenderTarget`API，相比直接使用`WebGLRenderTarget`进行后处理要方便得多。
+
++ **后期处理相关.js文件路径**
+
+后处理相关的库基本都在路径`three.js-master\examples\js\`下面`postprocessing`和`shaders` 两个文件夹下。
+
+EffectComposer.js库依赖RenderPass.js、ShaderPass.js、CopyShader.js。
+
+```HTML
+<!-- 引入EffectComposer.js库  封装了WebGLRenderTarget  可以调用WebGL渲染器的渲染方法 -->
+<script src="./three.js-master/examples/js/postprocessing/EffectComposer.js"></script>
+
+<!-- renderPass.js库  构造函数传入场景Scene和相机Camera作为构造函数renderPass的参数 -->
+<script src="./three.js-master/examples/js/postprocessing/RenderPass.js"></script>
+
+<!-- 这两个好像不能删除   EffectComposer依赖它们-->
+<!-- ShaderPass.js库，一个ShaderPass调用一个自定义着色器代码就构成一个后处理通道 -->
+<script src="./three.js-master/examples/js/postprocessing/ShaderPass.js"></script>
+
+<!-- 引入CopyShader.js库  CopyShader.js包含着色器代码，着色器代码功能：采样一张图片像素赋值给片元 -->
+<script src="./three.js-master/examples/js/shaders/CopyShader.js"></script>
+```
+
++ **EffectComposer.js**
+
+`EffectComposer`构造函数的参数是渲染器对象`renderer`.
+
+```javascript
+  var composer = new THREE.EffectComposer(renderer);
+```
+
++ **EffectComposer方法`.render()`**
+
+`EffectComposer`构造函数的参数是**WebGL渲染器**,执行`EffectComposer`的渲染方法`.render()`方法，相当于执行了WebGL渲染器对象的`.render()`方法。
+
+```javascript
+  function render() {
+    // EffectComposer的渲染方法.render()执行一次，相当于执行一次renderer.render()得到一帧图像
+    composer.render();
+    requestAnimationFrame(render);
+  }
+```
+
++ **EffectComposer方法`.addPass()`**
+
+该方法用于给EffectComposer对象添加后处理通道，可以添加多个后处理通道，每个通道就是一个处理环节，通道本质就是着色器代码。
+
+```javascript
+// 把渲染器作为参数
+var composer = new THREE.EffectComposer(renderer);
+// 设置renderPass通道，该通道并不对渲染结果的像素数据进行处理
+composer.addPass(renderPass);
+// 设置灰度图通道grayShaderPass，对渲染结果进行灰度计算处理
+composer.addPass(grayShaderPass);
+```
+
++ **通道对象的属性`.renderToScreen`**
+
+默认值是`false`，经过该通道的处理后的图像结果保存到`EffectComposer`对象的WebGL渲染目标对象`WebGLRenderTarget`中，如果你有WebGL基础，你也可以理解为把结果保存到自定义的帧缓冲区中，不会在canvas画布上直接显示。
+
+如果设置`Pass.renderToScreen = true;`，表示经过该通道的处理结果存储到系统默认的帧缓冲区中，也就是直接显示在canvas画布上面。
+
++ **RenderPass通道**
+
+`RenderPass`构造函数的参数是场景和相机对象(scene,camera) ，RenderPass通道的作用是把场景和相机作为参数传入，获得场景的渲染结果，并不对渲染结果做特定处理。如果`EffectComposer`对象只使用该通道，可以简单认为和直接调用WebGL渲染器的render方法区别不大，最终效果是一样的。一般来说RenderPass通道是`EffectComposer`对象的第一个通道。
+
+```javascript
+var renderPass = new THREE.RenderPass(scene, camera);
+// 渲染结果默认不显示，如果renderToScreen设置为true，经过该通道处理后会直接显示到Caanvas画布上
+renderPass.renderToScreen = true;
+
+var composer = new THREE.EffectComposer(renderer);
+// 渲染通道插入EffectComposer对象中
+composer.addPass(renderPass);
+```
+
++ **THREE.ShaderPass通道**
+
+该通道是着色器通道，可以自定义后处理的着色器代码作为`THREE.ShaderPasss`构造函数的参数。
+
+顶点着色器和片元着色器的编写要遵守一定的格式，具体格式可以参照`CopyShader.js`文件，在该文件的基础上进行修改，`CopyShader.js`文件中的着色器代码基本功能就是获取颜色贴图的像素值赋值给片元，不做特定功能的后期处理。
+
+下面顶点和片元着色器代码的后期处理功能就是灰度计算。
+
+顶点着色器代码和`CopyShader.js`文件中顶点着色器代码一样没有改变。
+
+```HTML
+<script id="vertexShader" type="x-shader/x-vertex">
+  // 声明一个变量vUv表示uv坐标插值后的结果
+  varying vec2 vUv;
+  void main(){
+    // 纹理坐标插值计算
+    vUv = uv;
+    // projectionMatrix投影矩阵  modelViewMatrix模型视图矩阵
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+  }
+</script>
+```
+
+片元着色器在`CopyShader.js`片元着色器的基础上进行了一定更改，插入一段灰度计算的代码。
+
+```HTML
+ <script id="fragmentShader" type="x-shader/x-fragment">
+  // 默认设置颜色贴图的变量是tDiffuse
+  uniform sampler2D tDiffuse;
+  varying vec2 vUv;
+  void main() {
+    //采集纹素
+    vec4 tColor = texture2D( tDiffuse, vUv );
+    //计算RGB三个分量光能量之和，也就是亮度
+    float luminance = 0.299*tColor.r+0.587*tColor.g+0.114*tColor.b;
+    //逐片元赋值，RGB相同均为亮度值，用黑白两色表达图片的明暗变化
+    gl_FragColor = vec4(luminance,luminance,luminance,1);
+  }
+</script>
+```
+
+创建着色器通道ShaderPass，着色器通道ShaderPass构造函数参数格式和着色器材质`ShaderMaterial`构造函数的选项参数一样。
+
+```javascript
+//自定义后处理通道
+var GreyShader = {
+  uniforms: {
+// 和着色器tDiffuse变量对应
+// THREE.ShaderPass会把渲染结果，也就是一张图片的像素值对应Texture对象赋值给tDiffuse
+    tDiffuse: {
+      value: null
+    },
+  },
+  vertexShader: document.getElementById('vertexShader').textContent,
+  fragmentShader: document.getElementById('fragmentShader').textContent,
+}
+// GreyShader作为THREE.ShaderPass的参数
+var grayShaderPass = new THREE.ShaderPass(GreyShader);
+```
+
++ **自定义R分量提取功能的着色器代码**
+
+直接修改片元着色器就可以
+
+```javascript
+void main() {
+  gl_FragColor = texture2D( tDiffuse, vUv );
+}
+void main() {
+  //采集纹素
+  vec4 tColor = texture2D( tDiffuse, vUv );
+  //计算RGB三个分量光能量之和，也就是亮度
+  float luminance = 0.299*tColor.r+0.587*tColor.g+0.114*tColor.b;
+  //逐片元赋值，RGB相同均为亮度值，用黑白两色表达图片的明暗变化
+  gl_FragColor = vec4(luminance,luminance,luminance,1);
+}
+void main() {
+  //采集纹素
+  vec4 tColor = texture2D( tDiffuse, vUv );
+  //逐片元赋值，RGB相同均为亮度值，用黑白两色表达图片的明暗变化
+  gl_FragColor = vec4(tColor.r,0,0,1);
+}
+```
+
++ **多个处理通道**
+
+多个通道之间是串联关系，执行一个通道的渲染结果，默认保存得到CPU自定义帧缓冲区中，不会显示在Canvas画布上，如果某个通道设置`Pass.renderToScreen = true;`，渲染结果就会直接显示在Canvas画布上。
+
+> 最后一个通道pass设置Pass.renderToScreen = true
+
+```javascript
+var composer = new THREE.EffectComposer(renderer);
+// 设置renderPass通道
+composer.addPass(renderPass);
+// 设置R分量提取通道RShaderPass
+composer.addPass(RShaderPass);
+// 设置灰度图通道grayShaderPass，对渲染结果进行灰度计算处理
+composer.addPass(grayShaderPass);
+```
+
+### 17.后处理EffectComposer——直接调用常见通道
+
+上节课讲解的是自定义通道的着色器代码，本节课讲解直接调用一个特定功能的通道模块，通道使用的着色器代码已经配置好，不需要自己编写。
+
++ **GlitchPass通道**
+
+效果：随机产生电脉冲
+
+```js
+// GlitchPass`通道依赖`THREE.DigitalGlitch`提供的uniforms对象、顶点着色器代码和片元着色器代码。 `THREE.DigitalGlitch`的路径`three.js-master\examples\js\shaders\DigitalGlitch.js
+var renderPass = new THREE.RenderPass(scene, camera);
+var GlitchPass = new THREE.GlitchPass(64);
+GlitchPass.renderToScreen = true;
+var composer = new THREE.EffectComposer(renderer);
+composer.addPass(renderPass);
+composer.addPass(GlitchPass);
+```
+
++ **FilmPass通道**
+
+模拟电视屏效果
+
+```javascript
+var renderPass = new THREE.RenderPass(scene, camera);
+var FilmPass = new THREE.FilmPass(0.3, 0.4, 512, false);
+FilmPass.renderToScreen = true;
+var composer = new THREE.EffectComposer(renderer);
+composer.addPass(renderPass);
+composer.addPass(FilmPass);
+```
+
++ **OutlinePass通道**
+
+一个模型外面添加一个高亮的外边框
+
+```javascript
+var renderPass = new THREE.RenderPass(scene, camera);
+var OutlinePass = new THREE.OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
+OutlinePass.renderToScreen = true;
+var composer = new THREE.EffectComposer(renderer);
+composer.addPass(renderPass);
+composer.addPass(OutlinePass);
+
+//设置需要添加外边框的网格模型
+//交互的时候可以设置一个鼠标事件，点击选中了某个模型，就直接把某个网格模型作为值的元素
+OutlinePass.selectedObjects = [mesh];
+```
+
 ## 18.other
 
 ### 1.stats.js
