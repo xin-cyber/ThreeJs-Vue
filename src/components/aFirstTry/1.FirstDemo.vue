@@ -32,8 +32,8 @@ export default {
         // 场景
         const scene = new THREE.Scene()
         // 坐标轴 辅助
-        var axes = new THREE.AxesHelper(700)
-        scene.add(axes)
+        // var axes = new THREE.AxesHelper(700)
+        // scene.add(axes)
 
 
         const color = 0xffffff
