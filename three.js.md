@@ -1288,6 +1288,14 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
   获得前后两次执行该方法的时间间隔
 
   > 假设你执行一次`.getDelta ()`方法，再执行一次`.getDelta ()`方法，第二次执行`.getDelta ()`方法时候，可以返回上次调用该方法到本次调用之间的时间间隔，返回间隔时间单位是秒，
+  
+  ![image-20221112215824284](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221112215824284.png)
+  
+  ![image-20221112220041478](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221112220041478.png)
+  
+  > ⚪型转圈 
+  
+  ![image-20221112220327410](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20221112220327410.png)
 
 ## 15.controls
 
