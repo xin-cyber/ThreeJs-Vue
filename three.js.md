@@ -4778,4 +4778,4 @@ loader.load('group.json', function(group) {
 
 ### 14.广告牌（精灵文字）
 
-> http://localhost:8080/manual/#zh/canvas-textures
+> http://localhost:8080/manual/#zh/billboards

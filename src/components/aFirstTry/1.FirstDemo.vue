@@ -1,5 +1,5 @@
 <template>
-    <div></div>
+    <div id="tooltip"></div>
 </template>
 
 <script>
@@ -14,7 +14,7 @@ export default {
         document.body.appendChild(renderer.domElement);
 
         // 以北京为中心 修改坐标
-        const projection1 = d3.geoMercator().center([116.412318, 39.909843]).translate([0, 0])
+        const projection1 = d3.geoMercator().center([116.405285, 39.904989]).translate([0, 0])
 
         // 透视投影相机
         const camera = new THREE.PerspectiveCamera(
@@ -32,7 +32,7 @@ export default {
         // 场景
         const scene = new THREE.Scene()
         // 坐标轴 辅助
-        // var axes = new THREE.AxesHelper(700)
+        // let axes = new THREE.AxesHelper(700)
         // scene.add(axes)
 
 
@@ -101,6 +101,85 @@ export default {
             return new THREE.Line(lineGeometry, lineMaterial)
         }
 
+        function makeLabelCanvas(size, name) {
+            const borderSize = 15;
+            const ctx = document.createElement('canvas').getContext('2d');
+            const font = `${size}px bold sans-serif`;
+            ctx.font = font;
+            const doubleBorderSize = borderSize * 2;
+            const width = ctx.measureText(name).width + doubleBorderSize;
+            const height = size + doubleBorderSize;
+            ctx.canvas.width = width;
+            ctx.canvas.height = height;
+
+            // 注意，调整画布后需要重新修改字体
+            ctx.font = font;
+            ctx.textBaseline = 'top';
+            ctx.fillStyle = '#167780';
+            ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = 'black';
+            ctx.fillText(name, borderSize, borderSize);
+            return ctx.canvas;
+        }
+
+        function makeTextSprite(center, name, projection) {
+            if (!center) return
+            const [x, y] = projection(center)
+            const canvas = makeLabelCanvas(40, name);
+            const texture = new THREE.Texture(canvas)
+            texture.needsUpdate = true;
+            texture.minFilter = THREE.LinearFilter;
+            texture.wrapS = THREE.ClampToEdgeWrapping;
+            texture.wrapT = THREE.ClampToEdgeWrapping;
+
+            const spriteMaterial = new THREE.SpriteMaterial({
+                map: texture,
+                transparent: true,
+            });
+            spriteMaterial.depthTest = false;
+            // spriteMaterial.blending = THREE.AdditiveBlending;
+            const sprite = new THREE.Sprite(spriteMaterial);
+            sprite.position.set(x, -y, 13);
+            sprite.scale.set(canvas.width > 280 ? 10 : 5, 2.5, 1);
+            return sprite
+        }
+
+        let changeNum = 25
+        // 绘制线条函数
+        function drawMetapLine(v0, v3) {
+            let v1 = {};
+            v1.x = (v0.x + v3.x) / 2;
+            v1.y = (v0.y + v3.y) / 2;
+            v1.z = 23;
+            // 绘制贝塞尔曲线
+            let curve = new THREE.QuadraticBezierCurve3(v0, v1, v3);
+            let geometry = new THREE.BufferGeometry().setFromPoints(curve.getPoints(100));
+            let material = new THREE.LineBasicMaterial({
+                // color: 'red',
+                // transparent: true,
+                // opacity: 0.5
+                linewidth: 3,
+                vertexColors: true
+            });
+            const colors = [];
+
+            for (let i = 0; i < 101; i++) {
+                if (changeNum < i && i < changeNum + 10) {
+                    colors.push(0.99);
+                    colors.push(0);
+                    colors.push(0.01);
+                } else {
+                    colors.push(0.9);
+                    colors.push(0.72);
+                    colors.push(0.5);
+                }
+            }
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            geometry.colorsNeedUpdate = true;
+            let line = new THREE.Line(geometry, material);
+            return line
+        }
+
         const map = new THREE.Object3D()
         // 解析数据
         function operationData(jsondata) {
@@ -113,9 +192,12 @@ export default {
                 // 地址
                 province.properties = feature.properties.name
                 const coordinates = feature.geometry.coordinates
-                const color = 'yellow'
+                const centerPosition = feature.properties.center
+                const color = '#2defff'
                 // const color = ['重庆市', '上海市'].includes(feature.properties.name) ? 'blue' : 'yellow'
 
+                const lable = makeTextSprite(centerPosition, feature.properties.name, projection1)
+                lable && province.add(lable)
                 if (feature.geometry.type === 'MultiPolygon') {
                     // 多个，多边形
                     coordinates.forEach((coordinate) => {
@@ -123,6 +205,7 @@ export default {
                         coordinate.forEach((rows) => {
                             const mesh = drawExtrudeMesh(rows, color, projection1)
                             const line = lineDraw(rows, color, projection1)
+
                             // 唯一标识
                             mesh.properties = feature.properties.name
 
@@ -146,34 +229,34 @@ export default {
                 }
                 map.add(province)
             })
+            const [x, y] = projection1([116.405285, 39.904989])
+            const [x1, y1] = projection1([103.823557, 36.058039])
+
+            let line = drawMetapLine(new THREE.Vector3(x, -y, 10), new THREE.Vector3(x1, -y1, 10))
+            line.name = 'curveLinkOne'
+            map.add(line)
             scene.add(map)
         }
 
-        // 计算 以画布 开始为（0，0）点 的鼠标坐标
-        function getCanvasRelativePosition(event) {
-            const rect = renderer.domElement.getBoundingClientRect()
-            return {
-                x: ((event.clientX - rect.left) * renderer.domElement.width) / rect.width,
-                y: ((event.clientY - rect.top) * renderer.domElement.height) / rect.height
-            }
-        }
+
+
         /**
          * 获取鼠标在three.js 中归一化坐标
          * */
         function setPickPosition(event) {
             let pickPosition = { x: 0, y: 0 }
-            // 计算后 以画布 开始为 （0，0）点
-            const pos = getCanvasRelativePosition(event)
-            // 数据归一化
-            pickPosition.x = (pos.x / renderer.domElement.width) * 2 - 1
-            pickPosition.y = (pos.y / renderer.domElement.height) * -2 + 1
+            pickPosition.x = (event.clientX / renderer.domElement.width) * 2 - 1
+            pickPosition.y = (event.clientY / renderer.domElement.height) * -2 + 1
             return pickPosition
         }
 
-        // 监听鼠标
-        window.addEventListener('click', onRay)
         // 全局对象
         let lastPick = null
+
+        // 监听鼠标
+        window.addEventListener('click', onRay)
+        // window.addEventListener('mousemove', onMove)
+
         function onRay(event) {
             let pickPosition = setPickPosition(event)
             const raycaster = new THREE.Raycaster()
@@ -184,7 +267,7 @@ export default {
             if (intersects.length > 0) {
                 if (lastPick) {
                     if (lastPick.object.properties !== intersects[0].object.properties) {
-                        lastPick.object.material.color.set('yellow')
+                        lastPick.object.material.color.set('#2defff')
                         lastPick = null
                     }
                 }
@@ -196,12 +279,33 @@ export default {
                 if (lastPick) {
                     // 复原
                     if (lastPick.object.properties) {
-                        lastPick.object.material.color.set('yellow')
+                        lastPick.object.material.color.set('#2defff')
                         lastPick = null
                     }
                 }
             }
         }
+
+        // function onMove(event) {
+        //     let mousePosition = setPickPosition(event)
+        //     let tooltip = document.getElementById('tooltip')
+        //     tooltip.style.left = event.clientX + 2 + 'px'
+        //     tooltip.style.top = event.clientY + 2 + 'px'
+        //     const raycaster = new THREE.Raycaster()
+        //     raycaster.setFromCamera(mousePosition, camera)
+        //     // 计算物体和射线的交点
+        //     const intersects = raycaster.intersectObjects([map], true)
+        //     // 数组大于0 表示有相交对象
+        //     if (intersects.length > 0) {
+
+        //         if (intersects[0].object.properties) {
+        //             tooltip.textContent = intersects[0].object.properties
+        //         }
+        //         tooltip.style.visibility = 'visible'
+        //     } else {
+        //         tooltip.style.visibility = 'hidden'
+        //     }
+        // }
 
         // 重庆市为中心
         const projection2 = d3.geoMercator().center([106.557691, 29.559296]).translate([0, 0])
@@ -224,7 +328,7 @@ export default {
                 // 地址
                 province.properties = feature.properties.name
                 const coordinates = feature.geometry.coordinates
-                const color = 'yellow'
+                const color = '#2defff'
                 // const color = ['重庆市', '上海市'].includes(feature.properties.name) ? 'blue' : 'yellow'
 
                 if (feature.geometry.type === 'MultiPolygon') {
@@ -261,12 +365,36 @@ export default {
             scene2.add(map2)
         }
 
+
         // 渲染
         function render() {
             if (lastPick && lastPick.object.properties === '重庆市') {
                 renderer.render(scene2, camera)
             } else {
                 renderer.render(scene, camera)
+            }
+            changeNum++
+            if (changeNum > 75) {
+                changeNum = 0
+            }
+            var curve = scene.getObjectByName("curveLinkOne");
+            if (curve) {
+                let color = curve.geometry.getAttribute('color')
+
+                let colors = [];
+                for (let i = 0; i < 101; i++) {
+                    if (changeNum < i && i < changeNum + 10) {
+                        colors.push(0.9);
+                        colors.push(0.72);
+                        colors.push(0.5);
+                    } else {
+                        colors.push(0.99);
+                        colors.push(0);
+                        colors.push(0.01);
+                    }
+                }
+                curve.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+                color.needsUpdate = true;
             }
 
             requestAnimationFrame(render)
@@ -276,5 +404,12 @@ export default {
 }
 </script>
 <style scoped>
-
+#tooltip {
+    position: absolute;
+    z-index: 2;
+    background: white;
+    padding: 6px;
+    border-radius: 3px;
+    visibility: hidden;
+}
 </style>
