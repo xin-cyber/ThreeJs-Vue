@@ -4779,3 +4779,24 @@ loader.load('group.json', function(group) {
 ### 14.广告牌（精灵文字）
 
 > http://localhost:8080/manual/#zh/billboards
+
+
+
+### 15.全屏
+
+```js
+// webkit 兼容safari
+const a = document.fullscreenElement || document.webkitFullscreenElement
+if (!a) {
+    if (canvas.reaquestFullscreen) {
+        canvas.reaquestFullscreen()
+    } else if (canvas.webkitFeaquestFullscreen()) {
+        canvas.webkitFeaquestFullscreen()
+    }
+
+} else {
+    // 同上，加个webkit
+    document.exitFullscreen()
+}
+```
+
