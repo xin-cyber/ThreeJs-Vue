@@ -3818,7 +3818,7 @@ function render() {
 }
 ```
 
-### 9.着色器——着色器模块.glsl调用
+### 9.着色器—着色器模块.glsl调用
 
 路径`three.js-master\src\renderers\shaders`下，
 
@@ -4062,7 +4062,7 @@ material.lights = true;
 material.uniforms.diffuse.value.setRGB(1.0, 1.0, 0.0)
 ```
 
-### 12.着色器——自动提取光源对象信息
+### 12.着色器—自动提取光源对象信息
 
 Three.js有点光源、环境光等等各种常见光源对象，一个应用中会有多个光源对象，在渲染的过程中，Threejs渲染器会自动从这些光源对象提取光源的颜色、位置等信息传值给着色器中的uniform变量。
 
@@ -4092,7 +4092,7 @@ lights_pars_begin中声明一些光源相关的变量，比如一个光源对象
 
 调用`THREE.UniformsLib["lights"]`设置ShaderMaterial材质对象的uniforms属性。该属性设置后，光源对象相关的值value都是空的，只要设置`material.lights = true;`，这些光源对象相关的uniform变量对应的值value，Threejs渲染器系统会自动帮你从Threejs光源对象中提取相关的信息。具体的提取过程可以阅读`three.js-master\src\renderers\webgl`目录下`WebGLLights.js`等源码模块了解。
 
-### 13.着色器——phong网格材质二次开发
+### 13.着色器—phong网格材质二次开发
 
 通过着色器材质`ShaderMaterial`编写着色器代码自定义一个材质对象，保证材质对象实现高光网格材质`MeshPhongMaterial`的功能，同时增加灰度计算的功能。
 
@@ -4418,7 +4418,7 @@ composer.addPass(RShaderPass);
 composer.addPass(grayShaderPass);
 ```
 
-### 17.后处理EffectComposer——直接调用常见通道
+### 17.后处理EffectComposer—直接调用常见通道
 
 上节课讲解的是自定义通道的着色器代码，本节课讲解直接调用一个特定功能的通道模块，通道使用的着色器代码已经配置好，不需要自己编写。
 
@@ -4621,161 +4621,206 @@ sphere.center=new THREE.Vector3(-10, -10,0);
 sphere.radius=20;
 ```
 
-#### Box3方法`.setFromPoints()`
++ #### Box3方法`.setFromPoints()`
 
-包围盒Box3方法`.setFromPoints()`用来计算一系列顶点集合的最小包围盒，参数是表示顶点坐标的三维向量`Vector3`作为元素构成的数组对象。
+  包围盒Box3方法`.setFromPoints()`用来计算一系列顶点集合的最小包围盒，参数是表示顶点坐标的三维向量`Vector3`作为元素构成的数组对象。
 
-```JavaScript
-// 通过球体API创建一个几何体，本质上就是一系列沿着球面分布的顶点
-var geometry = new THREE.SphereGeometry(50, 100, 100);
-// 创建一个包围盒对象Box3
-var box3 = new THREE.Box3()
-// 计算点集geometry.vertices的包围盒
-box3.setFromPoints(geometry.vertices);
-console.log('box3', box3);
-```
+  ```JavaScript
+  // 通过球体API创建一个几何体，本质上就是一系列沿着球面分布的顶点
+  var geometry = new THREE.SphereGeometry(50, 100, 100);
+  // 创建一个包围盒对象Box3
+  var box3 = new THREE.Box3()
+  // 计算点集geometry.vertices的包围盒
+  box3.setFromPoints(geometry.vertices);
+  console.log('box3', box3);
+  ```
 
-#### 几何体方法`.computeBoundingBox()`
+  #### 几何体方法`.computeBoundingBox()`
 
-几何体`Geometry`调用`Box3`的方法`.setFromPoints()`封装了一个方法`.computeBoundingBox()`，用来计算几何体的包围盒属性`.boundingBox`。
+  几何体`Geometry`调用`Box3`的方法`.setFromPoints()`封装了一个方法`.computeBoundingBox()`，用来计算几何体的包围盒属性`.boundingBox`。
 
-几何体包围盒属性`.boundingBox`默认值为空null，执行`.computeBoundingBox()`方法才会计算该几何体的包围盒Box3，然后赋值给`.boundingBox`属性。
+  几何体包围盒属性`.boundingBox`默认值为空null，执行`.computeBoundingBox()`方法才会计算该几何体的包围盒Box3，然后赋值给`.boundingBox`属性。
 
-几何体包围球属性`.boundingSphere`使用方式和包围盒属性`.boundingBox`一样。
+  几何体包围球属性`.boundingSphere`使用方式和包围盒属性`.boundingBox`一样。
 
-```JavaScript
-var geometry = new THREE.SphereGeometry(50, 100, 100); // 球体
-// .computeBoundingBox()方法计算.boundingBox的属性值
-geometry.computeBoundingBox();
-console.log('包围盒属性', geometry.boundingBox);
-// 包围球相关属性和计算方法和包围盒一样
-geometry.computeBoundingSphere();
-console.log('包围球属性', geometry.boundingSphere);
-```
+  ```JavaScript
+  var geometry = new THREE.SphereGeometry(50, 100, 100); // 球体
+  // .computeBoundingBox()方法计算.boundingBox的属性值
+  geometry.computeBoundingBox();
+  console.log('包围盒属性', geometry.boundingBox);
+  // 包围球相关属性和计算方法和包围盒一样
+  geometry.computeBoundingSphere();
+  console.log('包围球属性', geometry.boundingSphere);
+  ```
 
-+ **几何体居中方法center()**
+  + **几何体居中方法center()**
 
-在空间坐标系中把几何体居中，也就是几何体对应的包围盒中心平移到坐标原点。
+  在空间坐标系中把几何体居中，也就是几何体对应的包围盒中心平移到坐标原点。
 
-```JavaScript
-// 几何体的中心默认与坐标原点重合
-var geometry = new THREE.BoxGeometry(50, 50, 50);
-// 几何体沿着x轴平移50，几何体的顶点坐标变化
-geometry.translate(50, 0, 0);
-// 居中：偏移的几何体居中
-geometry.center();
-```
+  ```JavaScript
+  // 几何体的中心默认与坐标原点重合
+  var geometry = new THREE.BoxGeometry(50, 50, 50);
+  // 几何体沿着x轴平移50，几何体的顶点坐标变化
+  geometry.translate(50, 0, 0);
+  // 居中：偏移的几何体居中
+  geometry.center();
+  ```
 
-#### Box3方法`.expandByObject()`
+  #### Box3方法`.expandByObject()`
 
-获得层级模型的包围盒，一个层级模型可能包含多个子孙后代，具体点说，比如一个Group对象有多个网格模型Mesh作为子对象。
+  获得层级模型的包围盒，一个层级模型可能包含多个子孙后代，具体点说，比如一个Group对象有多个网格模型Mesh作为子对象。
 
-加载一个层级模型，并计算它的包围盒
+  加载一个层级模型，并计算它的包围盒
 
-```JavaScript
- loader.load('./group.json', function (group) {
-     // 一般来说一个三维场景中，不可能几何中心刚好是原点坐标
-     // 所以这里设置一个偏移，表示一个在三维空间中任意位置的层级模型
-     group.position.set(30, -10, 50)
-     
-    scene.add(group); //加载返回的模型对象插入场景
-    var box3 = new THREE.Box3();
-    // ⭐计算层级模型group包围盒
-    box3.expandByObject(group);
-    console.log('查看包围盒box3', box3);
-    // 缩放包围盒，尺寸放大1.5倍
-    box3.expandByScalar(1.5);
+  ```JavaScript
+   loader.load('./group.json', function (group) {
+       // 一般来说一个三维场景中，不可能几何中心刚好是原点坐标
+       // 所以这里设置一个偏移，表示一个在三维空间中任意位置的层级模型
+       group.position.set(30, -10, 50)
+       
+      scene.add(group); //加载返回的模型对象插入场景
+      var box3 = new THREE.Box3();
+      // ⭐计算层级模型group包围盒
+      box3.expandByObject(group);
+      console.log('查看包围盒box3', box3);
+      // 缩放包围盒，尺寸放大1.5倍
+      box3.expandByScalar(1.5);
+  
+      var v3 = new THREE.Vector3();
+      // ⭐获得包围盒长宽高尺寸，结果保存在参数三维向量对象v3中
+      box3.getSize(v3);
+      console.log('查看返回的包围盒尺寸', v3);
+  
+      /**
+       * 创建一个半透明的网格模型可视化展示包围盒效果
+       */
+      // 通过包围盒返回的长宽高尺寸设置几何体长宽高尺寸
+      var geometry = new THREE.BoxGeometry(v3.x, v3.y, v3.z);
+      var material = new THREE.MeshPhongMaterial({
+          color: 0xffffff,
+          // wireframe:true,//将几何图形渲染为线框
+          transparent: true, //开启透明
+          opacity: 0.3, //透明度0.5
+      });
+      var mesh = new THREE.Mesh(geometry, material);
+      scene.add(mesh);
+       
+      // ⭐ 计算一下包围盒的中心点
+       let center = new THREE.Vector3()
+       box.getCenter(center)
+       mesh.position.copy(center)
+  });
+  ```
 
-    var v3 = new THREE.Vector3();
-    // ⭐获得包围盒长宽高尺寸，结果保存在参数三维向量对象v3中
-    box3.getSize(v3);
-    console.log('查看返回的包围盒尺寸', v3);
+  #### Box3方法`.expandByScalar()`
 
+  包围盒整体尺寸放大
+
+  ```JavaScript
+  // 缩放包围盒，尺寸放大1.5倍
+  box3.expandByScalar(1.5)
+  ```
+
+  #### Box3方法`.getSize()`
+
+  返回包围盒具体的长宽高尺寸
+
+  ```JavaScript
+  var v3 = new THREE.Vector3()
+  // 获得包围盒长宽高尺寸，结果保存在参数三维向量对象v3中
+  box3.getSize(v3)
+  console.log('查看返回的包围盒尺寸', v3);
+  ```
+
+  #### Box3方法`.getCenter()`
+
+  计算返回包围盒几何中心
+
+  ```JavaScript
+  // 计算一个层级模型对应包围盒的几何体中心
+  var center = new THREE.Vector3()
+  box3.getCenter(center)
+  console.log('查看几何体中心坐标', center);
+  ```
+
+  #### Sphere方法`.getBoundingSphere()`
+
+  包围盒Box3和包围球Sphere可以相互等价转化，通过包围盒对象来计算包围球对象
+
+  ```JavaScript
+  loader.load('group.json', function(group) {
+    scene.add(group)
+    var box3 = new THREE.Box3()
+    // 计算层级模型的包围盒
+    box3.expandByObject(group)
+    // 包围盒缩放
+    box3.expandByScalar(1.5)
+  
+    // 通过包围盒对象来计算包围球对象
+    var sphere = new THREE.Sphere()
+    box3.getBoundingSphere(sphere)
+    console.log('sphere', sphere);
     /**
-     * 创建一个半透明的网格模型可视化展示包围盒效果
+     * 创建网格模型
      */
-    // 通过包围盒返回的长宽高尺寸设置几何体长宽高尺寸
-    var geometry = new THREE.BoxGeometry(v3.x, v3.y, v3.z);
+    var geometry = new THREE.SphereGeometry(sphere.radius, 25, 25); //创建一个立方体几何对象Geometry
     var material = new THREE.MeshPhongMaterial({
-        color: 0xffffff,
-        // wireframe:true,//将几何图形渲染为线框
-        transparent: true, //开启透明
-        opacity: 0.3, //透明度0.5
+      color: 0xffffff,
+      transparent: true, //开启透明
+      opacity: 0.3, //透明度0.5
     });
     var mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
-     
-    // ⭐ 计算一下包围盒的中心点
-     let center = new THREE.Vector3()
-     box.getCenter(center)
-     mesh.position.copy(center)
-});
-```
+  })
+  ```
 
-#### Box3方法`.expandByScalar()`
-
-包围盒整体尺寸放大
-
-```JavaScript
-// 缩放包围盒，尺寸放大1.5倍
-box3.expandByScalar(1.5)
-```
-
-#### Box3方法`.getSize()`
-
-返回包围盒具体的长宽高尺寸
-
-```JavaScript
-var v3 = new THREE.Vector3()
-// 获得包围盒长宽高尺寸，结果保存在参数三维向量对象v3中
-box3.getSize(v3)
-console.log('查看返回的包围盒尺寸', v3);
-```
-
-#### Box3方法`.getCenter()`
-
-计算返回包围盒几何中心
-
-```JavaScript
-// 计算一个层级模型对应包围盒的几何体中心
-var center = new THREE.Vector3()
-box3.getCenter(center)
-console.log('查看几何体中心坐标', center);
-```
-
-#### Sphere方法`.getBoundingSphere()`
-
-包围盒Box3和包围球Sphere可以相互等价转化，通过包围盒对象来计算包围球对象
-
-```JavaScript
-loader.load('group.json', function(group) {
-  scene.add(group)
-  var box3 = new THREE.Box3()
-  // 计算层级模型的包围盒
-  box3.expandByObject(group)
-  // 包围盒缩放
-  box3.expandByScalar(1.5)
-
-  // 通过包围盒对象来计算包围球对象
-  var sphere = new THREE.Sphere()
-  box3.getBoundingSphere(sphere)
-  console.log('sphere', sphere);
-  /**
-   * 创建网格模型
-   */
-  var geometry = new THREE.SphereGeometry(sphere.radius, 25, 25); //创建一个立方体几何对象Geometry
-  var material = new THREE.MeshPhongMaterial({
-    color: 0xffffff,
-    transparent: true, //开启透明
-    opacity: 0.3, //透明度0.5
-  });
-  var mesh = new THREE.Mesh(geometry, material);
-  scene.add(mesh);
-})
-```
-
-
+  
 
 ### 14.广告牌（精灵文字）
 
 > http://localhost:8080/manual/#zh/billboards
+
+
+
+### 15.移除物体
+
+```js
+/**
+ * 清除模型，模型中有 group 和 scene,需要进行判断
+ * @param scene
+ * @returns
+ */
+function clearScene(){
+	// 从scene中删除模型并释放内存
+	if(myObjects.length > 0){		
+		for(var i = 0; i< myObjects.length; i++){
+			var currObj = myObjects[i];
+			
+			// 判断类型
+			if(currObj instanceof THREE.Scene){
+				var children = currObj.children;
+				for(var i = 0; i< children.length; i++){
+					deleteGroup(children[i]);
+				}	
+			}else{				
+				deleteGroup(currObj);
+			}
+			scene.remove(currObj);
+		}
+	}
+}
+
+// 删除group，释放内存
+function deleteGroup(group) {
+	//console.log(group);
+    if (!group) return;
+    // 删除掉所有的模型组内的mesh
+    group.traverse(function (item) {
+        if (item instanceof THREE.Mesh) {
+            item.geometry.dispose(); // 删除几何体
+            item.material.dispose(); // 删除材质
+        }
+    });
+}
+```
+

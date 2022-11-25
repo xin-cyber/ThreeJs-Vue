@@ -101,6 +101,49 @@ export default {
             return new THREE.Line(lineGeometry, lineMaterial)
         }
 
+        /**
+         * 地图侧面渐变效果
+         * @param {THREE.material} material 
+         */
+        function createSideShaderMaterial(material) {
+            // 为现有material添加shader
+            material.onBeforeCompile = function (shader, renderer) {
+                // console.log(shader.fragmentShader);
+                shader.vertexShader = shader.vertexShader.replace(
+                    "void main() {",
+                    "varying vec4 vPosition;\nvoid main() {"
+                );
+                shader.vertexShader = shader.vertexShader.replace(
+                    "#include <fog_vertex>",
+                    "#include <fog_vertex>\nvPosition=modelMatrix * vec4( transformed, 1.0 );"
+                );
+
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    "void main() {",
+                    "varying vec4 vPosition;\nvoid main() {"
+                );
+
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    "#include <transmissionmap_fragment>",
+                    `
+                    #include <transmissionmap_fragment>
+                    float z = vPosition.z;
+                    float s = step(2.0,z);
+                    vec3 bottomColor =  vec3(.0,1.,1.0);
+
+                    diffuseColor.rgb = mix(bottomColor,diffuseColor.rgb,s);
+                    // float r =  abs( 1.0 * (1.0 - s) + z  * (0.0  - s * 1.0) + s * 4.0) ;
+                    float r =  abs(z  * (1.0  - s * 2.0) + s * 4.0) ;
+                    diffuseColor.rgb *= pow(r, 0.5 + 2.0 * s);
+
+                    // float c = 
+                    `
+                );
+            };
+
+            return material;
+        }
+
         function makeLabelCanvas(size, name) {
             const borderSize = 15;
             const ctx = document.createElement('canvas').getContext('2d');
