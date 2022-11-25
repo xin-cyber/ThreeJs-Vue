@@ -4821,6 +4821,22 @@ function deleteGroup(group) {
             item.material.dispose(); // 删除材质
         }
     });
+    
+### 16.全屏
+
+```js
+// webkit 兼容safari
+const a = document.fullscreenElement || document.webkitFullscreenElement
+if (!a) {
+    if (canvas.reaquestFullscreen) {
+        canvas.reaquestFullscreen()
+    } else if (canvas.webkitFeaquestFullscreen()) {
+        canvas.webkitFeaquestFullscreen()
+    }
+
+} else {
+    // 同上，加个webkit
+    document.exitFullscreen()
 }
 ```
 
