@@ -1235,13 +1235,34 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
   >
   > rotation 纹理旋转 ；center:旋转中心点，默认是（0，0）即左下角 ====> 中心点是（0.5，0.5）
 
-### 2.凹凸贴图创建褶皱
+### 2.纹理贴图
+
+```js
+colorTexture.wrapS = THREE.MirroredRepeatWrapping
+colorTexture.wrapT = THREE.MirroredRepeatWrapping
+colorTexture.repeat.x = 2
+colorTexture.repeat.y = 3
+colorTexture.offset.x = 0.5
+colorTexture.offset.y = 0.5
+colorTexture.rotation = Math.PI * 0.25
+colorTexture.center.x = 0.5
+colorTexture.center.y = 0.5
+colorTexture.generateMipmaps = false
+// get a small texture until get a 1*1 texture
+// 视角缩小时，纹理的呈现效果
+colorTexture.minFilter = THREE.NearestFilter  // 无模糊
+colorTexture.magFilter = THREE.NearestFilter
+```
+
+
 
 > 为材质添加厚度
 
 + 普通凹凸贴图增加细节凹凸感
 
 + 法向量贴图细节更强（可代替凹凸贴图）
+
+  > png lose less precision and higher weight
 
 + 位移贴图真正改变物体表面形状
 
@@ -4824,7 +4845,7 @@ function deleteGroup(group) {
     
 ### 16.全屏
 
-```js
+​```js
 // webkit 兼容safari
 const a = document.fullscreenElement || document.webkitFullscreenElement
 if (!a) {
@@ -4840,3 +4861,4 @@ if (!a) {
 }
 ```
 
+ 
