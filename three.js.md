@@ -1222,6 +1222,8 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 + UV贴图
 
   > 纹理可以很好的贴合，是通过UV贴图实现的，可以告诉渲染器将纹理的哪部分应用到指定的面上
+  >
+  > UV映射是将纹理中的2D点分配给几何体中的3D点的过程
   
 + 纹理属性
 
