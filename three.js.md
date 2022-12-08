@@ -4906,3 +4906,13 @@ const particles = new THREE.Points(particlesGeometry, particlesMaterial)
 scene.add(particles)
 ```
 
+## 17.css2dobject css3dobject
+
+CSS3DObject、CSS3DSprite(精灵)、CSS2DObject的区别
+
++ CSS3D不面向摄像机，场景缩放时，缩小放大跟随着，不被模型遮挡，通过DOM事件点击
+
++ CSS2D面向摄像机，场景缩放时，缩小放大都一样大，不被模型遮挡，通过DOM事件点击。
+
++ 精灵面向摄像机，场景缩放时，缩小放大跟随着，会被模型遮挡，可以被射线拾取。
+  
