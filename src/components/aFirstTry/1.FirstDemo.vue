@@ -32,8 +32,11 @@ export default {
         // 场景
         const scene = new THREE.Scene()
         // 坐标轴 辅助
-        // let axes = new THREE.AxesHelper(700)
-        // scene.add(axes)
+        let axes = new THREE.AxesHelper(700)
+        scene.add(axes)
+
+        const helper = new THREE.GridHelper(1000, 100);
+        scene.add(helper);
 
 
         const color = 0xffffff
@@ -50,7 +53,6 @@ export default {
             console.log('jsondata', jsondata)
             operationData(jsondata)
         })
-
         /**
          * 立体几何图形
          * @param polygon 多边形 点数组
@@ -101,49 +103,6 @@ export default {
             return new THREE.Line(lineGeometry, lineMaterial)
         }
 
-        /**
-         * 地图侧面渐变效果
-         * @param {THREE.material} material 
-         */
-        function createSideShaderMaterial(material) {
-            // 为现有material添加shader
-            material.onBeforeCompile = function (shader, renderer) {
-                // console.log(shader.fragmentShader);
-                shader.vertexShader = shader.vertexShader.replace(
-                    "void main() {",
-                    "varying vec4 vPosition;\nvoid main() {"
-                );
-                shader.vertexShader = shader.vertexShader.replace(
-                    "#include <fog_vertex>",
-                    "#include <fog_vertex>\nvPosition=modelMatrix * vec4( transformed, 1.0 );"
-                );
-
-                shader.fragmentShader = shader.fragmentShader.replace(
-                    "void main() {",
-                    "varying vec4 vPosition;\nvoid main() {"
-                );
-
-                shader.fragmentShader = shader.fragmentShader.replace(
-                    "#include <transmissionmap_fragment>",
-                    `
-                    #include <transmissionmap_fragment>
-                    float z = vPosition.z;
-                    float s = step(2.0,z);
-                    vec3 bottomColor =  vec3(.0,1.,1.0);
-
-                    diffuseColor.rgb = mix(bottomColor,diffuseColor.rgb,s);
-                    // float r =  abs( 1.0 * (1.0 - s) + z  * (0.0  - s * 1.0) + s * 4.0) ;
-                    float r =  abs(z  * (1.0  - s * 2.0) + s * 4.0) ;
-                    diffuseColor.rgb *= pow(r, 0.5 + 2.0 * s);
-
-                    // float c = 
-                    `
-                );
-            };
-
-            return material;
-        }
-
         function makeLabelCanvas(size, name) {
             const borderSize = 15;
             const ctx = document.createElement('canvas').getContext('2d');
@@ -186,6 +145,82 @@ export default {
             sprite.scale.set(canvas.width > 280 ? 10 : 5, 2.5, 1);
             return sprite
         }
+
+        //  vertexShader: `
+        // varying vec3 vNormal;
+        //             varying vec3 vPosition;
+        //             void main() {
+        //                 vNormal = normal;
+        //                 vPosition = position;
+        //                 gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+        //             }
+        //         `,
+        //         fragmentShader: `
+        //             varying vec3 vNormal;
+        //             varying vec3 vPosition;
+
+        //             void main() {
+        //                 float cy = (fract((vPosition.y - 20.0) / 40.0) + 0.7) * 0.7;
+        //                 if(vNormal.x==0.0&&vNormal.y==1.0&&vNormal.z==0.0){
+        //                     cy = 1.0;
+        //                 }
+        //                 gl_FragColor = vec4(0.0, cy, cy, 1.0);
+        //             }
+        //         `,
+        /**
+         * 渐变色圆柱体
+         * */
+        function createGradientCylinder(center, name, projection, height, colorArray) {
+            if (!center) return
+            const [x, y] = projection(center)
+            const geometry = new THREE.CylinderGeometry(1, 1, height, 32, 10);
+            const material = new THREE.ShaderMaterial({
+                vertexShader: `
+                    varying vec2 v_uv;
+                    void main () {
+                        v_uv = uv;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+                    }
+                `,
+                fragmentShader: `
+                    varying vec2 v_uv;
+                    uniform float u_r_base;
+                    uniform float u_g_base;
+                    uniform float u_b_base;
+                    uniform float u_r_space;
+                    uniform float u_g_space;
+                    uniform float u_b_space;
+                    
+                    void main () {
+                        // 限制在这个区间
+                        float r = u_r_base + (u_r_space) * v_uv.y;
+                        float g = u_g_base + (u_g_space) * v_uv.y;
+                        float b = u_b_base + (u_b_space) * v_uv.y;
+                        gl_FragColor = vec4(abs(r),abs(g),abs(b),1);
+                    }
+                `,
+                uniforms: {
+                    u_r_base: { value: colorArray[0].r },
+                    u_g_base: { value: colorArray[0].g },
+                    u_b_base: { value: colorArray[0].b },
+                    u_r_space: {
+                        value: colorArray[0].r - colorArray[1].r < 0 ? colorArray[0].r - colorArray[1].r : colorArray[1].r - colorArray[0].r,
+                    },
+                    u_g_space: {
+                        value: colorArray[0].g - colorArray[1].g < 0 ? colorArray[0].g - colorArray[1].g : colorArray[1].g - colorArray[0].g,
+                    },
+                    u_b_space: {
+                        value: colorArray[0].b - colorArray[1].b < 0 ? colorArray[0].b - colorArray[1].b : colorArray[1].b - colorArray[0].b,
+                    },
+                },
+            })
+            const cylinder = new THREE.Mesh(geometry, material);
+            cylinder.position.set(x, -y, height / 2 + 10);
+            // cylinder.scale.set(5, 2.5, 1);
+            cylinder.rotation.x = Math.PI / 2
+            return cylinder
+        }
+
 
         let changeNum = 25
         // 绘制线条函数
@@ -236,10 +271,13 @@ export default {
                 province.properties = feature.properties.name
                 const coordinates = feature.geometry.coordinates
                 const centerPosition = feature.properties.center
+                const length = feature.properties.subFeatureIndex + 1
                 const color = '#2defff'
                 // const color = ['重庆市', '上海市'].includes(feature.properties.name) ? 'blue' : 'yellow'
 
-                const lable = makeTextSprite(centerPosition, feature.properties.name, projection1)
+                // const lable = makeTextSprite(centerPosition, feature.properties.name, projection1)
+                const lable = createGradientCylinder(centerPosition, feature.properties.name, projection1, length, [new THREE.Color('red'), new THREE.Color('green')])
+                console.log(lable);
                 lable && province.add(lable)
                 if (feature.geometry.type === 'MultiPolygon') {
                     // 多个，多边形
