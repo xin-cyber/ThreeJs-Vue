@@ -184,36 +184,25 @@ export default {
                 `,
                 fragmentShader: `
                     varying vec2 v_uv;
-                    // uniform float u_r_base;
-                    // uniform float u_g_base;
-                    // uniform float u_b_base;
-                    // uniform float u_r_space;
-                    // uniform float u_g_space;
-                    // uniform float u_b_space;
+                    uniform float u_r_base;
+                    uniform float u_g_base;
+                    uniform float u_b_base;
+                    uniform float v_r_base;
+                    uniform float v_g_base;
+                    uniform float v_b_base;
 
                     void main () {
-                        // 限制在这个区间
-                        // float r = u_r_base + (u_r_space) * v_uv.y;
-                        // float g = u_g_base + (u_g_space) * v_uv.y;
-                        // float b = u_b_base + (u_b_space) * v_uv.y;
-                        // gl_FragColor = vec4(abs(r),abs(g),abs(b),1);
-                        gl_FragColor = mix(vec4(0.0, 0.0, 1.0,1.0), vec4(1.0, 0.0, 0.0,1.0), smoothstep(0.0, 1.0, v_uv.y));
+                        gl_FragColor = mix(vec4(u_r_base, u_g_base, u_b_base,1.0), vec4(v_r_base, v_g_base, v_b_base,1.0), smoothstep(0.0, 1.0, v_uv.y));
                     }
                 `,
-                // uniforms: {
-                //     u_r_base: { value: colorArray[0].r },
-                //     u_g_base: { value: colorArray[0].g },
-                //     u_b_base: { value: colorArray[0].b },
-                //     u_r_space: {
-                //         value: colorArray[0].r - colorArray[1].r < 0 ? colorArray[0].r - colorArray[1].r : colorArray[1].r - colorArray[0].r,
-                //     },
-                //     u_g_space: {
-                //         value: colorArray[0].g - colorArray[1].g < 0 ? colorArray[0].g - colorArray[1].g : colorArray[1].g - colorArray[0].g,
-                //     },
-                //     u_b_space: {
-                //         value: colorArray[0].b - colorArray[1].b < 0 ? colorArray[0].b - colorArray[1].b : colorArray[1].b - colorArray[0].b,
-                //     },
-                // },
+                uniforms: {
+                    u_r_base: { value: colorArray[0].r },
+                    u_g_base: { value: colorArray[0].g },
+                    u_b_base: { value: colorArray[0].b },
+                    v_r_base: { value: colorArray[1].r },
+                    v_g_base: { value: colorArray[1].g },
+                    v_b_base: { value: colorArray[1].b },
+                },
             })
             const cylinder = new THREE.Mesh(geometry, material);
             cylinder.position.set(x, -y, height / 2 + 10);
