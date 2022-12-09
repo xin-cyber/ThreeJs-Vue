@@ -192,7 +192,7 @@ export default {
                     uniform float v_b_base;
 
                     void main () {
-                        gl_FragColor = mix(vec4(u_r_base, u_g_base, u_b_base,1.0), vec4(v_r_base, v_g_base, v_b_base,1.0), smoothstep(0.0, 1.0, v_uv.y));
+                        gl_FragColor = mix(vec4(u_r_base, u_g_base, u_b_base,1.0), vec4(v_r_base, v_g_base, v_b_base,1.0), smoothstep(0.0, 1.0, v_uv.y > 0.1 ? v_uv.y - 0.1 : v_uv.y));
                     }
                 `,
                 uniforms: {
