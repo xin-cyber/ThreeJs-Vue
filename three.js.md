@@ -4803,7 +4803,58 @@ sphere.radius=20;
 
 > http://localhost:8080/manual/#zh/billboards
 
+### 15.内存清空⭐
 
++ dispose() 清除顶点缓冲区内存占用
+
+  ```js
+  geometry.dispose()
+  material.dispose()
+  renderer.dispose()
+  renderer.renderLists.dispose()
+  texture.dispose()
+  orbitControl.dispose()
+  ```
+
++ remove 销毁模型对象children
+
+  ```js
+  scene.remove(group); // 删除组
+  group.remove(mesh); // 删除模型
+  ```
+
++ object.clear() 销毁模型对象自身 ，清除页面缓存
+
+  > object3D的clear方法，scene继承object3D
+
+  ```js
+  scene.clear()
+  obj.clear()
+  renderer.clear()
+  ```
+
++ 暂停 requestAnimationFrame() 
+
+  ```js
+  cancelAnimationFrame(animationId);
+  ```
+
++ 清空canvas画布，置空dom与其他元素
+
++ 其他
+
+  ```js
+  this.clearScene();
+  this.renderer.renderLists.dispose();
+  this.renderer.dispose();
+  this.renderer.forceContextLoss();
+  this.renderer.domElement = null;
+  this.renderer.content = null;
+  this.renderer = null;
+  THREE.Cache.clear(); // 一个简单的缓存系统，内部使用FileLoader。
+  ```
+
+  
 
 ### 15.移除物体
 
@@ -4844,10 +4895,11 @@ function deleteGroup(group) {
             item.material.dispose(); // 删除材质
         }
     });
-    
-### 16.全屏
+```
 
-​```js
+ ### 16.全屏
+
+```js
 // webkit 兼容safari
 const a = document.fullscreenElement || document.webkitFullscreenElement
 if (!a) {
@@ -4863,9 +4915,7 @@ if (!a) {
 }
 ```
 
- 
-
-### 16.pariticles
+### 17.pariticles
 
 ```js
 / Geometry
@@ -4906,7 +4956,7 @@ const particles = new THREE.Points(particlesGeometry, particlesMaterial)
 scene.add(particles)
 ```
 
-## 17.css2dobject css3dobject
+### 18.css2dobject css3dobject
 
 CSS3DObject、CSS3DSprite(精灵)、CSS2DObject的区别
 
