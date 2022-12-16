@@ -4854,7 +4854,103 @@ sphere.radius=20;
   THREE.Cache.clear(); // 一个简单的缓存系统，内部使用FileLoader。
   ```
 
-  
+```js
+  clearCache(item: any) {
+    if (!item) {
+      return;
+    }
+    if (!item.geometry) {
+      item.dispose && item.dispose();
+    } else {
+      item.geometry.dispose();
+    }
+
+    if (Array.isArray(item.material)) {
+      item.material.forEach((material: any) => {
+        material.dispose();
+        if (material.map) {
+          material.map.dispose();
+        }
+        if (material.uniforms) {
+          // @ts-ignore
+          for (const value of Object.values(material.uniforms)) {
+            if (value) {
+              // @ts-ignore
+              const uniformValue = value.value;
+
+              if (uniformValue instanceof THREE.Texture) {
+                uniformValue.dispose();
+              } else if (Array.isArray(uniformValue)) {
+                uniformValue.forEach((value) => {
+                  if (value instanceof THREE.Texture) {
+                    value.dispose();
+                  }
+                });
+              }
+            }
+          }
+        }
+      });
+    } else if (item.material) {
+      item.material.dispose();
+      // 清楚贴图
+      if (item.material.map) {
+        item.material.map.dispose();
+      }
+
+      if (item.material.uniforms) {
+        // @ts-ignore
+        for (const value of Object.values(item.material.uniforms)) {
+          if (value) {
+            // @ts-ignore
+            const uniformValue = value.value;
+
+            if (uniformValue instanceof THREE.Texture) {
+              uniformValue.dispose();
+            } else if (Array.isArray(uniformValue)) {
+              uniformValue.forEach((value) => {
+                if (value instanceof THREE.Texture) {
+                  value.dispose();
+                }
+              });
+            }
+          }
+        }
+      }
+    }
+    item.parent.remove(item);
+  }
+
+  removeObj(obj: any) {
+    let arr = obj.children.filter((x: any) => x);
+    arr.forEach((item: any) => {
+      if (item.children.length) {
+        this.removeObj(item);
+      } else {
+        this.clearCache(item);
+        item.clear();
+        item = null;
+      }
+    });
+    obj.clear();
+    arr = null;
+  }
+
+  // 清除场景中的所有物体
+  clearGroup(group: THREE.Scene) {
+    this.removeObj(group);
+    this.renderer.forceContextLoss();
+    let gl = this.renderer.domElement.getContext('webgl');
+    gl && gl.getExtension('WEBGL_lose_context')?.loseContext();
+    this.renderer.dispose();
+    this.renderer.clear();
+    if (this.container) {
+      this.container.innerHTML = '';
+    }
+  }
+```
+
+
 
 ### 15.移除物体
 
@@ -4966,3 +5062,34 @@ CSS3DObject、CSS3DSprite(精灵)、CSS2DObject的区别
 
 + 精灵面向摄像机，场景缩放时，缩小放大跟随着，会被模型遮挡，可以被射线拾取。
   
+
+### 19.深度测试
+
+> https://blog.csdn.net/weixin_39981681/article/details/111756027
+
++ 首先 webgl 中，深度会存储在 depth buffer 中，它和普通的颜色缓冲一样，只是存储的是深度值而已。深度值的精度一般有16位、24位和32位float，比较常用的深度精度为24位
+
++ 片元在绘制过程中，会将像素的深度值与当前深度缓冲区中的值进行比较，如果大于等于深度缓冲区中值，则丢弃这部分;否则利用这个像素对应的深度值和颜色值，分别更新深度缓冲区和颜色缓冲区。这一过程称之为深度测试(Depth Testing)
+
++ z-fighting 的问题
+
+  深度冲突又叫(z-fighting)是图形渲染中一个非常常见的现象。造成深度冲突的主要原因是两个三角面片靠的非常近，在渲染的时候 gpu 很难分清到底哪个面在前，哪个面在后，从而形成闪烁的现象。
+
+  1. 简单直接的把两个靠近的面挪开一点
+
+  2. 调整 camera 的 near、far 参数
+
+  3. .使用对数缓冲
+
+     在 threejs 的 renderer 中可以启用 logarithmicDepthBuffer 属性，从而使用对数深度缓冲。虽然可以在一定程度上避免 z-fighting 的现象，但是它会使 early-z 的测试失效，从而造成一定程度的性能浪费，使用时应慎重。
+
+  4. 使用 polygonoffset
+
+     polygonoffset 是一个比较常见的消除 z-fighting 的设置项。在 threejs 中我们可以设置 material 的 polygonoffset 属性来达到启用的目的。其原理是在渲染的时候，将模型的订单稍微向靠近或远离相机的方向做一定的偏移，从而错开两个靠近的面的目的。
+
++ **depthTest 和 depthWrite**
+
+  Depth test off means to turn off depth testing all together. (reading/testing and writing)
+
+  Depth write off means to prevent the depth buffer from being written. ; **阻止新像素写入深度缓冲区，但仍启用深度测试**
+

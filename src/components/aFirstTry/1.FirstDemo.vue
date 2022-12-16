@@ -145,28 +145,6 @@ export default {
             sprite.scale.set(canvas.width > 280 ? 10 : 5, 2.5, 1);
             return sprite
         }
-
-        //  vertexShader: `
-        // varying vec3 vNormal;
-        //             varying vec3 vPosition;
-        //             void main() {
-        //                 vNormal = normal;
-        //                 vPosition = position;
-        //                 gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-        //             }
-        //         `,
-        //         fragmentShader: `
-        //             varying vec3 vNormal;
-        //             varying vec3 vPosition;
-
-        //             void main() {
-        //                 float cy = (fract((vPosition.y - 20.0) / 40.0) + 0.7) * 0.7;
-        //                 if(vNormal.x==0.0&&vNormal.y==1.0&&vNormal.z==0.0){
-        //                     cy = 1.0;
-        //                 }
-        //                 gl_FragColor = vec4(0.0, cy, cy, 1.0);
-        //             }
-        //         `,
         /**
          * 渐变色圆柱体
          * */
@@ -184,27 +162,35 @@ export default {
                 `,
                 fragmentShader: `
                     varying vec2 v_uv;
-                    uniform float u_r_base;
-                    uniform float u_g_base;
-                    uniform float u_b_base;
-                    uniform float v_r_base;
-                    uniform float v_g_base;
-                    uniform float v_b_base;
+                    uniform vec3 start_color;
+                    uniform vec3 end_color;
 
                     void main () {
-                        gl_FragColor = mix(vec4(u_r_base, u_g_base, u_b_base,1.0), vec4(v_r_base, v_g_base, v_b_base,1.0), smoothstep(0.0, 1.0, v_uv.y > 0.1 ? v_uv.y - 0.1 : v_uv.y));
+                        gl_FragColor = mix(vec4(start_color,1.0), vec4(end_color,1.0), smoothstep(0.0, 1.0, v_uv.y > 0.1 ? v_uv.y - 0.1 : v_uv.y));
                     }
+                    // 或者v_uv.y
                 `,
+                //  varying vec3 vNormal;
+                //  varying vec3 vPosition;
+                //     如果只有一个颜色用下面这个
+                //    float cy = (fract((vPosition.z - 5.0) / 10.0) + 0.7) * 0.7;
+                //    vec3 color = color1;
+                //    if(vNormal.x==0.0&&vNormal.y==1.0&&vNormal.z==0.0){
+                //        cy = 1.0;
+                //    }
+                //    gl_FragColor = vec4(color, cy);
                 uniforms: {
-                    u_r_base: { value: colorArray[0].r },
-                    u_g_base: { value: colorArray[0].g },
-                    u_b_base: { value: colorArray[0].b },
-                    v_r_base: { value: colorArray[1].r },
-                    v_g_base: { value: colorArray[1].g },
-                    v_b_base: { value: colorArray[1].b },
+                    start_color: { value: colorArray[0] },
+                    end_color: { value: colorArray[1] },
                 },
             })
-            const cylinder = new THREE.Mesh(geometry, material);
+            const material2 = new THREE.MeshBasicMaterial({
+                color: colorArray[0],
+            })
+            const cylinder = new THREE.Mesh(geometry, [
+                material,
+                material2
+            ]);
             cylinder.position.set(x, -y, height / 2 + 10);
             // cylinder.scale.set(5, 2.5, 1);
             cylinder.rotation.x = Math.PI / 2
@@ -325,7 +311,7 @@ export default {
         let lastPick = null
 
         // 监听鼠标
-        window.addEventListener('click', onRay)
+        // window.addEventListener('click', onRay)
         // window.addEventListener('mousemove', onMove)
 
         function onRay(event) {
@@ -334,6 +320,7 @@ export default {
             raycaster.setFromCamera(pickPosition, camera)
             // 计算物体和射线的交点
             const intersects = raycaster.intersectObjects([map], true)
+            console.log(intersects);
             // 数组大于0 表示有相交对象
             if (intersects.length > 0) {
                 if (lastPick) {
