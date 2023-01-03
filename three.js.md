@@ -5093,3 +5093,14 @@ CSS3DObject、CSS3DSprite(精灵)、CSS2DObject的区别
 
   Depth write off means to prevent the depth buffer from being written. ; **阻止新像素写入深度缓冲区，但仍启用深度测试**
 
+### 20.renderer.outputEncoding
+
+> 默认线性插值
+
+```js
+renderer.outputEncoding = THREE.sRGBEncoding
+```
+
+> 在0.75到1的时候人眼感觉不到变化
+
+![image-20230103204350127](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20230103204350127.png)![image-20230103204708889](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20230103204708889.png)
