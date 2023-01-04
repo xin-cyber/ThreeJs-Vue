@@ -5093,7 +5093,6 @@ CSS3DObject、CSS3DSprite(精灵)、CSS2DObject的区别
 
   Depth write off means to prevent the depth buffer from being written. ; **阻止新像素写入深度缓冲区，但仍启用深度测试**
 
-### 20.renderer.outputEncoding
 ### 20.更新纹理贴图
 
 ```js
@@ -5115,6 +5114,7 @@ Mesh1.material.map.needsUpdate = true;
       };
 ```
 
+### 21.renderer.outputEncoding
 
 > 默认线性插值
 
@@ -5125,3 +5125,61 @@ renderer.outputEncoding = THREE.sRGBEncoding
 > 在0.75到1的时候人眼感觉不到变化
 
 ![image-20230103204350127](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20230103204350127.png)![image-20230103204708889](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/image-20230103204708889.png)
+
+### 22.流光效果
+
+1.实现方式是不断修改顶点的颜色。优点就是简单，具有可编辑性。缺点就是线条需要自己手工布置，不能使用现有模型。数量一多，可能对性能有影响
+
+```js
+import { interpolateHsl } from 'd3-interpolate';  
+  // 生成渐变色的color数组
+  const count = geometry.attributes.position.count;
+  const rgbInterpolate = interpolateHsl('#00ffff', '#f81795');
+  const colorArray = new Array(count);
+  for (let index = 0; index < count; index++) {
+    const t = index / count;
+    const rgb = rgbInterpolate(t);
+    const rgbValue = rgb.match(/\d+/g);
+    // 从 "rgb(1,2,3)" 字符串里 提取出 1,2,3 并 归一化（ 0.0 ~ 10）
+    const r = Number(rgbValue[0]) / 255;
+    const g = Number(rgbValue[1]) / 255;
+    const b = Number(rgbValue[2]) / 255;
+
+    colorArray[3 * index] = r;
+    colorArray[3 * index + 1] = g;
+    colorArray[3 * index + 2] = b;
+  }
+  geometry.setAttribute(
+    'color',
+    new THREE.Float32BufferAttribute(colorArray, 3)
+  );
+
+ // 更新
+const anchor = Number((val.value * count).toFixed(0));
+// 从第anchor * 3个开始往后获取
+const b: number[] = colorArray.slice(anchor * 3);
+// 从0获取到anchor * 3位数组
+const f = colorArray.slice(0, anchor * 3);
+// 把获取的数组交换顺序 然后重新设置颜色
+const newColorArray = [].concat(b, f);
+mesh.geometry.setAttribute(
+  'color',
+  new THREE.Float32BufferAttribute(newColorArray, 3)
+);
+```
+
+2.通过改变uv值实现纹理流动。优点也是简单，性能也会好一点，可以直接作用在模型上。缺点就是编辑性较差，改变颜色或者渐变幅度，间距什么的都需要调整材质。
+
+```js
+// 使用贴图制作流光效果
+const loader = new THREE.TextureLoader();
+const t1Texture = loader.load(t3);
+t1Texture.wrapS = t1Texture.wrapT = THREE.RepeatWrapping; //每个都重复
+t1Texture.repeat.set(1, 1);
+t1Texture.needsUpdate = true;
+// 更新
+tick = ()=> {
+	t1Texture.offset.x -= 0.01;
+}
+```
+
