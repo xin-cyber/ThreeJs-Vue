@@ -5093,3 +5093,24 @@ CSS3DObject、CSS3DSprite(精灵)、CSS2DObject的区别
 
   Depth write off means to prevent the depth buffer from being written. ; **阻止新像素写入深度缓冲区，但仍启用深度测试**
 
+### 20.更新纹理贴图
+
+```js
+//更新纹理贴图的方法
+Mesh1.material.map.matrixAutoUpdate = false;
+Mesh1.material.map.needsUpdate = true;
+      const updateUV = () => {
+        // 一种方法，直接全写在一个方法内
+        //texture.matrix.setUvTransform( API.offsetX, API.offsetY, API.repeatX, API.repeatY, API.rotation, API.centerX, API.centerY );
+
+        // 另一种方法，分开写
+        Mesh1.material.map.matrix
+          .identity() //矩阵重置
+          .translate(-gui.centerX, -gui.centerY) //设置中心点
+          .rotate(gui.rotation) // 旋转
+          .scale(gui.repeatX, gui.repeatY) //缩放
+          .translate(gui.centerX, gui.centerY) //设置中心点
+          .translate(gui.offsetX, gui.offsetY); //偏移
+      };
+```
+
