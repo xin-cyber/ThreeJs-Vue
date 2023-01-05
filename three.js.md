@@ -5183,3 +5183,49 @@ tick = ()=> {
 }
 ```
 
+### 23.hdr纹理转化
+
+![hdr](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/hdr.png)
+
+![sadasdasd](https://picgo-1307940198.cos.ap-nanjing.myqcloud.com/sadasdasd.png)
+
+### 24.Flow(曲线上物体移动)
+
+```js
+import { Flow } from 'three/examples/jsm/modifiers/CurveModifier.js';
+
+const loader = new FontLoader();
+  loader.load(helvetiker_regularJsonUrl, function (font) {
+    const geometry = new TextGeometry('Hello three.js!', {
+      font: font,
+      size: 0.2,
+      height: 0.05,
+      curveSegments: 12,
+      bevelEnabled: true,
+      bevelThickness: 0.02,
+      bevelSize: 0.01,
+      bevelOffset: 0,
+      bevelSegments: 5,
+    });
+
+    geometry.rotateX(Math.PI);
+
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x99ffff,
+    });
+
+    const objectToCurve = new THREE.Mesh(geometry, material);
+
+    // 初始化flow吧要移动的模型放到flow里面
+    flow = new Flow(objectToCurve);
+    // 更新flow
+    flow.updateCurve(0, curve);
+    three.scene.add(flow.object3D);
+
+  });
+
+tick = ()=> {
+    flow.moveAlongCurve(0.001);
+}
+```
+
