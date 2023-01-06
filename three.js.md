@@ -5191,6 +5191,8 @@ tick = ()=> {
 
 ### 24.Flow(曲线上物体移动)
 
+> https://github.com/zz85/threejs-path-flow
+
 ```js
 import { Flow } from 'three/examples/jsm/modifiers/CurveModifier.js';
 
